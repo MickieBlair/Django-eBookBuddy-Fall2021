@@ -1,0 +1,226 @@
+{% extends 'site_admin/admin_base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="mt-1">
+{% include 'site_admin/snippets/buttons.html' %}
+{% include 'site_admin/snippets/django_messages_snippet.html' %}
+</div>
+
+<div class="d-inline-flex w-100">
+	<div class="flex-grow-1">
+		<h4 class="pt-3">Student Attendance Report - {{active_semester}}</h4>
+	</div>
+	<div class="d-flex justify-content-center align-items-end">
+		<a class="btn btn-warning" href="{% url 'site_admin:download_all_students' %}">Download</a>
+	</div>
+	
+</div>
+<div class="row">
+	
+	<div class="col d-flex justify-content-start">
+		<div class="w-100">
+			<div>
+				<h5 class="pt-2 border-bottom">Students</h5>
+			</div>
+			<div>
+				<h6>Total Results = <text id="results_count">{{count}}</text></h6>
+			</div>
+		</div>
+	</div>
+
+	<div class="col d-flex justify-content-center align-items-end">
+		<div class="w-100">
+			<div>
+				<h5 class="pt-2 border-bottom">Days With Sessions</h5>
+			</div>
+			<div>
+				<h6>Complete: {{all_complete.count}}  / Total: {{days_with_sessions.count}}</h6>
+			</div>
+		</div>
+	</div>
+
+	<div class="col d-flex justify-content-center align-items-end">
+		<div class="w-100">
+			<div>
+				<h5 class="pt-2 border-bottom">Sessions</h5>
+			</div>
+			<div>
+				<h6>Complete: {{all_complete_session.count}}  / Total: {{all_sessions.count}}</h6>
+			</div>
+		</div>
+	</div>
+	<div class="col d-flex justify-content-center align-items-end">
+		<div>
+
+			
+			<div class="d-flex justify-content-end align-items-end">
+		<!-- <form class="form-inline search_text" id="searchForm" method="GET">
+			<input class="form-control2" type="text" placeholder="Search Users..." name="q" id="id_q">
+			<button type="submit" class="search_icon2"><i class="fas fa-search big_icon"></i></button>
+		</form>   -->
+		<!-- <div class="form-inline search_text" id="searchForm" method="GET"> -->
+			<input class="form-control2" type="text" placeholder="Search Users..." name="q" id="search_terms">
+			<input type="hidden" name="role" id="role_input" value="Student">
+			<button class="search_icon2 ajax_search_users" id ="ajax_search_users"onclick="get_url('{% url 'site_admin:ajax_search_users' %}')" ><i class="fas fa-search big_icon"></i></button>
+		<!-- </div>      -->
+    </div>
+			
+		</div>
+		
+		
+		
+	</div>
+	
+	
+ </div>
+ <div class="row p-3">
+ 	<div class="col">
+				<button class="btn btn-primary" onclick="display_all_users()">Display All</button>
+ 	</div>
+ 	
+ </div>
+
+<div class="table-responsive pt-1">
+	<table class="table table-sm align-middle">
+		<thead>
+            <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>Full Name</th>
+              <th class="text-center"><div>No</div><div>Logins</div></th>
+              <th class="text-center"><div>Currently Has</div><div>Active Match</div></th>
+              
+              <th class="text-center"><div>Detailed</div><div>Attendance</div></th> 
+              <th>Days</th>
+              <th class="text-center">Status</th> 
+              
+              <th class="text-center">First In / Last Out</th> 
+              <th class="text-center"><div>Total</div><div>Minutes</div></th>          
+        			<th class="text-center"><div>Temp Match</div><div>Created</div></th>
+        			<th class="text-center"><div>Temporary</div><div>Buddies</div></th> 
+        			<th class="text-center"><div>Total Temp</div><div>Matches</div></th> 
+        			
+              <!-- <th class="text-center">User Created</th> -->
+              <!-- <th class="text-center">Last Updated</th> -->
+            </tr>
+          </thead>
+          <tbody>
+          	{% for student in students %}
+	          	<tr id="user_report-{{student.id}}" class="user_row border {% if student.student_attendance_report.no_logs %}bg_muted_red{% endif %}">
+	          		<td class="border_right px-2">{{student.id}}</td>
+
+	          		<td class="border_right ">{{student.username}}</td>
+
+
+	          		<td class="border_right ">
+	                  <a class="text-dark" href="{% url 'site_admin:user_profile' student.id %}">
+	                    <text class="">{{student.full_name}} </text>
+	                  </a>
+                	</td>
+                	<td class="text-center fw-bold">{% if student.student_attendance_report.no_logs %}X{% endif %}</td>
+                	<td class="text-center">
+	                	{% if student.student_attendance_report.has_active_match %}                   
+		                	<!-- <i class="fas fa-check  match_check_green"></i> -->Yes
+		              	{% else %}
+		               		<!-- <i class="fas fa-times match_times_red"></i> -->No
+		              	{% endif %}
+			        		</td>
+			        		<td class="text-center">	                 
+	                  <a href="{% url 'site_admin:individual_student_attendance' student.id %}">View</a>
+	                </td>	 
+                	<td>
+                		<ol class=" m-0 p-0">
+                			{% for sign_in in student.sign_ins.all %}
+                			{% if sign_in.session %}
+                			<li class=" border ps-2 {% if sign_in.status.name == 'On Time'%} bg_muted_green {% elif sign_in.status.name == 'Late' %} bg_muted_yellow {% elif sign_in.status.name == 'No Show' %} bg_muted_dark_red {% endif %}">{{sign_in.session.short_date_day_session_slot}}</li>
+                			{% endif %}
+                		{% endfor %}
+                		</ol>
+                	</td>         
+	                
+
+	                <td class="text-center">
+	                	<ul class="list-unstyled  m-0 p-0">
+	                		{% for sign_in in student.sign_ins.all %}
+                			{% if sign_in.session %}
+			                	<li class=" border {% if sign_in.status.name == 'On Time'%} bg_muted_green {% elif sign_in.status.name == 'Late' %} bg_muted_yellow {% elif sign_in.status.name == 'No Show' %} bg_muted_dark_red {% endif %}" >{{sign_in.status}}</li>
+										      	{% endif %}
+                		{% endfor %} 
+	                	</ul>
+	                	
+	                </td>
+
+	                <td class="text-center">
+	                	<ul class="list-unstyled m-0 p-0">
+	                		{% for sign_in in student.sign_ins.all %}
+                			{% if sign_in.session %}
+			                	<li class=" border {% if sign_in.status.name == 'On Time'%} bg_muted_green {% elif sign_in.status.name == 'Late' %} bg_muted_yellow {% elif sign_in.status.name == 'No Show' %} bg_muted_dark_red {% endif %}" ><text>{{sign_in.logs.all.first.local_time_in_only}} -  {{sign_in.logs.all.last.local_time_out_only}}</text></li>
+										      	{% endif %}
+                		{% endfor %} 
+	                	</ul>
+	                	
+	                </td>
+
+	                
+
+	                
+			        		<!-- <td>
+			        			
+			        			{% for item in student.student_attendance_report.complete_sessions.all %}
+			        			<div>
+			        				{{item.month_day_session_slot}}
+			        			</div>
+			        			{% endfor %}
+			        		</td> -->
+
+    
+              
+       
+                <td class="text-center">
+                  
+                  	<ul class="list-unstyled m-0 p-0">
+	                		{% for sign_in in student.sign_ins.all %}
+                			{% if sign_in.session %}
+			                	<li ><text>{{sign_in.total_minutes}}</text></li>
+										  {% endif %}
+                		{% endfor %} 
+	                	</ul>
+                  
+                </td>
+                <td class="text-center">
+	                	<ul class="list-unstyled m-0 p-0">
+	                		{% for sign_in in student.sign_ins.all %}
+                			{% if sign_in.session %}
+			                	<li >
+			                		{% if sign_in.temp_match_created %}                   
+									        	<text class="fw-bold">Yes</text>
+									      	{% else %}
+									       		<text class="fw-bold">.</text>
+									      	{% endif %} 
+			                	</li>
+										      	{% endif %}
+                		{% endfor %} 
+	                	</ul>	                	
+	                </td>
+
+									<td class="text-center">
+	                	{% for person in student.student_attendance_report.temporary_buddies.all %}
+	                	<div>{{person.full_name}}</div>
+	                	{% endfor %}
+	                </td>
+	                
+	                <td class="text-center"><text>{{student.student_attendance_report.total_temp_matches}}</text></td>
+	                
+                <!-- <td class="text-center"><text>{{student.date_joined}}</text></td> -->
+
+	          	</tr>
+          	{% endfor %}
+          </tbody>
+	</table>
+</div>
+
+{% endblock content %}
+

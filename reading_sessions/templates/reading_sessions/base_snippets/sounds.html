@@ -1,0 +1,20 @@
+{% load static%}
+
+
+<div class="d-none" id="general_audio_div">
+	<audio id='general_audio'>
+		<source src="{% static 'sounds/redirect.ogg' %}" type="audio/ogg">
+			<source src="{% static 'sounds/redirect.mp3' %}" type="audio/mpeg">			
+	</audio>
+	<button id='play_general_sound' onclick="play_notification_sound()">			
+	</button>		
+</div>
+
+<script type="text/javascript">
+	
+function play_notification_sound(){
+    let audio_element = document.getElementById('general_audio');
+    audio_element.play();
+}
+
+</script>

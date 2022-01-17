@@ -1,0 +1,79 @@
+<button type="button" class="d-none btn btn-primary" data-bs-toggle="modal" data-bs-target="#testModal" id="testModal_btn"></button>
+
+<!-- Modal -->
+<div class="modal fade" id="testModal" tabindex="-1" aria-labelledby="testModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="testModalLabel">Modal title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center" >
+        <h6><span class="fw-bold">From:</span> <text id="test_sender">System</h6>
+        <p id="results_msg"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div> 
+
+<script type="text/javascript">
+	// const echoSocket = new WebSocket("wss://goebookbuddy.org:8001/echo/");
+	const echoSocket = new WebSocket("ws://127.0.0.1:8000/echo/");
+ console.log("echoSocket", echoSocket);
+
+	
+
+	echoSocket.addEventListener("open", function(e){
+		console.log("Echo Socket OPEN", e);
+		console.log("echoSocket [open] Connection established");
+		echoSocket.send(JSON.stringify({
+					"command": "join",
+					"member_id": "{{request.user.id}}",
+					"page_header": document.getElementById('card_header_name').innerHTML
+				}))
+		// display_message_echo_ws("Success")
+			
+	});	
+
+	echoSocket.onmessage = function(message) {
+		let echo_data = JSON.parse(message.data);
+		let time_now = new Date()
+		console.log("Echo Data", echo_data, time_now )	
+		let success_message = echo_data.username + " - Successfully Joined"
+		if ("{{request.user.username}}"== "Buddy_Admin"){
+			display_message_echo_ws(success_message, true)
+		} else{
+			if(echo_data.username == "{{request.user.username}}" ){
+				display_message_echo_ws(success_message, true)
+			}
+		}
+		
+		
+	};
+
+	echoSocket.onerror = function(e){
+			// alert("FAILED  !!!!  ")
+			console.log("Echo Socket on error: " + JSON.stringify(e))
+			display_message_echo_ws("Still more work to do.", false)
+	};
+
+	function display_message_echo_ws(message, success){
+	    const testModal_btn = document.getElementById('testModal_btn');
+	    const testModalLabel = document.getElementById('testModalLabel');
+	    const test_sender = document.getElementById('test_sender');
+	    const results_msg = document.getElementById('results_msg');
+	    testModalLabel.innerHTML = "Connection Status";
+
+	    test_sender.innerHTML = "System";
+	    results_msg.innerHTML = message; 
+	    if(success){
+	    	results_msg.setAttribute('class','custom_bg_light_green_gradient')
+	    }
+	    //testModal_btn.click();
+	}
+
+
+</script>

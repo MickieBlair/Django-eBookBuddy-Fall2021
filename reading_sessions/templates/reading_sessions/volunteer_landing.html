@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+{% include 'reading_sessions/json_variables.html' %}
+{% include 'reading_sessions/base_snippets/room_links.html' %}
+
+<div class="px-5 py-3">
+	<div class="card w-100">
+		<div class="card-header text-center custom_bg_blue_gradient">
+			{% if logged_in_user %}
+			<div>
+				<h4 class="m-0 pb-1" id="card_header_name">{{logged_in_user.full_name}}</h4>
+			</div>
+			{% endif %}
+		</div>
+		<div class="card-body bg-white">
+			<div class="text-center">
+				<div class="w-100 d-flex justify-content-end pb-3">
+					<div>
+						<h5 class="m-0 p-0 text-center">{{today_date}}</h5>
+						<h5 class="m-0 p-0 text-center" id="server_clock"></h5>	
+					</div>			
+				</div>
+
+				{% if messages %}
+				<ul class="messages_django pt-2" id="django_messages">
+				    {% for message in messages %}
+				    <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+				    {% endfor %}
+				</ul>
+				{% endif %}
+
+			<!--	<div class="row text-center border m-3 p-3 bg-light">
+				<h4 class="pb-3 m-0">Mac Users</h4>
+
+			<div class="col ">				
+					<a class="btn btn-primary button_fixed_250" href="{% url 'reading_sessions:room' troubleshooting_room.slug %}">Connection Testing</a>		
+				</div>
+			</div>-->
+
+			<div class="d-grid text-center border m-3 p-3 bg-light">
+				<div>
+					<h3 class="pb-3 m-0">Fall 2021 eBookBuddy has ended.</h3>
+				</div>
+					
+				<div>
+					<h4>Thank you for all of your hard work!</h4>
+				</div>
+
+				<div>
+                    <img class="img-fluid" src="{% static 'images/star.gif' %}">
+                </div>
+			</div>
+
+				{% if show_orientation_button %}
+				<div class="row text-center border m-3 p-3 bg-light">
+					<h4 class="pb-3 m-0">Orientation Room</h4>
+					<div class="col ">				
+						<a class="btn btn-primary button_fixed_250" href="{% url 'reading_sessions:room' orientation_room.slug %}">Join Orientation</a>		
+					</div>
+				</div>
+				{% endif %}
+
+				
+				{% if show_schedule %}
+				<div class="row m-3 text-center border bg-light ">
+					<h4 class="p-3 m-0">Schedule</h4>
+					<div class="row m-0">
+						{% for day in days %}
+						<div class="col border {% if today == day.name %} custom_bg_light_green_gradient {% else %} custom_bg_light_yellow_gradient {% endif %}">
+							<div class="fw-bold border-bottom py-1">
+								<div>
+									<text >{{day}}</text>	
+								</div>
+								<div>
+									<text >{{day.span_name}}</text>	
+								</div>							
+							</div>
+
+							{% if scheduled_slots.count != 0 %}
+							<div style="min-height: 80px;">
+								{% for slot in scheduled_slots %}
+									{% if slot.day == day %}									
+										<div class="py-1" >
+											<div>{{slot.time_start}}</div>
+											<div>to</div>
+											<div>{{slot.time_end}}</div>
+										</div>
+									{% endif %}							
+								{% endfor %}							
+							</div>	
+							{% else %}
+							<div style="min-height: 80px;">
+								<div class="py-1" >
+								</div>									
+							</div>
+							{% endif %}
+						</div>
+						{% endfor %} 
+					</div>
+
+					{% if show_join_button %}
+					<div class="p-3">
+						<div class="text-center border bg-white">
+
+							<div class="text-center p-3">
+								<a class="btn btn-success btn-lg button_fixed_150" href="{% url 'reading_sessions:initial_entry' %}">Join Session</a>
+							</div>	
+						</div>
+					</div>
+
+					{% else %}
+					<div class="p-3">
+						<div class="border custom_bg_light_blue_gradient text-center ">						
+							<div class="p-5">
+								<h4>{{message_for_user.eng_message}}</h4>
+								<!-- <h4 class="pt-5">{{message_for_user.span_message}}</h4> -->
+							</div>
+						</div>
+					</div>
+						
+					{% endif %}
+
+					{% if scheduled_slots.count == 0 %}
+					<div class="p-3">
+						<div class="border custom_bg_light_green_gradient">
+							<div class="pt-3">
+								<h4>No Scheduled Sessions</h4>
+							</div>
+
+							<div class="m-4">
+								<div class="border bg-white mx-5">
+									<div class="fw-bold py-3">
+										<div>
+											<text class="fw-bold">
+												Please contact your team leader ({{logged_in_user.volunteer_profile.team.leader.full_name}}) if you need assistance.
+											</text>
+										</div>
+
+										<div>
+											<text class="fw-bold pt-3">Email:</text> <a href="mailto: {{logged_in_user.volunteer_profile.team.leader.email}}">{{logged_in_user.volunteer_profile.team.leader.email}}</a>
+										</div>
+
+										<div>
+											<text class="fw-bold pt-3">Phone:</text> <text>{{logged_in_user.volunteer_profile.team.leader.contact_number}}</text>
+										</div>									
+									</div>
+								</div>
+								
+							</div>
+
+
+						</div>
+
+						
+						
+					</div>
+					
+					{% endif %}
+
+				</div>
+				{% endif %}
+			</div>
+
+			{% if show_team_meetings %}
+			<div>
+
+			{% if is_team_leader %}
+				<div class="m-3 p-3 bg-light border">
+					<h4 class="pb text-center">Team Meetings</h4>
+					<div class="row bg-light">
+						
+						<div class="col border p-3 m-3 bg-white">
+							<div>
+								<h5 class="text-center p-2 m-0">{{tl_team}}</h5>
+								<h6 class="text-center p-1 m-0"><text class="fw-bold">Team Leader: </text>{{tl_team.leader.full_name}}</h6>
+
+								<div class="text-center py-1">
+									<h6>{{tl_team.meeting_day}}s at {{tl_team.meeting_time}} EST</h6>				
+								</div>
+
+								<div class="text-center py-1">
+									<a href="{% url 'reading_sessions:room' tl_team.room.slug %}">{{tl_team.room}}</a>									
+								</div>
+							</div>
+							
+						</div>
+						
+					</div>
+					
+				</div>
+			{% else %}
+				<div class="m-3 p-3 custom_bg_light_green_gradient border">
+					<h3 class="text-center">Team Meetings</h3>
+					<h4 class="text-center fw-normal">(Meeting Rooms are only open Monday-Thursday from 4pm until 8pm Eastern Time)</h4>
+					<div class="row ">						
+						<div class="col border p-3 m-3 bg-white">
+							{% if logged_in_user.volunteer_profile.team %}
+							<div>
+								<h5 class="text-center p-2 m-0">{{logged_in_user.volunteer_profile.team}}</h5>
+								<h6 class="text-center p-1 m-0"><text class="fw-bold">Team Leader: </text>{{logged_in_user.volunteer_profile.team.leader.full_name}}</h6>
+
+								<div class="text-center py-1">
+									<h6>{{logged_in_user.volunteer_profile.team.meeting_day}}s at {{logged_in_user.volunteer_profile.team.meeting_time}} EST</h6>				
+								</div>
+
+								<div class="text-center py-1">
+									<a href="{% url 'reading_sessions:room' logged_in_user.volunteer_profile.team.room.slug %}">{{logged_in_user.volunteer_profile.team.room}}</a>									
+								</div>
+							</div>
+							{% else %}
+							<div class="text-center">
+								<h5>Team Meeting Link Will Be Posted.</h5>
+							</div>
+							{% endif %}							
+						</div>						
+					</div>					
+				</div>
+			{% endif %}
+			</div>
+
+			{% endif %}
+
+			{% if show_evaluation_link %}
+
+			<div class="m-3 p-3 custom_bg_light_blue_gradient border">
+				<h4 class="px-3 m-0 text-center">Session Evaluations</h4>
+				<div class="row">
+					
+					<div class="col border p-3 m-3 bg-white">
+			
+						<div class="text-center py-1">
+							<a class="btn btn-info btn-log btn button_fixed_250 " href="{% url 'reading_sessions:link_session_evaluation' %}">Complete Form</a>						
+						</div>
+					
+					</div>						
+				</div>					
+			</div>
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% include 'reading_sessions/base_snippets/ws_test.html' %}
+{% endblock content %}

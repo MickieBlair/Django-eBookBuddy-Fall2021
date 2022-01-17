@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+{% include 'reading_sessions/json_variables.html' %}
+<div class="px-5 py-3">
+	<div class="card w-100 ">
+		<div class="card-header text-center custom_bg_blue_gradient">
+			<!-- <h3 class="m-0 p-1">Staff Home</h3> -->
+			{% if logged_in_user %}
+			<div>
+				<h4 class="m-0 p-1" id="card_header_name">{{logged_in_user}} - {{logged_in_user.role.name}} </h4>
+			</div>
+			{% endif %}
+		</div>
+		<div class="card-body bg-white">
+						
+			<div class="w-100 d-flex justify-content-end">
+					<div>
+						<h5 class="m-0 p-0 text-center">{{today_date}}</h5>
+						<h5 class="m-0 p-0 text-center" id="server_clock">{{server_time}}</h5>
+					</div>			
+				</div>
+
+			{% if messages %}
+			<ul class="messages_django pt-2" id="django_messages">
+			    {% for message in messages %}
+			    <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+			    {% endfor %}
+			</ul>
+			{% endif %}		
+      
+      <!--<div class="row text-center border m-3 p-3 bg-light">
+				<h4 class="pb-3 m-0">Mac Users</h4>
+
+			<div class="col ">				
+					<a class="btn btn-primary button_fixed_250" href="{% url 'reading_sessions:room' troubleshooting_room.slug %}">Connection Testing</a>		
+				</div>
+			</div>	-->
+
+			{% if show_rooms %}
+
+			<div class="row text-center border m-3 p-3 bg-light">
+				<h4 class="pb-3 m-0">Session Rooms</h4>
+
+				{% if show_orientation_button %}
+				<div class="col ">				
+					<a class="btn btn-primary button_fixed_250" href="{% url 'reading_sessions:room' orientation_room.slug %}">Join Orientation</a>		
+				</div>
+				{% endif %}
+
+				<div class="col ">
+					<a class="btn btn-success button_fixed_250" href="{% url 'reading_sessions:room' session_lobby.slug %}">Join Session Lobby</a>
+				</div>
+
+				<div class="col">
+					<a class="btn btn-success button_fixed_250" href="{% url 'reading_sessions:room' match_pending.slug %}">Join Match Pending</a>
+				</div>
+			</div>
+
+			{% endif %}
+
+			<!-- <div class="m-3 p-3 bg-light border"> -->
+				<div class="row text-center border m-3 p-3 bg-light ">
+					<h4 class="pb-3 m-0 text-center">Staff Links</h4>
+					<div class="col">
+						<div class="text-center">
+							<a class="btn btn-primary button_fixed_250" href="{% url 'site_admin:admin_home' %}">Admin Home</a>
+						</div>						
+					</div>
+
+					{% if logged_in_user.is_superuser %}
+					<div class="col">
+						<div class="text-center">
+							<a class="btn btn-warning button_fixed_250" href="{% url 'admin:index' %}">Django Admin</a>
+						</div>
+					</div>
+					<div class="col">
+						<div class="text-center ">
+							<a class="btn btn-info button_fixed_250" href="{% url 'testing:testing_home' %}">Testing Home</a>
+						</div>
+					</div>
+					{% endif %}
+
+
+					
+				</div>				
+			<!-- </div> -->
+
+			{% if show_team_meetings %}
+
+			{% if needs_full_access %}
+				<div class="m-3 p-3 bg-light border">
+					<h3 class="text-center">Team Meetings</h3>
+					<h4 class="text-center fw-normal">(Meeting Rooms are only open Monday-Thursday from 4pm until 8pm Eastern Time)</h4>
+					<div class="row bg-light">
+						{% for item in mega_teams %}
+						<div class="col border p-3 m-3 bg-white">
+							<div>
+								<h5 class="text-center p-2 m-0">{{item}}</h5>
+								<h6 class="text-center p-1 m-0"><text class="fw-bold">Coordinator: </text>{{item.coordinator.full_name}}</h6>
+								
+
+								{% for team in item.mega_team.all %}
+								<div class="text-center py-1">
+									{% if team.room %}
+									<a href="{% url 'reading_sessions:room' team.room.slug %}">{{team.room}}</a>
+									{% endif %}
+									<h6>{{team.meeting_day}}s at {{team.meeting_time}} EST</h6>
+																	
+								</div>
+								{% endfor %}
+							</div>
+							
+						</div>
+						{% endfor %}
+					</div>
+					
+				</div>
+			{% endif %}
+
+			{% if is_coordinator %}
+				<div class="m-3 p-3 bg-light border">
+					<h3 class="text-center">Team Meetings</h3>
+					<h4 class="text-center fw-normal">(Meeting Rooms are only open Monday-Thursday from 4pm until 8pm Eastern Time)</h4>
+					<div class="row bg-light">
+						
+						<div class="col border p-3 m-3 bg-white">
+							<div>
+								<h5 class="text-center p-2 m-0">{{coor_mega_team}}</h5>
+								<h6 class="text-center p-1 m-0"><text class="fw-bold">Coordinator: </text>{{coor_mega_team.coordinator.full_name}}</h6>
+
+								{% for team in coor_mega_team.mega_team.all %}
+								<div class="text-center py-1">
+									<a href="{% url 'reading_sessions:room' team.room.slug %}">{{team.room}}</a>
+									<h6>{{team.meeting_day}}s at {{team.meeting_time}} EST</h6>		
+								</div>
+								{% endfor %}
+							</div>
+							
+						</div>
+						
+					</div>
+					
+				</div>
+			{% endif %}
+
+<!-- 			{% if is_facilitator %}
+				<div class="border m-3 p-3 bg-light">
+					<h4 class="pb-3">Facilitator</h4>
+				</div>
+			{% endif %} -->
+
+			{% if is_team_leader %}
+				<div class="m-3 p-3 bg-light border">
+					<h3 class="text-center">Team Meetings</h3>
+					<h4 class="text-center fw-normal">(Meeting Rooms are only open Monday-Thursday from 4pm until 8pm Eastern Time)</h4>
+					<div class="row bg-light">
+						
+						<div class="col border p-3 m-3 bg-white">
+							<div>
+								<h5 class="text-center p-2 m-0">{{tl_team}}</h5>
+								<h6 class="text-center p-1 m-0"><text class="fw-bold">Team Leader: </text>{{tl_team.leader.full_name}}</h6>
+
+								<div class="text-center py-1">
+									<a href="{% url 'reading_sessions:room' tl_team.room.slug %}">{{tl_team.room}}</a>
+									<h6>{{tl_team.meeting_day}}s at {{tl_team.meeting_time}} EST</h6>									
+								</div>
+							</div>
+							
+						</div>
+						
+					</div>
+					
+				</div>
+			{% endif %}
+
+			{% endif %}
+
+			{% if show_evaluation_link %}
+			<div class="m-3 p-3 custom_bg_light_blue_gradient border">
+				<h4 class="px-3 m-0 text-center">Session Evaluations</h4>
+				<div class="row">
+					
+					<div class="col border p-3 m-3 bg-white">
+			
+						<div class="text-center py-1">
+							<a class="btn btn-info btn-log btn button_fixed_250 " href="{% url 'reading_sessions:link_session_evaluation' %}">Complete Form</a>						
+						</div>
+					
+					</div>						
+				</div>					
+			</div>
+			{% endif %}
+			
+
+		</div>
+	</div>
+</div>
+
+{% include 'reading_sessions/base_snippets/ws_test.html' %}
+
+{% endblock content %}

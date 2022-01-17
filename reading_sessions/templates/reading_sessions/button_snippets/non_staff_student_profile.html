@@ -1,0 +1,72 @@
+<button type="button" class="btn custom_bg_light_green_gradient button_bottom_toolbar" data-bs-toggle="modal" data-bs-target="#ns_student_profile_Modal">
+  Student Info
+</button>
+
+<div class="modal fade" id="ns_student_profile_Modal" tabindex="-1" aria-labelledby="ns_student_profile_ModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content modal-dialog-scrollable">
+      <div class="modal-header">
+        <h4 class="modal-title" id="ns_student_profile_ModalLabel">Student Profiles</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% for profile in student_profiles %}
+          <div class="card m-2 volunteer_display_student_profile" id="student_member_profile-{{profile.user.id}}">
+            <div class="card-header m-0 p-0">
+              <h5 class="m-0 py-0 px-2">{{profile.user.username}} - {{profile.user.full_name}}</h5>
+            </div>
+            <div class="card-body">
+              <div class="p-2 d-flex">
+                <label class="fixed_width_bold_label250">Initial Assessment Performed:</label> 
+                <text class="ps-2">
+                  
+                  {% if profile.user.student_progress.initial_assessment %}
+                  Yes
+                  {% else %}
+                  No
+                  {% endif %}
+                  </text>
+              </div>
+              <div class="p-2 d-flex">
+                <label class="fixed_width_bold_label250">Initial Reading Level:</label> 
+                <text class="ps-2">
+                  {{profile.user.student_progress.starting}}
+                  </text>
+              </div>
+              <div class="p-2 d-flex">
+                <label class="fixed_width_bold_label250">Current Reading Level:</label> 
+                <text class="ps-2">
+                  {{profile.user.student_progress.current}}
+                </text>
+              </div>
+
+              <div class="p-2 d-flex">
+                <label class="fixed_width_bold_label250">Last Updated:</label> 
+                <text class="ps-2">
+                  {{profile.user.student_progress.last_assessed}}
+                </text>
+              </div>
+
+              <div class="p-2 d-flex">
+                <label class="fixed_width_bold_label250">Grade:</label> 
+                <text class="ps-2">
+                  {{profile.grade}}
+                  </text>
+              </div>
+            </div>
+          </div>
+        {% endfor %}      
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="close_help" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script type="text/javascript">
+
+	
+
+</script>

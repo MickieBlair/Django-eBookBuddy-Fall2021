@@ -1,0 +1,54 @@
+{% block other %}
+<div class="outer_non_staff_content">
+	<div class="top_bar">
+		<h5 class="ps-2 m-0">{{user.role.name}}: {{user.full_name}} - {{room.name}}</h5>
+	</div>
+
+	<div class="border middle_section">
+		<div class="non_staff_content" id="non_staff_content">
+			<div class="left_pane_non_staff border-right" id="left_pane_non_staff">
+				<div class="inner_left_pane">
+					<div class="non_staff_room_header_inline_grid pe-1" id="non_staff_room_header_inline_grid">
+						<div class="d-flex align-items-center ps-1">
+							<div> 
+								<h5 id="left_pane_title"></h5>
+							</div>							
+						</div>
+
+						<div class="d-flex align-items-center"></div>
+						<div class="d-flex align-items-center">	</div>
+						
+						<div>
+							<button type="button" class="btn-close bg_red mb-1 button_opacity" id="non_staff_close_left_pane_btn" onclick="close_left_pane(this)"></button>
+						</div>	
+					</div>
+					<div class="room_chat_div_non_staff" id="room_chat_div_non_staff">
+						{% include 'reading_sessions/non_staff_content/ns_snippets/non_staff_chat.html' %}	
+					</div>
+
+					<div class="private_msgs_div_non_staff" id="private_msgs_div_non_staff">
+						{% include 'reading_sessions/non_staff_content/ns_snippets/non_staff_messages.html' %}					
+					</div>
+					
+				</div>				
+			</div>
+			<div class="right_pane_non_staff">
+				<div class="jitsi_div" id="room_video">
+					{% if not load_jitsi_script %}
+						<div class="d-grid h-100 justify-content-center align-items-center p-4">
+							<h3 class="w-100 text-center" id="text_test_div"> Please wait for the session to begin.</h3>
+							<h3 class="w-100 text-center"> The page will be refreshed when the session starts.</h3>
+							<h5 class="w-100 text-center" id="server_clock"></h5>			
+						</div>
+					{% endif %}	
+				</div>	
+			</div>	
+			
+		</div>
+	</div>
+
+	<div class="bottom_tool_bar">
+		{% include 'reading_sessions/non_staff_content/ns_snippets/non_staff_bottom_bar.html' %}	
+	</div>
+</div>
+{% endblock other %}

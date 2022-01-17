@@ -1,0 +1,105 @@
+<div class="text-center pt-2 w-100">
+  <button class="btn btn_staff_sidebar" data-bs-toggle="modal" data-bs-target="#help_requests_Modal" id="view_help_request_button">
+    <h6 class="link_text">Help</h6>
+    <h6 class="link_text">Requests</h6>
+    <h6 class="red_link_text">(<span id="request_count">0</span>)</h6> 
+  </button>
+</div>
+
+<div class="modal fade" id="help_requests_Modal" tabindex="-1" aria-labelledby="help_requests_Modal_Label" aria-hidden="true" >
+  <div class="modal-dialog modal-dialog-scrollable modal-fullscreen p-5">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="help_requests_Modal_Label">Help Requests</h3>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="close_view_help_requests()"></button>
+      </div>
+      <div class="modal-body ">
+      	
+	      	<div class="table-responsive pt-1">
+				<table class="table table-striped table-sm align-middle">
+				 <thead>
+				     <tr>
+				      <th>From</th>
+				      <th class="">Message</th>
+				      <th class="">In Room</th>
+				      <th class=""></th>
+				    </tr>
+				  </thead>
+				  <tbody id="table_body_all_help_requests">
+<!-- 				 	{% for redirect in all_redirects %}
+				     <tr class="redirect_row">
+				      <td>
+				      	{{redirect.user_to_redirect.full_name}}
+				      </td>
+				      <td class="text-center">
+				      	{{redirect.to_room.name}}
+				      </td>
+				      <td class="text-center">
+				      	<div class="p-1 cursor_pointer broadcast_redirect" id="redirect_id-{{redirect.id}}" value="{{redirect.id}}" onclick="broadcast_redirect(this)">
+							<div class="sidebar_link text-center">
+								<h6 class="link_text">Redirect</h6>
+							</div> 
+						</div>
+				      </td>
+				    </tr>
+				    {% endfor %} -->
+				  </tbody>
+				</table> 
+			</div>
+		
+			<div class="text-center bg_custom_light_gray" id ="no_help_requests">
+				<h2 class="py-3"> No Help Requests </h2>
+			</div>
+		
+      </div>
+      <div class="modal-footer">
+        
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close_help_modal" onclick="close_view_help_requests()" >Close</button>
+
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="mark_all_as_done" onclick="mark_all_as_done()" >Mark All As Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script type="text/javascript">
+  const close_help_modal = document.getElementById('close_help_modal');
+
+  function close_view_help_requests(){
+        // console.log("close_view_help_requests")
+        // var checkboxes_session = document.querySelectorAll(".session_radio");
+        // for(let item of checkboxes_session){
+        //     item.checked = false;
+        // }
+        // var new_match_radios = document.querySelectorAll(".new_match_radio");
+
+        // for(let item of new_match_radios){
+        //     item.checked = false;
+        // }
+        // clear_error_manual()
+    }
+
+
+
+    function mark_all_as_done(){
+        // console.log("mark_all_as_done")
+        var individual_buttons = document.querySelectorAll(".individual_help_request");
+        var individual_buttons_length = individual_buttons.length
+        // console.log("individual_buttons_length", individual_buttons_length)
+
+        for(let [index, item]  of individual_buttons.entries()){
+            let individual_redirect_id = item.getAttribute('value');
+            // mark_as_done(individual_redirect_id, true)
+            // console.log(index, individual_redirect_id)
+            if(index != individual_buttons_length -1){
+            	mark_as_done(individual_redirect_id, false)
+            } else{
+            	mark_as_done(individual_redirect_id, true)
+            }
+        }
+
+        close_help_modal.click()
+    }
+
+</script>

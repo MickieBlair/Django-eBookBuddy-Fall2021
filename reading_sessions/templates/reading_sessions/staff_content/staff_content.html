@@ -1,0 +1,100 @@
+{% block staff %}
+<div class="staff_outer_div" id="staff_outer_div">
+	<div class="staff_sidebar" id="staff_sidebar">
+		{% include 'reading_sessions/staff_content/s_snippets/staff_sidebar.html' %}
+		{% include 'reading_sessions/button_snippets/user_profile.html' %}
+		{% include 'reading_sessions/button_snippets/create_match.html' %}
+	</div>
+
+	<div class="staff_left_panel" id="staff_left_panel">
+		<div class="staff_session_monitoring" id="staff_session_monitoring">
+			<div class="staff_room_header_inline_grid pe-1" id="room_header_inline_grid">
+				<div class="d-flex align-items-center">
+					<h5 class="m-0 ps-2 p-0">{{room}}</h5>
+				</div>
+
+				<div>
+					<button type="button" class="btn-close bg_red mb-1 button_opacity" id="close_staff_monitoring_btn" onclick="close_monitoring(this)"></button>
+				</div>				
+			</div>
+
+			<div class="row m-0 pt-1 unmatched_row" id="unmatched_row">
+				<div class="col d-flex justify-content-start align-items-center">      
+			      <div>
+			      	<div>
+			      		<h6 class="p-0 m-0 fw-bold text-center">Unmatched Students:</h6>   	
+			      	</div>
+
+			      	<div class="pending_student_count fw-normal text-center w-100" id="pending_student_count">	0      		
+			      	</div>
+			      </div>
+			    </div>
+
+			    <div class="d-flex justify-content-center align-items-center fixed_width_create">
+			    	<div class="btn btn-success mb-1" type="button"  data-bs-toggle="modal" data-bs-target="#manual_match_Modal">
+			      		Create Match
+					</div>
+			    </div>
+
+			    <div class="col d-flex justify-content-end align-items-center">      
+			      <div>
+			      	<div>
+			      		<h6 class="p-0 m-0 fw-bold text-center">Available Volunteers:</h6>
+			      	</div>
+			      	<div class="available_volunteer_count fw-normal text-center" id="available_volunteer_count">
+			      		0
+			      	</div>
+			      </div>
+			    </div>				
+			</div>
+
+			<div class="border-top monitoring_content" id="monitoring_content">
+				<div class="monitoring_type room_chat_div" id="room_chat_btn_show">			
+					{% include 'reading_sessions/staff_content/s_snippets/monitoring_divs/room_chat.html' %}
+				</div>
+
+				<div class="monitoring_type today_sessions_div" id="todays_session_btn_show">
+					{% include 'reading_sessions/staff_content/s_snippets/monitoring_divs/todays_sessions.html' %}
+				</div>
+
+				<div class="monitoring_type rooms_div" id="rooms_participants_btn_show">
+					{% include 'reading_sessions/staff_content/s_snippets/monitoring_divs/rooms_and_jitsi_participants.html' %}
+				</div>
+
+				<div class="monitoring_type staff_chat_div" id="staff_chat_btn_show">
+					{% include 'reading_sessions/staff_content/s_snippets/monitoring_divs/staff_only_chat.html' %}
+				</div>
+
+				<div class="monitoring_type messages_div" id="staff_messages_btn_show">
+					{% include 'reading_sessions/staff_content/s_snippets/monitoring_divs/staff_private_messages.html' %}
+				</div>
+
+			</div>
+
+
+
+		</div>
+	</div>
+
+	<div class="staff_drag" id="staff_drag">
+		
+	</div>
+
+	<div class="staff_right_panel" id="staff_right_panel">
+		<div class="staff_video_div" id="room_video">
+			{% if not load_jitsi_script %}
+				<div class="d-grid h-100 justify-content-center align-items-center">
+							<h3 class="w-100 text-center"> Please wait for the session to begin.</h3>
+							<h3 class="w-100 text-center"> The page will be refreshed when the session starts.</h3>
+							<h5 class="w-100 text-center" id="server_clock"></h5>			
+						</div>
+			{% endif %}			
+		</div>
+		<div class="staff_video_bottom_bar">
+			<div class="video_buttons_div">	
+				{% include 'reading_sessions/staff_content/s_snippets/staff_bottom_bar.html' %}	
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock staff %}

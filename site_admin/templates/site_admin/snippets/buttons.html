@@ -1,0 +1,152 @@
+<!-- Example single danger button -->
+<div class="d-flex">
+
+  <div class="pe-1">
+    <a class="btn bg_dark_green text_white" href="{% url 'site_admin:admin_home' %}">Home</a>
+  </div>
+
+  <div class="pe-1">
+    <a class="btn bg_dark_green text_white" href="{% url 'site_admin:superuser_home' %}">Superuser</a>
+  </div>
+
+  {% if active_semester %}
+    <div class="btn-group pe-1">
+    <button type="button" class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+      {{active_semester}}
+    </button>
+    <ul class="dropdown-menu">
+      <li><a class="dropdown-item" href="{% url 'site_admin:scheduled_matches' active_semester.id 'Semester' 'Active' %}">Semester Scheduled Matches</a></li>
+      <li><a class="dropdown-item" href="{% url 'site_admin:sessions_by_day' active_semester.id 'All' %}">Sessions By Day</a></li>
+      <li><a class="dropdown-item" href="{% url 'site_admin:sessions_by_semester' active_semester.id 'All' %}">Semester Sessions</a></li>
+      
+     <li><hr class="dropdown-divider"></li>
+      <li>
+        <a class="dropdown-item bold bg-success bg-gradient" href="{% url 'site_admin:create_match_for_semester' active_semester.id %}">
+          <h5 class="m-0 p-0">Create New Match</h5>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  {% endif %}
+
+  <div class="btn-group pe-1">
+    <button type="button" class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+      Users
+    </button>
+    <ul class="dropdown-menu">
+      <li><a class="dropdown-item" href="{% url 'site_admin:users' 'All' %}">All</a></li>
+      {% for role in all_roles %}
+        <li><a class="dropdown-item" href="{% url 'site_admin:users' role.name %}">{{role.name}}</a></li>
+        {% endfor %}
+      
+      <li><hr class="dropdown-divider"></li>
+      <li>
+        <a class="dropdown-item bold bg-success bg-gradient" href="{% url 'site_admin:create_user' %}">
+          <h5 class="m-0 p-0">Create New User</h5>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+<!--   <div class="btn-group pe-1">
+    <button type="button" class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+      Matches
+    </button>
+    <ul class="dropdown-menu">
+      <li><a class="dropdown-item" href="{ url 'site_admin:semesters' }">Active Scheduled Matches</a></li>
+      <li><a class="dropdown-item" href="{% url 'site_admin:semesters' %}">Inactive Scheduled Matches</a></li>
+      <li><a class="dropdown-item" href="{% url 'site_admin:semesters' %}">All Scheduled Matches</a></li>
+      
+       <li><hr class="dropdown-divider"></li>
+      <li>
+        <a class="dropdown-item bold bg-success bg-gradient" href="{% url 'site_admin:create_semester' %}">
+          <h5 class="m-0 p-0">Create New Match</h5>
+        </a>
+      </li> 
+    </ul>
+  </div>-->
+
+  <div class="btn-group pe-1">
+    <button type="button" class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+      Semesters
+    </button>
+    <ul class="dropdown-menu">
+      <!-- <li><a class="dropdown-item" href="{ url 'site_admin:semesters' }">Active Semester</a></li> -->
+      <li><a class="dropdown-item" href="{% url 'site_admin:semesters' %}">All Semesters</a></li>
+      
+      <li><hr class="dropdown-divider"></li>
+      <li>
+        <a class="dropdown-item bold bg-success bg-gradient" href="{% url 'site_admin:create_semester' %}">
+          <h5 class="m-0 p-0">Create New Semester</h5>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="btn-group pe-1">
+    <button type="button" class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+      Day-Time Slots
+    </button>
+    <ul class="dropdown-menu">
+      <!-- <li><a class="dropdown-item" href="{ url 'site_admin:semesters' }">Active Semester</a></li> -->
+      <li><a class="dropdown-item" href="{% url 'site_admin:day_time_slots' %}">All Day Time Slots</a></li>
+      
+      <li><hr class="dropdown-divider"></li>
+      <li>
+        <a class="dropdown-item bold bg-success bg-gradient" href="{% url 'site_admin:create_day_time_slot' %}">
+          <h5 class="m-0 p-0">Create Day Time Slot</h5>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="btn-group pe-1">
+    <button type="button" class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+      Rooms
+    </button>
+    <ul class="dropdown-menu">
+      <li><a class="dropdown-item" href="{% url 'site_admin:all_rooms' %}">All Rooms</a></li>
+      
+      <li><hr class="dropdown-divider"></li>
+      <li>
+        <a class="dropdown-item bold bg-success bg-gradient" href="{% url 'site_admin:create_custom_room' %}">
+          <h5 class="m-0 p-0">Create Custom Room</h5>
+        </a>
+      </li>
+      <li class="pt-1">
+        <a class="dropdown-item bold bg-success bg-gradient" href="{% url 'site_admin:create_breakout_rooms' %}">
+          <h5 class="m-0 p-0">Create Additional Breakout Rooms</h5>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="pe-1">
+    <a class="btn btn-info" href="{% url 'site_admin:assessments' %}">Assessments</a>
+  </div>
+
+  <div class="pe-1">
+    <a class="btn btn-info" href="{% url 'site_admin:all_sign_ins' 'All' %}">Time Online</a>
+  </div>
+  <div class="pe-1">
+    <a class="btn btn-info" href="{% url 'site_admin:all_logs' %}">All Logs</a>
+  </div>
+
+  <div class="btn-group">
+  <button type="button" class="btn btn-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+    Reports
+  </button>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" href="{% url 'site_admin:sessions_by_day' active_semester.id 'All' %}">Attendance Reports By Day</a></li>
+    <li><a class="dropdown-item" href="{% url 'site_admin:all_session_evaluations' %}">Session Evaluations</a></li>
+    <li><a class="dropdown-item" href="{% url 'site_admin:all_students_attendance_report' %}">Student Report</a></li>
+    <li><a class="dropdown-item" href="{% url 'site_admin:all_volunteers_attendance_report' %}">Volunteer Report</a></li>
+    <!-- <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item" href="#">Separated link</a></li> -->
+  </ul>
+</div>
+
+ 
+
+</div>

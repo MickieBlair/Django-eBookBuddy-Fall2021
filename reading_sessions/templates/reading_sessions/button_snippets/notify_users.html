@@ -1,0 +1,122 @@
+<div class="text-center pt-2 w-100">
+  <button class="btn btn_staff_sidebar" data-bs-toggle="modal" data-bs-target="#sendMessageModal" id="notify_users_button">
+    <h6 class="link_text">Notify</h6>
+    <h6 class="link_text">Users</h6>  
+  </button>
+</div>
+
+
+<div class="modal fade" id="sendMessageModal" tabindex="-1" aria-labelledby="sendMessageModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="sendMessageModalLabel">Send Message</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="close_notify_all()"></button>
+      </div>
+      <div class="modal-body">
+      	<h6><span class="fw-bold">From:</span> {{user.full_name}}</h6>
+
+        <div class="row px-0 mx-0 pb-3" onclick="clear_notify_error()">
+          <div class="col px-0 d-flex justify-content-start align-items-center">
+            <div class="d-inline-flex justify-content-start align-items-center">
+              <label class="fw-bold">To:</label>
+            </div>              
+          </div>
+          <div class="col d-flex justify-content-center align-items-center">
+            <div class="d-inline-flex justify-content-center align-items-center">
+              <input class="session_radio" type="radio" checked name="to_group" value="All" id="notify_all_default">
+              <label>All</label>
+            </div>              
+          </div>
+          <div class="col d-flex justify-content-center align-items-center">
+            <div class="d-inline-flex justify-content-center align-items-center">
+              <input class="session_radio" type="radio" name="to_group" value="Volunteer">
+              <label>Volunteers</label>
+            </div>              
+          </div>
+          <div class="col d-flex justify-content-center align-items-center">
+            <div class="d-inline-flex justify-content-center align-items-center">
+              <input class="session_radio" type="radio" name="to_group" value="Student">
+              <label>Students</label>
+            </div>              
+          </div>
+          <div class="col d-flex justify-content-center align-items-center">
+            <div class="d-inline-flex justify-content-center align-items-center">
+              <input class="session_radio" type="radio" name="to_group" value="Staff">
+              <label>Staff</label>
+            </div>              
+          </div>
+            
+        
+          
+        </div>
+        <textarea class="form-control" type="text" name="message_to_all" id="message_to_all" rows=7 onfocus="clear_notify_error()"></textarea>
+      </div>
+      <div class="modal-footer">
+        <div class="error w-100 text-center" id="notify_error"></div>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close_to_all" onclick="close_notify_all()">Close</button>
+        <button type="button" class="btn btn-primary" onclick="send_msg_to_all()">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script type="text/javascript">
+  var sendMessageModal = document.getElementById('sendMessageModal')
+  var myInput = document.getElementById('message_to_all')
+
+  sendMessageModal.addEventListener('shown.bs.modal', function () {
+    myInput.focus()
+  })
+
+function send_msg_to_all(){
+  // console.log("To All");
+  let message_to_all = document.getElementById('message_to_all');
+  let close_to_all = document.getElementById('close_to_all');
+  let from = "{{user.full_name}}";
+  let to_group = document.querySelector('input[name="to_group"]:checked')
+  let msg_to_all = message_to_all.value;
+  let notify_error = document.getElementById('notify_error');
+  
+  if(to_group && msg_to_all!=""){
+    match_socket_private.send(JSON.stringify({
+          "command": "notify_all",
+          "message": msg_to_all,
+          "to_group": to_group.getAttribute('value'),
+          "user_id": from,
+      }));
+      
+      close_to_all.click()
+  } else{
+    if(!to_group){
+      notify_error.innerHTML = "To Group is Required."
+    } else if(msg_to_all == ""){
+      notify_error.innerHTML = "Message is Required."
+    }else{
+      notify_error.innerHTML = "To Group and Message are Required."
+    }
+    
+  }
+
+  
+}
+
+function clear_notify_error(){
+  let notify_error = document.getElementById('notify_error');
+  notify_error.innerHTML = ""
+}
+
+function close_notify_all(){
+  let default_choice = document.getElementById('notify_all_default');
+  default_choice.checked = true;
+  let message_to_all = document.getElementById('message_to_all');
+  message_to_all.value = '';
+
+
+}
+
+
+
+
+</script>

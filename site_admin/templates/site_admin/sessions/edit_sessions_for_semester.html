@@ -1,0 +1,52 @@
+{% extends 'site_admin/admin_base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="mt-1">
+{% include 'site_admin/snippets/buttons.html' %}
+{% include 'site_admin/snippets/django_messages_snippet.html' %}
+</div>
+
+<div class="row pt-5">
+  <div class="col-lg-6 col-md-8 col-sm-10 mx-auto">
+    <div class="card mx-auto">
+      <div class="card-header custom_bg_blue">
+        <div class="row mx-auto my-auto">
+          <div class='col'>
+            <h1 class="h3 fw-bold pt-2 text-center">Edit Sessions for {{semester}}</h1>
+          </div>
+        </div>
+        
+      </div>
+      <div class="card-body" >
+
+        <form method="POST" class="px-3">
+          {% csrf_token %}
+          <div class="mx-auto">
+            <div>
+                <input type="hidden" class="" name="semester" id="id_semester" value="{{semester.id}}">
+              </div>
+          {% for day_time in day_times%}
+          <div class="fixed_width_325 mx-auto">         
+            <div class="d-inline-flex">
+              
+              <div>
+                <input type="checkbox" class="checkbox" name="day_time" id="id_day_time-{{day_time.id}}" value="{{day_time.id}}" {% if day_time in semester.day_time_slots.all %} checked {% endif %}>
+              </div>
+              <div>
+                <text class="fw-bold ps-3 pe-3">{{day_time}}: </text>{{day_time.time_start}} - {{day_time.time_end}}
+              </div>                         
+            </div>
+          </div>
+          {% endfor %}
+          </div>
+          <button class="w-100 btn btn-lg btn-success my-3" type="submit"> Submit Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

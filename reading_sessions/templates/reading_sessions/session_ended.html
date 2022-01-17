@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+{% include 'reading_sessions/json_variables.html' %}
+<div class="p-3">
+	<div class="container-fluid">
+    	<div class="text-center">
+            {% if user_role != "Staff" %}
+            <div class="px-5 py-3">
+                <div class="card w-100">
+                    <div class="card-header text-center custom_bg_blue_gradient">
+                        <!-- <h3 class="m-0 p-1">Staff Home</h3> -->
+                        {% if logged_in_user %}
+                        <div>
+                            <h4 class="m-0 p-1">{{logged_in_user.full_name}} </h4>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body bg-light">
+                        <div class="text-center">
+                            <div class="w-100 text-end">
+                                <h5 class="m-0 p-0">{{today_date}}</h5>
+                                <h5 class="m-0 p-0" id="server_clock">{{server_time}}</h5>                  
+                            </div>                           
+
+                            <div>
+                                <h2 class="py-3"> You did an excellent job!</h2>
+                            </div> 
+
+                            <div>
+                                <img class="img-fluid" src="{% static 'images/star.gif' %}">
+                            </div>
+
+                            <div class="text-center p-3">
+                                <a class="btn btn-primary" href="{% url 'reading_sessions:student_home' %}">Session Home</a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+
+
+
+
+            {% else %}
+
+            <div class="px-5 py-3">
+                <div class="card w-100">
+                    <div class="card-header text-center custom_bg_blue_gradient">
+                        <!-- <h3 class="m-0 p-1">Staff Home</h3> -->
+                        {% if logged_in_user %}
+                        <div>
+                            <h4 class="m-0 p-1">{{logged_in_user.full_name}} </h4>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body bg-light">
+                        <div class="text-center">
+                            <div class="w-100 text-end">
+                                <h5 class="m-0 p-0">{{today_date}}</h5>
+                                <h5 class="m-0 p-0" id="server_clock">{{server_time}}</h5>                  
+                            </div>                           
+
+                           <!-- 
+                            <div class="text-center p-3">
+                <a class="btn btn-primary" href="url 'reading_sessions:initial_entry' %}">Return to Session</a>
+            </div> -->
+                            <div class="text-center py-2 px-3">
+                                <a class="btn btn-primary btn-lg" href="{% url 'reading_sessions:staff_home' %}">Staff Home</a>
+                            </div> 
+
+                            
+
+                            <div class="row pt-3">
+                                <div class="col">
+                                    <div class="text-center py-2 px-3">
+                                        <a class="btn btn-info btn-lg " href="{% url 'reading_sessions:room' 'match-pending' %}">Return to Match Pending</a>
+                                    </div> 
+                                </div>
+
+                                <div class="col">
+                                    <div class="text-center py-2 px-3">
+                                        <a class="btn btn-warning btn-lg" href="{% url 'reading_sessions:room' 'session-lobby' %}">Return to Session Lobby</a>
+                                    </div> 
+                                    
+                                </div>
+                                
+                            </div>
+
+                            
+
+                            <div class="text-center py-4 px-3">
+                                <h4>If you read with a student, please complete an evaluation.</h4>
+
+                                <a class="btn btn-warning btn-lg mt-3" href="{% url 'reading_sessions:session_evaluation' %}">Student Evaluation</a>
+                            </div>
+
+                            {% if day_with_session %}
+
+                            <div class="text-center py-4 px-3">
+                                <h3>Generate Attendance Reports</h3>
+
+                                <a class="btn btn-primary btn-lg mt-3"href="{% url 'site_admin:staff_mark_day_complete' day_with_session.id %}">Mark Today As Complete</a>
+                            </div>
+                            {% endif %}
+
+                            
+
+                        
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+           
+            
+            {% endif %}
+    		
+    	</div>
+    </div>
+
+
+
+</div>
+
+
+{% endblock content %}

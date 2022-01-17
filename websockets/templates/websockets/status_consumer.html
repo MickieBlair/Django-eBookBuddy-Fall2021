@@ -1,0 +1,94 @@
+<script type="text/javascript">
+	let display = true
+	if (ws_scheme == "ws"){
+		console.log("ws_scheme", ws_scheme)
+		status_ws_path = ws_scheme + '://' + window.location.host + "/status/";
+	} else if (ws_scheme == "wss"){
+		console.log("ws_scheme", ws_scheme)
+		status_ws_path = ws_scheme + '://' + window.location.host + ":8001/status/";
+	} else {
+		console.log("Else ws_scheme", ws_scheme)
+	}
+
+	console.log("status_ws_path", status_ws_path);
+
+	let status_socket_private = ""
+
+	function connect_status_socket(){
+		const statusSocket = new WebSocket(status_ws_path);
+		status_socket_private=statusSocket
+		console.log("const status_ws_path", status_ws_path);
+
+		statusSocket.onmessage = function(message) {
+			let status_data = JSON.parse(message.data);
+			console.log("Status Data", status_data)	
+
+
+		}
+
+		statusSocket.onopen = function(e) {
+			console.log("statusSocket [open] Connection established");	
+			if(display && room_name == "Connection Testing"){
+				// alert("SUCCESS !!! " );
+				console.log("success")
+				display_message_ws("SUCCESS !!! ")
+				display = false;
+			};		
+				
+			
+		};
+
+		statusSocket.addEventListener("open", function(e){
+			console.log("Status Socket OPEN");
+			console.log("statusSocket [open] Connection established");
+			if("{{request.user.is_authenticated}}"){
+				statusSocket.send(JSON.stringify({
+					"command": "join",
+					"member_id": user_id,
+					"room_id": room_id, 
+				}))
+			}			
+		});	
+
+		statusSocket.onerror = function(e){
+			// alert("FAILED  !!!!  ")
+			console.log("Status Socket on error: " + JSON.stringify(e))
+			
+			// if(display && room_name == "Connection Testing"){
+			// 	display_message_ws("Sadly still not working !!! " );
+			// 	display = false;
+   //      post_ajax_drop(user_id, room_id)
+			// };	
+			
+		};
+
+
+
+		statusSocket.onclose = function (event) {
+			console.error('Status Socket. The connection has been closed.');
+			// check_connections_interval = setInterval(check_all_connections, 30000)
+		};
+
+
+
+	}
+
+	
+	connect_status_socket();
+
+	function display_message_ws(message){
+	    const display_to_all_btn = document.getElementById('display_to_all_btn');
+	    const notificationModalLabel = document.getElementById('notificationModalLabel');
+	    const sender_of = document.getElementById('sender');
+	    const this_msg = document.getElementById('this_msg');
+	    notificationModalLabel.innerHTML = "Connection Status";
+	    sender_of.innerHTML = "System";
+	    this_msg.innerHTML = message; 
+	    display_to_all_btn.click();
+	}
+
+
+	
+
+
+</script>

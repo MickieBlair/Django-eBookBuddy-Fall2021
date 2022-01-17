@@ -1,0 +1,153 @@
+{% extends 'site_admin/admin_base.html' %}
+
+{% load static %}
+
+
+{% block content %}
+
+<div class="mt-1">
+{% include 'site_admin/snippets/buttons.html' %}
+{% include 'site_admin/snippets/django_messages_snippet.html' %}
+</div>
+
+
+<div class="border-bottom">
+  <h2 class="pt-2 ">{{volunteer.full_name}} Attendance Report - {{semester}}</h2>
+</div>
+<!-- <div class="row m-0 pt-2 border-bottom bg-light w-100">
+	<div class="col d-flex justify-content-left align-items-center">
+		<div class="w-100 text-center">
+			<div>
+	          <h6 class="pt-0">Total Sign Ins:</h6>
+	        </div>
+	        <div>
+	          <h6 class="pt-0">{{report.total_sign_ins}}</h6>
+	        </div>			
+		</div>		
+	</div>
+	<div class="col d-flex justify-content-center align-items-center">
+		<div class="w-100 text-center">
+			<div>
+	          <h6 class="pt-0">Scheduled Sessions:</h6>
+	        </div>
+	        <div>
+	          <h6 class="pt-0">{{report.scheduled_count}}</h6>
+	        </div>			
+		</div>		
+	</div>
+
+  <div class="col d-flex justify-content-center align-items-center">
+    <div class="w-100 text-center">
+      <div>
+            <h6 class="pt-0">Sessions Attended:</h6>
+          </div>
+          <div>
+            <h6 class="pt-0">{{report.attended_count}}</h6>
+          </div>      
+    </div>    
+  </div>
+	<div class="col text-center d-flex justify-content-right align-items-center"> 
+		<div class="w-100 text-center">
+			<a class="btn btn-warning" href="url 'site_admin:by_day_attendance_csv' day.id">Download Report</a>
+		</div> 
+    </div>
+</div> -->
+
+<div class="table-responsive pt-1">
+<table class="table table-striped table-sm align-middle">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th class="text-center">Scheduled</th>
+      <th class="text-center">Logged In</th>
+      <th class="text-center"><div>Session</div><div>Slot</div> </th>
+       <th class="text-center">Logs</th>
+       <th class="text-center">Status</th>
+       <th class="text-center"><div>Pending</div><div>Minutes</div> </th>
+       <th class="text-center"><div>Breakout</div><div>Minutes</div> </th>
+      <th class="text-center"><div>Total</div><div>Minutes</div> </th>
+      <th class="text-center"><div>Temp</div><div>Match</div> </th>
+      <th class="text-center"><div>Temp</div><div>Buddies</div> </th>
+    </tr>
+  </thead>
+  <tbody>
+  	{% for day in sign_ins_day %}
+    <tr>
+      <td>
+        {{day}}       
+      </td>
+      <td class="text-center">
+        <!-- {{day.scheduled}}  -->
+        {% if day.scheduled %}                   
+        	<i class="fas fa-check  match_check_green"></i>
+      	{% else %}
+       		<i class="fas fa-times match_times_red"></i>
+      	{% endif %}      
+      </td>
+      <td class="text-center">
+        <!-- {{day.signed_in}} -->
+        {% if day.signed_in %}                   
+        	<i class="fas fa-check  match_check_green"></i>
+      	{% else %}
+       		<i class="fas fa-times match_times_red"></i>
+      	{% endif %}        
+      </td>
+
+
+      <td>
+        {{day.session_slot.get_name_time}}       
+      </td>
+
+      <td class="">
+
+        <ol class="ps-3 m-0">
+        {% for log in day.logs.all %}
+        
+          <li class="">{{log.room}} - {{log.local_time_in_only}} - {{log.local_time_out_only}}</li>
+        
+        {% endfor %}
+
+<!--           <li class=""><text class="fw-bold">In: </text>{{day.logs.all.first.room}} - {{day.logs.all.first.local_time_in_only}}</li>
+          <li class=""><text class="fw-bold">Out: </text>{{day.logs.all.last.room}} - {{day.logs.all.last.local_time_out_only}}</li> -->
+        
+        
+        </ol>
+      </td>
+      <td class="text-center">
+        {{day.status}}       
+      </td>
+      <td class="text-center">
+        {{day.pending_minutes}}       
+      </td>
+      <td class="text-center">
+        {{day.breakout_minutes}}       
+      </td>
+      <td class="text-center">
+        {{day.total_minutes}}       
+      </td>   
+      <td class="text-center">
+        
+        {% if day.temp_match_created %}                   
+        	<text class="fw-bold red">Yes</text>
+      	{% else %}
+       		<text class="fw-bold"></text>
+      	{% endif %}       
+      </td> 
+
+      <td class="text-center">
+    	{% for person in day.temporary_buddies.all %}
+    	<div>{{person.full_name}}</div>
+    	{% endfor %}
+    </td>                  
+        
+    </tr>
+    {% endfor %}
+
+  </tbody>
+</table>
+</div>
+
+
+
+{% endblock content %}
+

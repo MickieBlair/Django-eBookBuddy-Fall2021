@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+	<div class="card my-3">
+		<div class="card-header text-center custom_bg_blue_gradient">
+			<h1 class="">Oops, System Error</h1>
+		</div>
+		<div class="card-body text-center">
+			<div>
+				<h2>The error has been sent to a Staff member.</h2>
+				<h3 class="py-3">In the meantime, try the following:</h2>
+				<div class="row w-100">
+					<div class="col">
+						<div>
+							<img class="button_fixed_150" src="{% static 'images/chrome_logo.png' %}">
+							<h3>Make sure you are using the Chrome Browser.</h3>
+						</div>						
+					</div>
+					<div class="col">
+						<div>
+							<img class="button_fixed_150" src="{% static 'images/cookie.png' %}">
+							<h3>Use an Incognito to Login, a cookie is probably stuck!</h3>
+						</div>
+						
+					</div>
+					
+				</div>
+				
+				
+			</div>
+			<div class="py-3">
+				<a class="fixed_width_btn btn btn-primary btn-lg" href="{% url 'logout' %}">
+				Logout
+			</a>
+			</div >				
+		</div>
+		<div class="card-footer text-center">
+			<h5> For assistance: <a href="mailto: admin@ebookbuddy.org">Email: admin@ebookbuddy.org</a></h5>			
+		</div>
+	</div>	
+</div>
+
+{% endblock content %}

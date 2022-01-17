@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+{{ user_role|json_script:"user_role" }}
+
+<div class="login_card mx-auto my-5">
+        <div class="card mx-auto">
+          <div class="card-header custom_bg_blue">
+            <h1 class="h3 mb-3 w-100 text-center fw-bold mt-2">Sign In!</h1>
+          </div>
+          <div class="card-body">
+            <div class="row m-3">
+              <div class="col mx-auto">
+                <form method="POST">
+                  {% csrf_token %}
+                  <div class="my-2">
+                    <div class="grid">
+                      <label for="id_username" class="visually-hidden">Username</label>
+                      <input type="text" id="id_username" name="username" class="form-control" placeholder="Username" required autofocus>
+                    </div>
+                  </div>
+
+                  <div class="my-2">
+                    <label for="id_password" class="visually-hidden">Password</label>
+                    <input type="password" id="id_password" name="password" class="form-control" placeholder="Password" required>
+                  </div>
+                  <div class="login_error" >                 
+                    {% for field in login_form %}
+                        <p>
+                          {% for error in field.errors %}
+                            <p class="error">{{ error }}</p>
+                          {% endfor %}
+                        </p>
+                    {% endfor %}
+                    {% if login_form.non_field_errors %}
+                      <div class="">
+                        <p>{{login_form.non_field_errors}}</p>
+                      </div>
+                        
+                    {% endif %}                
+                  </div>
+                  <button class="w-100 btn btn-lg btn-warning my-2" type="submit">Let's Go !</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+</div>
+
+{% endblock content %}
+<!--           <div class="card-footer">
+            <div class="card pt-2">
+
+              <h4 class="text-center pb-2">New Users</h4>
+              <a class="btn btn-secondary custom-color m-2" href="{% url 'register' %}">Register Here</a>
+
+            </div>
+          </div> -->

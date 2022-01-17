@@ -1,0 +1,258 @@
+<!-- <div class="p-1 cursor_pointer" type="button"  data-bs-toggle="modal" data-bs-target="#manual_match_Modal">
+  <div class="sidebar_link text-center">
+    <h6 class="link_text">Create</h6>
+    <h6 class="link_text">Match</h6>    
+  </div> 
+</div>
+ -->
+<div class="modal fade" id="manual_match_Modal" tabindex="-1" aria-labelledby="manual_match_Modal_Label" aria-hidden="true" >
+  <div class="modal-dialog modal-dialog-scrollable modal-fullscreen p-5">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="manual_match_Modal_Label">Manually Create Match - {{day_with_session}}</h3>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="close_create_manual_match()"></button>
+      </div>
+      <div class="modal-body px-5">
+          <!-- <div id="today_create_match" class="grid_display border-bottom pb-3"> -->
+          
+          <div class="row create_match_row_1">
+            <div class="col d-flex justify-content-left align-items-center">
+              <h5 class="text-center text-decoration-underline">Choose Session</h5>
+            </div>
+            {% for session in day_with_session.day_sessions.all  %}
+            <div class="col">
+              <div class="d-inline-flex align-items-center">
+                <input type="radio" name="ind_session" class="session_radio" value="{{session.id}}" onclick="clear_error_manual()">
+                <label class="session_label">{{session.day_time.session_slot}}</label>
+              </div> 
+            </div>
+            {% endfor %}
+
+
+         
+            <div class="col d-none">
+              <div class="d-inline-flex align-items-center">
+
+                <input id="input_temp_type" type="text" name="ind_temp_type" class="" value="{{temp_match_type.id}}" onclick="clear_error_manual()" >
+              </div> 
+            </div>
+           
+          </div>          
+        <!-- </div> -->
+       
+        <div class="row pt-3 create_match_row_2">
+
+          <div class="col h-100">
+            <h5 class="text-center pt-2 text-decoration-underline height32">Students</h5>
+
+            <div class="scrolling_table_fixed_head table-responsive fixed_height_match_table" id="">
+              <table class="table table-striped table-sm align-middle ">
+                <thead>
+                  <tr>          
+                    <th class=""></th>          
+                    <th class=""></th>
+                    <!-- <th class=""></th> -->
+                  </tr>
+                </thead>
+                <tbody class="h-100">
+                  {% for student in all_students %}
+                  
+                  <tr class="available_for_match" id="available_for_match-{{student.id}}">
+                    <td id="input_stu_div_{{student.id}}" onclick="clear_error_manual()"><input type="radio" class="stu_radio new_match_radio" name="stu_choice" value ="{{student.id}}" id = "radio_stu_{{student.id}}"></td>
+                    <td>{{student.full_name}}</td>
+                    <!-- <td></td> -->
+                  </tr>
+                  {% endfor %}                  
+                </tbody>
+              </table>
+            </div>
+
+            
+          </div>
+
+          <div class="col h-100">
+            <h5 class="text-center pt-2 text-decoration-underline height32">Volunteers</h5>
+
+            <div class="scrolling_table_fixed_head table-responsive fixed_height_match_table" id="">
+              <table class="table table-striped table-sm align-middle ">
+                <thead>
+                  <tr>          
+                    <th class=""></th>          
+                    <th class=""></th>
+                    <!-- <th class=""></th> -->
+                  </tr>
+                </thead>
+                <tbody class="h-100">
+                  {% for vol in all_volunteers %}
+                  <tr class="available_for_match" id="available_for_match-{{vol.id}}">
+                    <td id="input_vol_div_{{vol.id}}" onclick="clear_error_manual()"><input type="radio" class="vol_radio new_match_radio" name="vol_choice" value ="{{vol.id}}" id = "radio_vol_{{vol.id}}"></td>
+                    <td>{{vol.full_name}}</td>
+                    <!-- <td></td> -->
+                  </tr>
+                  {% endfor %}                  
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+
+          <div class="col h-100">
+            <h5 class="text-center pt-2 text-decoration-underline height32">Staff</h5>
+
+            <div class="scrolling_table_fixed_head table-responsive fixed_height_match_table" id="">
+              <table class="table table-striped table-sm align-middle ">
+                <thead>
+                  <tr>          
+                    <th class=""></th>          
+                    <th class=""></th>
+                    <!-- <th class=""></th> -->
+                  </tr>
+                </thead>
+                <tbody class="h-100">
+                  {% for staff in all_staff %}
+                  <tr class="available_for_match" id="available_for_match-{{staff.id}}">
+                    <td id="input_staff_div_{{staff.id}}" onclick="clear_error_manual()"><input type="radio" class="vol_radio new_match_radio" name="vol_choice" value ="{{staff.id}}" id = "radio_vol_{{staff.id}}"></td>
+                    <td>{{staff.full_name}}</td>
+                    <!-- <td></td> -->
+                  </tr>
+                  {% endfor %}                  
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+
+          
+         
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <div class="error w-100 text-center" id="create_match_error"></div>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close_create_manual_create_modal" onclick="close_create_manual_match()" >Close</button>
+        <button type="button" class="btn btn-primary" onclick="create_manual_match()">Create and Redirect</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script type="text/javascript">
+
+    function set_new_match_vol(element){
+        const input_new_match_vol = document.getElementById('to_vol_id');
+        // console.log(element.id);
+        let radio_id = "radio_vol_" + element.id.split("_")[3];
+        const radio_input_vol = document.getElementById(radio_id);
+        radio_input_vol.checked = true;
+
+        // console.log('element', element);
+        input_new_match_vol.value = radio_input_vol.value;
+    }
+
+    function set_new_match_stu (element){
+        const input_new_match_stud = document.getElementById('reassign_student_id2');
+        
+        let radio_id = "stu_radio_" + element.id.split("_")[3];
+        // console.log("RADIO_ID", radio_id)
+        const radio_input_vol = document.getElementById(radio_id);
+        // console.log("radio_input_vol", radio_input_vol);
+        radio_input_vol.checked = true;
+
+        // console.log('element', element);
+        input_new_match_stud.value = radio_input_vol.value;
+    }
+
+
+  function clear_error_manual(){
+    let error_div = document.getElementById('create_match_error');
+    error_div.innerHTML = "";
+  }
+  
+
+  function close_create_manual_match(){
+        // console.log("Closing manual match")
+        var checkboxes_session = document.querySelectorAll(".session_radio");
+        for(let item of checkboxes_session){
+            item.checked = false;
+        }
+        var new_match_radios = document.querySelectorAll(".new_match_radio");
+
+        for(let item of new_match_radios){
+            item.checked = false;
+        }
+        clear_error_manual()
+
+    }
+
+    function create_manual_match() {
+  
+        let match_type = document.getElementById('input_temp_type')
+        let student_new_match = document.querySelector('input[name="stu_choice"]:checked');
+        let vol_new_match = document.querySelector('input[name="vol_choice"]:checked');
+        let current_session = document.querySelector('input[name="ind_session"]:checked');
+        let close_manual_match_modal = document.getElementById('close_create_manual_create_modal');
+        let manual_match_error = document.getElementById('create_match_error');
+        let send = true;
+        let current_session_id = "";
+        let vol_new_match_id = "";
+        let student_new_match_id = "";
+
+        // console.log("Student", student_new_match);
+        // console.log("Volunteer", vol_new_match);
+        // console.log("Current Session", current_session);
+
+        if (current_session){
+            current_session_id = current_session.value;
+            // console.log("Current Session Value", current_session_id);
+
+        } else {
+            send = false;
+            let session_error_div = document.createElement('div')
+            session_error_div.innerHTML = " * Please add a Session."
+            manual_match_error.appendChild(session_error_div)
+        }
+
+        if (vol_new_match){
+            vol_new_match_id = vol_new_match.value;
+            // console.log("Current Vol Value", vol_new_match_id);
+
+        } else {
+            send = false;
+            let vol_error_div = document.createElement('div')
+            vol_error_div.innerHTML = "* Please add a Volunteer."
+            manual_match_error.appendChild(vol_error_div)
+        }
+
+        if (student_new_match){
+            student_new_match_id = student_new_match.value;
+            // console.log("Current Stu Value", student_new_match_id);
+        } else {
+            let student_error_div = document.createElement('div')
+            student_error_div.innerHTML = "* Please add a Student."
+            manual_match_error.appendChild(student_error_div);
+            send = false;
+        }
+
+
+        if(send){
+            console.log("sent_by", user_id)
+            console.log("match_type", match_type.value)
+            console.log("current_session_id", current_session_id)
+            console.log("student_new_match_id", student_new_match_id)
+            console.log("vol_new_match_id", vol_new_match_id)
+
+            match_socket_private.send(JSON.stringify({
+                    "command": "create_temp_match",
+                    "sent_by": user_id,
+                    "temp_match_type": match_type.value,
+                    "current_session_id": current_session_id,
+                    "student_new_match_id": student_new_match_id,
+                    "vol_new_match_id": vol_new_match_id,
+                    
+                }));
+            close_manual_match_modal.click()   
+        }             
+    }
+
+</script>

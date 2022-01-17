@@ -1,0 +1,123 @@
+<div class="text-center pt-2 w-100">
+    <button class="btn btn_staff_sidebar" id="redirect_modal_button" data-bs-toggle="modal" data-bs-target="#redirect_notifications_Modal">
+      <h6 class="link_text">Redirects</h6>
+        <h6 class="red_link_text">(<span id="number_pending_redirects">0</span>)</h6>  
+    </button>
+  </div>
+
+
+<div class="modal fade" id="redirect_notifications_Modal" tabindex="-1" aria-labelledby="redirect_notifications_Modal_Label" aria-hidden="true" >
+  <div class="modal-dialog modal-dialog-scrollable modal-fullscreen p-5">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="redirect_notifications_Modal_Label">Pending Redirects</h3>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="close_redirects()"></button>
+      </div>
+      <div class="modal-body ">
+      	
+	      	<div class="table-responsive pt-1">
+				<table class="table table-striped table-sm align-middle">
+				 <thead>
+				     <tr>
+				      <th>User</th>
+				      <th class="text-center">Send To</th>
+              <th class="text-center"></th>
+				      <th class="text-center"></th>
+				    </tr>
+				  </thead>
+				  <tbody id="table_body_all_redirects">
+<!-- 				 	{% for redirect in all_redirects %}
+				     <tr class="redirect_row">
+				      <td>
+				      	{{redirect.user_to_redirect.full_name}}
+				      </td>
+				      <td class="text-center">
+				      	{{redirect.to_room.name}}
+				      </td>
+				      <td class="text-center">
+				      	<div class="p-1 cursor_pointer broadcast_redirect" id="redirect_id-{{redirect.id}}" value="{{redirect.id}}" onclick="broadcast_redirect(this)">
+							<div class="sidebar_link text-center">
+								<h6 class="link_text">Redirect</h6>
+							</div> 
+						</div>
+				      </td>
+				    </tr>
+				    {% endfor %} -->
+				  </tbody>
+				</table> 
+			</div>
+		
+			<div class="text-center bg_custom_light_gray" id ="no_pending_redirects">
+				<h2 class="py-3"> No Pending Redirects </h2>
+			</div>
+		
+      </div>
+      <div class="modal-footer">
+        
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close_redirects_modal" onclick="close_redirects()" >Close</button>
+
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="send_all_redirects" onclick="send_all_redirects()" >Send All Redirects</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script type="text/javascript">
+  const close_redirects_btn = document.getElementById('close_redirects_modal');
+
+  function close_redirects(){
+        console.log("Closing redirects")
+        // var checkboxes_session = document.querySelectorAll(".session_radio");
+        // for(let item of checkboxes_session){
+        //     item.checked = false;
+        // }
+        // var new_match_radios = document.querySelectorAll(".new_match_radio");
+
+        // for(let item of new_match_radios){
+        //     item.checked = false;
+        // }
+        // clear_error_manual()
+    }
+
+    function cancel_json_redirect(element){
+        // console.log("send_json_redirect", element)
+
+        match_socket_private.send(JSON.stringify({
+                "command": "delete_redirect",
+                "user_id": user_id,
+                "redirect_id": parseInt(element.getAttribute('value')),
+            }));
+        // close_redirects_btn.click()
+    }
+
+     function send_json_redirect(element){
+        // console.log("send_json_redirect", element)
+
+        match_socket_private.send(JSON.stringify({
+                "command": "redirect_user",
+                "user_id": user_id,
+                "redirect_id": parseInt(element.getAttribute('value')),
+            }));
+        // close_redirects_btn.click()
+
+    }
+
+    function send_all_redirects(){
+        console.log("send_all_redirects")
+        var individual_buttons = document.querySelectorAll(".individual_redirect");
+        console.log("individual_buttons", individual_buttons)
+        for(let item of individual_buttons){
+            let individual_redirect_id = item.getAttribute('value');
+
+            match_socket_private.send(JSON.stringify({
+                "command": "redirect_user",
+                "user_id": user_id,
+                "redirect_id": individual_redirect_id,
+            }));
+        }
+
+        close_redirects_btn.click()
+    }
+
+</script>

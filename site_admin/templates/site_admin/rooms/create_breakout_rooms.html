@@ -1,0 +1,45 @@
+{% extends 'site_admin/admin_base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="mt-1">
+{% include 'site_admin/snippets/buttons.html' %}
+{% include 'site_admin/snippets/django_messages_snippet.html' %}
+</div>
+
+<div class="row pt-5">
+  <div class="col-lg-7 col-md-9 col-sm-11 mx-auto">
+    <div class="card mx-auto">
+      <div class="card-header custom_bg_blue">
+        <h1 class="h3 mb-3 w-100 text-center fw-bold mt-2">Additional Breakout Rooms</h1>
+      </div>
+      <div class="card-body">
+        <form method="POST">
+          {% csrf_token %}
+
+          <div class="fieldWrapper my-1 text-center">
+            <label for="id_number_of_rooms" class="fixed_width_bold_label">Number Of Rooms:</label>
+            <input type="number" name="number_of_rooms" min=0 class="fixed_width_input2"  id="id_number_of_rooms" 
+            >
+            <div>
+            {% if form.number_of_rooms.errors %}
+                <ul class="error_list pb-3">
+                {% for error in form.number_of_rooms.errors %}
+                    <li>{{ error|escape }}</li>
+                {% endfor %}
+                </ul>
+              {% endif %}
+              </div>
+          </div>
+
+          <button class="w-100 btn btn-lg btn-success my-3" type="submit">Create</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock content %}

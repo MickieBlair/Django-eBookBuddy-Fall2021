@@ -1,0 +1,14 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="en">
+{% include 'site_admin/snippets/admin_head.html' %}
+<body >
+{% include 'site_admin/snippets/admin_nav.html' %}
+<div class="main_content">
+	{% block content %}
+	{% endblock content %}
+</div>
+{% include 'site_admin/snippets/admin_footer.html' %}	
+</body>
+</html>

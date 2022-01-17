@@ -1,0 +1,40 @@
+<div class="staff_sidebar_div">
+
+	<div class="text-center pt-2 w-100">
+		<button class="btn btn_staff_sidebar" id="todays_session_btn" onclick="determine_button(this)">
+			<h6 class="link_text">Today's</h6>
+    		<h6 class="link_text">Sessions</h6>
+    		<h6 class="blue_link_text">Total: {{day_with_session.count}}</h6> 
+		</button>
+	</div>
+
+	<div class="text-center pt-2 w-100">
+		<button class="btn btn_staff_sidebar" id="rooms_participants_btn" onclick="determine_button(this)">
+			<h6 class="link_text">Rooms</h6>
+    		<h6 class="blue_link_text">Users: <span id="total_users">0</span></h6>
+		</button>
+	</div>
+
+	{% include 'reading_sessions/button_snippets/view_redirects.html' %}
+
+	{% include 'reading_sessions/button_snippets/view_help_requests.html' %}
+
+	{% include 'reading_sessions/button_snippets/notify_users.html' %}
+
+	{% include 'reading_sessions/button_snippets/staff_only_chat_button.html' %}
+
+	<div class="text-center pt-2 w-100">
+		<button class="btn btn_staff_sidebar" id="staff_messages_btn" onclick="determine_button(this)">
+			<h6 class="link_text">Messages</h6>
+    		<h6 class="red_link_text">(<span class="new_private_messages-{{user.id}}" id="new_staff_messages">0</span>)</h6>
+		</button>
+	</div>
+	{% include 'reading_sessions/button_snippets/assessment_status.html' %}
+	{% include 'reading_sessions/button_snippets/manual_redirect.html' %}
+	
+
+
+
+
+	
+</div>

@@ -1,0 +1,50 @@
+ {% load static %}
+
+<nav class="navbar navbar-expand-sm navbar-dark bg-dark fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">eBookBuddy</a> 
+    {% if user.role.name == "Staff" %}
+    <text class="navbar-brand staff_name ps-2"> - {{role}}</text>
+    {% endif %}
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse " id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+
+        
+        <li class="nav-item px-2">
+          <a class="nav-link" href="/">Home </a>
+        </li>
+
+        {% if not request.user.is_authenticated %}
+        <li class="nav-item px-2">
+          <a class="nav-link" href="/login">Login</a>
+        </li>
+
+        {% endif %}
+
+         {% if request.user.is_staff %} 
+         <li class="nav-item px-2">
+          <a class="nav-link " href="{% url 'testing:testing_home' %}">Testing Home</a>
+        </li>
+
+         <li class="nav-item px-2">
+          <a class="nav-link " href="{% url 'site_admin:admin_home' %}">Site Admin</a>
+        </li>
+
+        <li class="nav-item px-2">
+          <a class="nav-link " href="{% url 'admin:index' %}">Django Admin</a>
+        </li>
+        {% endif %} 
+
+        {% if request.user.is_authenticated %}
+
+        <li class="nav-item px-2">
+          <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>

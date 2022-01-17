@@ -1,0 +1,642 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+{% include 'reading_sessions/json_variables.html' %}
+{% include 'reading_sessions/base_snippets/room_links.html' %}
+<div class="text-center py-2 pt-3">
+	{% if logged_in_user.role.name == "Staff" %}
+        <a class="btn btn-primary btn-lg" href="{% url 'reading_sessions:staff_home' %}"> Staff Home</a>
+	{% elif logged_in_user.role.name == "Volunteer" %}
+		<a class="btn btn-primary btn-lg" href="{% url 'reading_sessions:volunteer_home' %}"> Volunteer Home</a>
+	{% endif %}
+ </div> 
+
+<div class="px-5 pb-3 pt-2">
+	<div class="card w-100">
+		<div class="card-header text-center custom_bg_blue_gradient">
+			
+			<div>
+				<h4 class="m-0 p-1">eBookBuddy Session Evaluation  </h4>
+			</div>
+			
+		</div>
+		<div class="card-body bg-light">
+			<form action = "" method = "post">
+			    {% csrf_token %}
+			    <div class="p-2 d-flex border">
+	              <label class="fixed_width_bold_label2">Date:</label>
+	              <input type="date" name="date" maxlength="255" id="id_date" class="fixed_width_input3" {% if form.initial.date %} value="{{form.initial.date.year}}-{{form.initial.date.month}}-{{form.initial.date.day}}"{% endif %}>
+	              <text></text>
+	              <div>
+	                {% if form.date.errors %}
+	                  <ul class="error_list pb-3">
+	                  {% for error in form.date.errors %}
+	                      <li>{{ error|escape }}</li>
+	                  {% endfor %}
+	                  </ul>
+	                {% endif %}
+	              </div>
+	            </div>
+
+	            <div class="p-2 d-flex d-none">
+	              <label class="fixed_width_bold_label2">Completed By:</label> 
+	              <select name="completed_by" id="id_completed_by" class="fixed_width_input3">
+	                  <option value="{{form.initial.completed_by.id}}">{{form.initial.completed_by.full_name}}</option>
+	              </select>
+	              <div>
+	                {% if form.completed_by.errors %}
+	                  <ul class="error_list pb-3">
+	                  {% for error in form.completed_by.errors %}
+	                      <li>{{ error|escape }}</li>
+	                  {% endfor %}
+	                  </ul>
+	                {% endif %}
+	              </div>
+	            </div>
+	            <div class="d-grid border w-100">
+	            	<div class="p-2 d-flex align-items-center ">
+
+	            	<div class="d-flex align-items-center">
+	            		<label class="fw-bold " for="id_read_with_scheduled"><text class="red large_text">*</text>Did you meet with your assigned Buddy on this date?</label>
+	            		<div class=" d-inline-flex align-items-center ps-3 pe-3">
+	            							
+			                      <input type="radio" class="form-check-input" name="scheduled_buddy"  onclick="display_chosen_student(this)" id="yes_scheduled" {%if form.initial.read_with_scheduled %} checked {% endif %}>
+			                     <label class="ps-2">Yes</label> 
+		                  </div> 
+		                  <div class=" d-inline-flex align-items-center ps-3 pe-3">         			
+			                      <input type="radio" class="form-check-input" name="scheduled_buddy"  onclick="display_chosen_student(this)" id="no_scheduled" >
+			                     <label class="ps-2">No</label> 
+		                  </div>
+
+
+	            	</div>
+	            	
+	            	<div class="d-none"><p><label for="id_read_with_scheduled">Read With Scheduled:</label> <input type="text" name="read_with_scheduled" id="id_read_with_scheduled">
+	            	</div>	
+
+	                   	
+	            	
+	            </div>
+
+	            {% if read_with_scheduled_error %}
+	            <div class="w-100 text-center eval_error red fw-bold" id="read_with_scheduled_error">	            	
+	            	{{read_with_scheduled_error}}
+             	</div>  
+             	{% endif %} 
+	            	
+	            </div>
+
+
+	            
+
+	            <div id="scheduled_student_div" class="scheduled_student_div border">
+	            	<div class="p-2 d-flex">
+		              <h5 class="pe-3 m-0 p-0 text-decoration-underline">Scheduled Student: </h5> 
+		              <h5 class="pe-3 m-0 p-0 text-decoration-underline">{{scheduled_buddy.username}} - {{scheduled_buddy.full_name}}</h5>
+		              <div class="d-none">
+		              	<input type="text" name="scheduled_student" value="{{scheduled_buddy.id}}">           	
+		              	
+		              </div>
+		              
+		              <div>
+		                {% if form.scheduled_student.errors %}
+		                  <ul class="error_list pb-3">
+		                  {% for error in form.scheduled_student.errors %}
+		                      <li>{{ error|escape }}</li>
+		                  {% endfor %}
+		                  </ul>
+		                {% endif %}
+		              </div>
+		            </div>
+
+		            <div class="p-2 d-flex">
+		              <label class="fw-bold pe-3"><text class="red large_text">*</text>Scheduled Student Attendance:</label>
+		     <!-- onclick="check_selected_arrival(this)"  -->
+		              {% for desc in arrivals %}
+	                        <div class=" d-inline-flex align-items-center pe-3">
+	                            <input type="radio" class="roles_radio" name="scheduled_student_attendance" value="{{desc.id}}" id="{{desc.name}}" onclick="clear_scheduled_student_attendance_error()">
+	                           <label class="ps-2">{{desc}}</label> 
+	                        </div>              
+	                    {% endfor %} 
+		            </div>
+
+	
+             	{% if scheduled_student_attendance_error %}
+	            <div class="w-100 text-center red fw-bold" id="scheduled_student_attendance_error">	            	
+	            	{{scheduled_student_attendance_error}}
+             	</div>  
+             	{% endif %} 
+
+
+	            </div>
+
+	            
+
+
+
+
+
+	            <div class="temp_student_div" id="temp_student_div">
+	            	<div class="p-2 d-flex align-items-center">
+	            		<label class="fw-bold " for="id_temp_student_assigned"><text class="red large_text">*</text>Were you assigned a student?</label>
+	            		<div class=" d-inline-flex align-items-center ps-3 pe-3">
+	            							
+	                      <input type="radio" class="form-check-input assigned" name="assigned_new"  onclick="display_temp_students(this)" id="yes_assigned">
+	                     <label class="ps-2">Yes</label> 
+                  </div> 
+                  <div class=" d-inline-flex align-items-center ps-3 pe-3">         			
+	                      <input type="radio" class="form-check-input assigned" name="assigned_new"  onclick="display_temp_students(this)" id="no_assigned">
+	                     <label class="ps-2">No</label> 
+                  </div> 
+                  <div class="d-none">
+                  	<p><label for="id_temp_student_assigned"><text class="red large_text">*</text>Temporary Student Assigned:</label> <input type="checkbox" name="temp_student_assigned" id="id_temp_student_assigned"></p>
+                  </div>
+	            	</div>
+
+	            	
+	            	<div class="temp_student_list" id="temp_student_list">
+	            		<div class="p-2 d-flex ">
+		              <label class="fixed_width_bold_label2"><text class="red large_text">*</text>Temporary Student:</label> 
+
+		       
+		              <select name="temp_student" id="id_temp_student" class="fixed_width_input3">
+		              	<option value="" id="no_temp" selected>--------</option>
+		                {% for item in students %}
+		                  <option value="{{item.id}}">{{item.username}} - {{item.full_name}}</option>
+		                {% endfor %}
+		              </select>
+		              <div>
+		                {% if form.temp_student.errors %}
+		                  <ul class="error_list pb-3">
+		                  {% for error in form.temp_student.errors %}
+		                      <li>{{ error|escape }}</li>
+		                  {% endfor %}
+		                  </ul>
+		                {% endif %}
+		              </div>
+		            </div>
+	            	</div>
+	            </div>
+
+	            <div class="p-2 d-flex">
+	            	<div class="d-flex align-items-center">
+	            		<label class="fw-bold " for="id_temp_student_assigned"><text class="red large_text">*</text>Did you do a reading assessment on your student today?</label>
+	            		<div class=" d-inline-flex align-items-center ps-3 pe-3">
+	            							
+	                      <input type="radio" class="form-check-input assessment" name="assessed"  onclick="display_assessed_level(this)" id="yes_assessed">
+	                     <label class="ps-2">Yes</label> 
+                  </div> 
+                  <div class=" d-inline-flex align-items-center ps-3 pe-3">         			
+	                      <input type="radio" class="form-check-input assessment" name="assessed"  onclick="display_assessed_level(this)" id="no_assessed" checked>
+	                     <label class="ps-2">No</label> 
+                  </div> 
+                  <div class="d-none">
+                  	<p><label for="id_level_assessment_performed">Performed Assessment:</label> <input type="checkbox" name="level_assessment_performed" id="id_level_assessment_performed"></p>
+                  </div>
+	            	</div>
+	            </div>
+
+	            <div id="assessed_div" class="assessed_div">
+<!-- 	            		<p><label for="id_assessment_level">Assessment level:</label> <select name="assessment_level" id="id_assessment_level">
+		  <option value="" selected>---------</option>
+
+		  <option value="1">A</option>
+
+
+		</select></p> -->
+		<div class="p-2 d-grid">
+		            	<div>
+		            		<label class="fw-bold pe-3"><text class="red large_text">*</text>Assessed Level (Choose One):</label>
+									</div>
+		            	<div class="inline_grid_reading_levels ">		            		
+		            		{% for level in reading_levels %}
+		            		<div class="d-grid justify-content-center align-items-center text-center border p-2">
+		            			<input type="radio" class="form-check-input accessed_levels" name="assessment_level" value={{level.id}}>
+		            			<label>{{level}}</label>
+		            		</div>
+		            		{% endfor %}
+		            	</div>
+		            </div>
+	            	</div>
+
+	            	            	
+
+	            <div class="p-2 d-flex">
+		              <label class="fw-bold pe-3"><text class="red large_text">*</text>Number Of Books Read:</label> 
+		              <input class="fixed_width_input_2 text-end" type="number" name="books_read" id="id_books_read" value=0>
+		              
+		              <div>
+		                {% if form.books_read.errors %}
+		                  <ul class="error_list pb-3">
+		                  {% for error in form.books_read.errors %}
+		                      <li>{{ error|escape }}</li>
+		                  {% endfor %}
+		                  </ul>
+		                {% endif %}
+		              </div>
+		            </div>
+
+		            <div class="p-2 d-grid">
+		            	<div>
+		            		<label class="fw-bold pe-3"><text class="red large_text">*</text>What level books were read today? (Select as many as needed):</label>
+									</div>
+		            	<div class="inline_grid_reading_levels ">		            		
+		            		{% for level in reading_levels %}
+		            		<div class="d-grid justify-content-center align-items-center text-center border p-2">
+		            			<input type="checkbox" class="form-check-input" name="level_today" value={{level.id}}>
+		            			<label>{{level}}</label>
+		            		</div>
+		            		{% endfor %}
+		            	</div>
+		            </div>
+
+		            	<div class="p-2 d-grid">
+		            		<div class="pb-1">
+		            			<h5 class="fw-bold"><text class="red large_text">*</text>Relational Engagement:</h5> 
+		            		</div>
+		            		<div class="d-grid">
+		            			{% for level in relational_engagement %}
+		            			<div class="d-inline-flex py-1">
+		            				<input class="form-check-input" type="radio" name="engagement" value={{level.id}}>
+		            				<label class="ps-3">{{level.name}} - {{level.desc}}</label>
+		            			</div>
+		            			{% endfor %}
+		            		</div>
+			              <div>
+			                {% if form.engagement.errors %}
+			                  <ul class="error_list pb-3">
+			                  {% for error in form.engagement.errors %}
+			                      <li>{{ error|escape }}</li>
+			                  {% endfor %}
+			                  </ul>
+			                {% endif %}
+			              </div>
+			            </div>
+
+			            
+			            <div class="p-2 d-grid">
+			            	<div class="p-2 border">
+		            			<h5 class="fw-bold text-center m-0 p-0"><text class="red large_text">*</text>Literacy Assessment  (in 4 areas)</h5> 
+		            		</div>
+		            		<div class="inline_grid_assessment_levels w-100">
+		            			<div class="border"></div>
+		            			{% for level in assessment_levels %}
+		            			<div class="border text-center fw-bold">
+		            				{{level}}
+		            			</div>
+		            			{% endfor %}
+		            			
+		            		</div>
+		            		<div class="inline_grid_assessment_levels w-100">
+		            			<div class="border d-grid align-items-center"><label class="fw-bold ps-2"><text class="red large_text">*</text>Word Recognition:</label></div>
+		            			{% for level in assessment_levels %}
+		            			<div class="border fw-bold d-grid justify-content-center align-items-center py-2">
+		            				<input class="form-check-input" type="radio" name="word_recognition" value={{level.id}}>
+		            			</div>
+		            			{% endfor %}		            			
+		            		</div>
+
+		            		<div class="inline_grid_assessment_levels w-100">
+		            			<div class="border d-grid align-items-center"><label class="fw-bold ps-2"><text class="red large_text">*</text>Pronunciation/Fluency:</label></div>
+		            			{% for level in assessment_levels %}
+		            			<div class="border fw-bold d-grid justify-content-center align-items-center py-2">
+		            				<input class="form-check-input" type="radio" name="pronunciation_fluency" value={{level.id}}>
+		            			</div>
+		            			{% endfor %}		            			
+		            		</div>
+
+		            		<div class="inline_grid_assessment_levels w-100">
+		            			<div class="border d-grid align-items-center"><label class="fw-bold ps-2"><text class="red large_text">*</text>Vocabulary:</label></div>
+		            			{% for level in assessment_levels %}
+		            			<div class="border fw-bold d-grid justify-content-center align-items-center py-2">
+		            				<input class="form-check-input" type="radio" name="vocabulary" value={{level.id}}>
+		            			</div>
+		            			{% endfor %}		            			
+		            		</div>
+
+		            		<div class="inline_grid_assessment_levels w-100">
+		            			<div class="border d-grid align-items-center"><label class="fw-bold ps-2"><text class="red large_text">*</text>Comprehension:</label></div>
+		            			{% for level in assessment_levels %}
+		            			<div class="border fw-bold d-grid justify-content-center align-items-center py-2">
+		            				<input class="form-check-input" type="radio" name="comprehension" value={{level.id}}>
+		            			</div>
+		            			{% endfor %}		            			
+		            		</div>
+
+		        <!--     		<div class="inline_grid_assessment_levels w-100">
+		            			<div class="border d-grid align-items-center"><label class="fw-bold ps-2">TBD:</label></div>
+		            			{% for level in assessment_levels %}
+		            			<div class="border fw-bold d-grid justify-content-center align-items-center py-2">
+		            				<input class="form-check-input" type="radio" name="tbd" value={{level.id}}>
+		            			</div>
+		            			{% endfor %}		            			
+		            		</div> -->
+		            		<div>
+			                {% if form.word_recognition.errors %}
+			                  <ul class="error_list pb-3">
+			                  {% for error in form.word_recognition.errors %}
+			                      <li>{{ error|escape }}</li>
+			                  {% endfor %}
+			                  </ul>
+			                {% endif %}
+			              </div>
+			              <div>
+			                {% if form.pronunciation_fluency.errors %}
+			                  <ul class="error_list pb-3">
+			                  {% for error in form.pronunciation_fluency.errors %}
+			                      <li>{{ error|escape }}</li>
+			                  {% endfor %}
+			                  </ul>
+			                {% endif %}
+			              </div>
+			              <div>
+			                {% if form.vocabulary.errors %}
+			                  <ul class="error_list pb-3">
+			                  {% for error in form.vocabulary.errors %}
+			                      <li>{{ error|escape }}</li>
+			                  {% endfor %}
+			                  </ul>
+			                {% endif %}
+			              </div>
+			              <div>
+			                {% if form.comprehension.errors %}
+			                  <ul class="error_list pb-3">
+			                  {% for error in form.comprehension.errors %}
+			                      <li>{{ error|escape }}</li>
+			                  {% endfor %}
+			                  </ul>
+			                {% endif %}
+			              </div>
+			          <!--     <div>
+			                {% if form.tbd.errors %}
+			                  <ul class="error_list pb-3">
+			                  {% for error in form.tbd.errors %}
+			                      <li>{{ error|escape }}</li>
+			                  {% endfor %}
+			                  </ul>
+			                {% endif %}
+			              </div> -->
+			            </div>
+
+			            <div class="p-2 d-grid">
+		            		<div class="pb-1">
+		            			<h5 class="fw-bold">Overall Session comments (good/bad):</h5> 
+		            		</div>
+		            		<div class="d-grid">
+		            			<textarea class="form-control" name="session_comment" rows="5" maxlength="2000" id="id_session_comment"></textarea>
+		            		</div>
+			            </div>
+
+			            <div class="p-2 d-grid">
+		            		<div class="pb-1">
+		            			<h5 class="fw-bold">Social Emotional Learning:</h5> 
+		            		</div>
+		            		<div class="d-grid">
+		            			<textarea class="form-control" name="social_emotional_learning_comment" rows="5" maxlength="2000" id="id_social_emotional_learning_comment"></textarea>
+		            		</div>
+			            </div>
+
+			            <div class="p-2 d-flex align-items-center">
+			            	
+	            	<div class="d-flex align-items-center">
+	            		<h5 class="fw-bold " for="id_follow_up_needed"><text class="red large_text">*</text>Needs Follow Up:</h5>
+	            		<div class=" d-inline-flex align-items-center ps-3 pe-3">
+	            							
+	                      <input type="radio" class="form-check-input" name="needs_fu"  onclick="display_follow_up(this)" id="yes_fu">
+	                     <label class="ps-2">Yes</label> 
+                  </div> 
+                  <div class=" d-inline-flex align-items-center ps-3 pe-3">         			
+	                      <input type="radio" class="form-check-input" name="needs_fu"  onclick="display_follow_up(this)" id="no_fu" checked>
+	                     <label class="ps-2">No</label> 
+                  </div> 
+	            	</div>
+	            	<div class="d-none"><p><label for="id_follow_up_needed">Needs Follow Up:</label> <input type="checkbox" name="follow_up_needed" id="id_follow_up_needed"></p>
+	            	</div>	            	
+	            	
+	            </div>
+
+	            <div class="display_fu_div" id="display_fu_div">
+	            	<div class="p-2 d-flex align-items-center">
+	            		<label class="fw-bold" for="id_follow_up_type"><text class="red large_text">*</text>Follow up type:</label>           		
+	            	</div>
+	            	<div class="d-grid w-100">
+	            		{{form.initial.follow_up_type|slugify}}
+            			{% for item in follow_up_types %}
+            			<div class="d-inline-flex py-1 ps-3 pe-3">
+            				<input class="form-check-input" type="radio" name="follow_up_type" value={{item.id}}>
+            				<label class="ps-3">{{item.name}}</label>
+            			</div>
+            			{% endfor %}
+            		</div>
+
+            		 <div class="p-2 d-grid">
+		            		<div class="pb-1">
+		            			<h5 class="fw-bold">Follow up comments:</h5> 
+		            		</div>
+		            		<div class="d-grid">
+		            			<textarea class="form-control" name="follow_up_comment" rows="5" maxlength="2000" id="id_follow_up_comment"></textarea>
+		            		</div>
+			            </div>
+	            </div>
+	            <div class="p-3 text-center">
+	            	<button class="btn btn-lg btn-success my-3 fixed_width_input3" type="submit">Submit</button>
+	            </div>
+
+<script type="text/javascript">
+
+
+window.addEventListener('load', (event) => {
+  console.log('page is fully loaded');
+  let role = "{{role}}"
+  let display_scheduled = "{{display_scheduled}}"
+  let match_needed = "{{match_needed}}"
+  let form_date = "{{form.initial.date}}"
+  let form_completed_by = "{{form.initial.completed_by}}"
+  let form_read_with_scheduled = "{{form.initial.read_with_scheduled}}"
+  let form_scheduled_student = "{{form.initial.scheduled_student}}"
+  let form_scheduled_student_attendance = "{{form.initial.scheduled_student_attendance}}"
+  let form_temp_student_assigned = "{{form.initial.temp_student_assigned}}"
+  let form_level_assessment_performed = "{{form.initial.level_assessment_performed}}"
+  let form_assessment_level = "{{form.initial.assessment_level}}"
+  let form_temp_student = "{{form.initial.temp_student}}"
+  let form_temp_student_attendance = "{{form.initial.temp_student_attendance}}"
+  let form_books_read = "{{form.initial.books_read}}"
+  let form_no_books = "{{form.initial.no_books}}"
+  let form_level_today = "{{form.initial.level_today}}"
+  let form_engagement = "{{form.initial.engagement}}"
+  let form_word_recognition = "{{form.initial.word_recognition}}"
+  let form_pronunciation_fluency = "{{form.initial.pronunciation_fluency}}"
+  let form_vocabulary = "{{form.initial.vocabulary}}"
+  let form_comprehension = "{{form.initial.comprehension}}"
+  let form_session_comment = "{{form.initial.session_comment}}"
+  let form_social_emotional_learning_comment = "{{form.initial.social_emotional_learning_comment}}"
+  let form_follow_up_needed = "{{form.initial.follow_up_needed}}"
+  let form_follow_up_type = "{{form.initial.follow_up_type}}"
+  let form_follow_up_comment = "{{form.initial.follow_up_comment}}"
+  let form_has_errors = "{{has_errors}}"
+
+  
+  console.log("role", role)
+	console.log("match_needed", match_needed) 
+	console.log("display_scheduled", display_scheduled) 
+  console.log("\n\n\n****form_has_errors", form_has_errors)
+  console.log("form_date", form_date) 
+  console.log("form_completed_by", form_completed_by)
+  console.log("form_read_with_scheduled", form_read_with_scheduled)
+  console.log("form_scheduled_student", form_scheduled_student)
+  console.log("form_scheduled_student_attendance", form_scheduled_student_attendance) 
+  console.log("form_temp_student_assigned", form_temp_student_assigned) 
+  console.log("form_level_assessment_performed", form_level_assessment_performed)
+  console.log("form_assessment_level", form_assessment_level) 
+  console.log("form_temp_student", form_temp_student) 
+  console.log("form_temp_student_attendance", form_temp_student_attendance)
+  console.log("form_books_read", form_books_read)
+  console.log("form_no_books", form_no_books) 
+  console.log("form_level_today", form_level_today) 
+  console.log("form_engagement", form_engagement) 
+  console.log("form_word_recognition", form_word_recognition) 
+  console.log("form_pronunciation_fluency", form_pronunciation_fluency) 
+  console.log("form_vocabulary", form_vocabulary)
+  console.log("form_comprehension", form_comprehension) 
+  console.log("form_session_comment", form_session_comment) 
+  console.log("form_social_emotional_learning_comment", form_social_emotional_learning_comment) 
+  console.log("form_follow_up_needed", form_follow_up_needed) 
+  console.log("form_follow_up_type", form_follow_up_type) 
+  console.log("form_follow_up_comment", form_follow_up_comment) 
+
+  let no_scheduled = document.getElementById('no_scheduled')
+  // if (no_scheduled){
+  // 	if(display_scheduled == "False" && role=="Staff"){
+  // 		no_scheduled.click()
+  // 	}
+  // }
+
+  let yes_scheduled = document.getElementById('yes_scheduled')
+  if(yes_scheduled && no_scheduled){
+  	if(match_needed == "True" && role=="Staff"){
+  		yes_scheduled.disabled = true
+  		no_scheduled.click()
+  	} else if(match_needed == "True" && role=="Volunteer"){
+  		yes_scheduled.disabled = true
+  		no_scheduled.click()
+  	}
+  }
+
+
+
+
+});
+
+
+	function clear_scheduled_student_attendance_error(){
+		let scheduled_student_attendance_error = document.getElementById('scheduled_student_attendance_error')
+		if(scheduled_student_attendance_error){
+			scheduled_student_attendance_error.innerHTML=""
+		}
+	}
+
+
+	function display_chosen_student(element) {
+			// console.log("element id", element.id)
+			let check_read_with_scheduled = document.getElementById('id_read_with_scheduled')
+			let scheduled_student_div = document.getElementById('scheduled_student_div')
+			let temp_student_div = document.getElementById('temp_student_div')
+			let all_assigned = document.querySelectorAll(".assigned")
+			for (let item of all_assigned){
+
+				item.checked = false;
+
+			}
+			let read_with_scheduled_error = document.getElementById('read_with_scheduled_error')
+			if(read_with_scheduled_error){
+				read_with_scheduled_error.innerHTML = ""
+			}
+			
+			// console.log("check_read_with_scheduled", check_read_with_scheduled)
+			if(element.id == "yes_scheduled"){
+				check_read_with_scheduled.checked = true
+				check_read_with_scheduled.value = true
+				scheduled_student_div.style.display = "block"
+				temp_student_div.style.display = "none"
+				
+			}else if(element.id == "no_scheduled"){
+				check_read_with_scheduled.checked = false
+				check_read_with_scheduled.value = false
+				scheduled_student_div.style.display = "none"
+				temp_student_div.style.display = "block"
+			}
+
+			let temp_option = document.getElementById('no_temp')
+			temp_option.selected = true
+		}
+
+		function display_temp_students(element) {
+			// eval_error_clear()
+			let temp_option = document.getElementById('no_temp')
+			temp_option.selected = true
+			let id_temp_student_assigned = document.getElementById('id_temp_student_assigned')
+			let temp_student_list = document.getElementById('temp_student_list')
+			if(element.id == "yes_assigned"){
+				id_temp_student_assigned.checked = true
+				temp_student_list.style.display = "flex"
+			}else if(element.id == "no_assigned"){
+				id_temp_student_assigned.checked = false
+				temp_student_list.style.display = "none"
+			}
+		}
+
+		function display_follow_up(element) {
+			// eval_error_clear()
+  		console.log("element id", element.id)
+			let id_follow_up_needed = document.getElementById('id_follow_up_needed')
+			let display_fu_div = document.getElementById('display_fu_div')
+			if(element.id == "yes_fu"){
+				id_follow_up_needed.checked = true
+				display_fu_div.style.display = "block"
+			}else if(element.id == "no_fu"){
+				id_follow_up_needed.checked = false
+				display_fu_div.style.display = "none"
+			}
+		}
+
+		function display_assessed_level(element) {
+			// eval_error_clear()
+  		console.log("element id", element.id)
+			let id_level_assessment_performed = document.getElementById('id_level_assessment_performed')
+			let assessed_div = document.getElementById('assessed_div')
+			let accessed_levels = document.querySelectorAll('.accessed_levels')
+			if(element.id == "yes_assessed"){
+				id_level_assessment_performed.checked = true
+				assessed_div.style.display = "block"
+			}else if(element.id == "no_assessed"){
+				id_level_assessment_performed.checked = false
+				assessed_div.style.display = "none"
+				for(let item of accessed_levels){
+					item.checked =false
+				}
+			}
+		}
+
+</script>
+	             <!-- {{form.as_p}} -->
+
+	           <!-- {% if form.errors %}
+			       {% for field in form %}
+			           {% for error in field.errors %} 
+			              <div class="red">
+			                   <strong>{{ error|escape }}</strong>
+			              </div>
+			           {% endfor %}
+			       {% endfor %}
+			    {% endif %} -->
+			</form>
+							
+
+		</div>
+			
+	</div>
+</div>
+{% endblock content %}

@@ -1,0 +1,16 @@
+{% extends 'testing/testing_base.html' %}
+
+{% load static %}
+
+{% block content %}
+{{ token|json_script:"token" }}
+{{ role|json_script:"role" }}
+{{ room_name|json_script:"room_name" }}
+<div class="d-flex justify-content-end">
+	<button class="btn btn-sm btn-warning"  id="get_jitsi_part_btn"  onclick="get_room_participants()">Jitsi All Rooms</button>
+</div>
+<div class="react" id="react">
+		
+</div>
+{% include 'testing/snippets/jitsi_script.html' %}
+{% endblock content %}

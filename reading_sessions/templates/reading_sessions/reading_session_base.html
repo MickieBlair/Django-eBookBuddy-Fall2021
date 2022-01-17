@@ -1,0 +1,20 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="en">
+{% include 'reading_sessions/base_snippets/session_head.html' %} 
+<body>
+{% include 'reading_sessions/base_snippets/session_nav.html' %}
+
+<div class="main_content" id="main_content">
+	{% include 'reading_sessions/json_variables.html' %}
+	{% include 'reading_sessions/base_snippets/room_links.html' %}
+	{% block content %}
+	{% endblock content %}
+</div>
+{% include 'reading_sessions/base_snippets/session_footer.html' %}
+</body>
+</html>
+
+
+

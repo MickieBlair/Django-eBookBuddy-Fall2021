@@ -1,0 +1,73 @@
+{% extends 'site_admin/admin_base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="mt-1">
+{% include 'site_admin/snippets/buttons.html' %}
+{% include 'site_admin/snippets/django_messages_snippet.html' %}
+</div>
+
+<div class="row">
+    <div class="col d-flex justify-content-start">
+      <div>
+        <div class="">
+          <h2 class="pt-2 border-bottom">Session Days/Times/Slots</h2>
+        </div>
+        <div>
+          <h5 class="pt-0">Total Weekly Slots - {{count}}</h5>
+        </div>
+      </div>    
+    </div>
+  </div>
+
+  {% if all_dts.count != 0 %}    
+
+      <div class="table-responsive pt-1">
+        <table class="table table-striped table-sm align-middle">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Day</th>
+              <th>Session Slot</th>
+              <th>Start</th>
+              <th>End</th>              
+              <th class="text-center">Active - {{active_semester}}</th>
+              <th></th>
+
+            </tr>
+          </thead>
+          <tbody>
+
+            {% for entry in all_dts %}
+            <tr>
+              <td class="">{{entry.id}}</td>
+              <td class="">{{entry.day}}</td>
+              <td class="">{{entry.session_slot}}</td>              
+              <td class="">{{entry.time_start}}</td>
+              <td class="">{{entry.time_end}}</td>
+              <td class="">
+                <div class="d-flex justify-content-center align-items-center">
+                  <input type="checkbox" class="mx-auto checkbox activate_slot" name="activate_slot" id="slot-{{entry.id}}" value="{{entry.id}}"
+                  onclick="window.location.assign('{% url 'site_admin:activate_slot' entry.id %}')" {% if entry.currently_active %} checked {% endif %} > 
+                </div>
+              </td> 
+              <td class="">
+                <a class="" href="{% url 'site_admin:edit_day_time_slot' entry.id %}">Edit</a>
+              </td> 
+                     
+            </tr>
+            {% endfor %}
+
+          </tbody>
+        </table>
+      </div>
+   {% else %}
+    <div class="text-center mt-5 bg_custom_light_gray">
+      <h2 class="p-3"> No Day/Time/Slots </h2>
+    </div>
+  {% endif %}
+
+{% endblock content %}
+

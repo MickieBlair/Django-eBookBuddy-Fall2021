@@ -1,0 +1,61 @@
+{% extends 'site_admin/admin_base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="mt-1">
+{% include 'site_admin/snippets/buttons.html' %}
+{% include 'site_admin/snippets/django_messages_snippet.html' %}
+</div>
+
+<div class="row pt-5">
+  <div class="col-lg-7 col-md-9 col-sm-11 mx-auto">
+    <div class="card mx-auto">
+      <div class="card-header custom_bg_blue">
+        <h1 class="h3 mb-3 w-100 text-center fw-bold mt-2">New Custom Room</h1>
+      </div>
+      <div class="card-body">
+        <form method="POST">
+          {% csrf_token %}
+
+          <div class="fieldWrapper my-1 text-center">
+            <label for="id_name" class="fixed_width_bold_label">Name:</label>
+            <input type="text" name="name" maxlength="100" class="fixed_width_input2"  id="id_name" 
+            {% if form.name.value %} value="{{form.name.value}}" {% endif %}>
+              {% if form.name.errors %}
+                <ul class="error_list pb-3">
+                {% for error in form.name.errors %}
+                    <li>{{ error|escape }}</li>
+                {% endfor %}
+                </ul>
+              {% endif %}
+          </div>
+          <div class="fieldWrapper my-1 text-center">
+            <label for="id_room_type" class="fixed_width_bold_label">Type:</label>
+            <select id="id_room_type" name="room_type" class="fixed_width_input2">
+              {% for item in room_types %}
+              <option value={{item.id}}>{{item}}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <input type="hidden" name="num_participants" id="id_num_participants" value=0>
+          <input type="hidden" name="jitsi_num_participants" id="id_jitsi_num_participants" value=0>
+          <input type="hidden" name="number" id="id_number" value=0>
+
+          <!-- <input type="hidden" name="room_type" id="id_room_type" value="{{room_type.id}}"> -->
+
+          <div class="my-3 text-center red">
+            {% if form.non_field_error %}
+              {{ form.non_field_errors }}
+            {% endif %}
+          </div>
+
+          <button class="w-100 btn btn-lg btn-success my-3" type="submit">Create</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

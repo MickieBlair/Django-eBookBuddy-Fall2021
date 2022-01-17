@@ -1,0 +1,294 @@
+<!-- <div class=d-none>
+	{% for room in rooms %}
+		<a class="p-0 m-0" href="{% url 'reading_sessions:room' room.slug %}" id={{room.slug}}>{{room}}</a>
+	{% endfor %}
+	
+</div> -->
+
+<div class="h-100"id = "rooms_participants_div">
+	
+	<div class="d-inline-flex w-100">
+		<div class="w-50">
+			<h5 class='mb-1 mt-2'>Room Participants </h5>
+		</div>
+		
+
+		<div class="w-25 d-flex justify-content-end align-items-end">
+			<div>
+				<button class="btn btn-sm btn-primary" onclick="show_rooms()">Rooms</button>
+			</div>
+			
+		</div>
+
+		<!-- <div class="w-25 d-flex justify-content-end align-items-end">
+			<div>
+				<button class="btn btn-sm btn-info" onclick="api_get_by_room()">API</button>
+			</div>
+			
+		</div> -->
+
+
+		<div class="w-25 d-flex justify-content-end align-items-end">
+			<div class="pe-1">
+				<button class="btn btn-sm btn-warning"  id="get_jitsi_part_btn" {% if load_jitsi_script %} onclick="get_jitsi_rooms()" {% else %} onclick="server_closed()" {% endif %}>Jitsi</button>
+			</div>
+
+
+<!--  -->
+		</div>	
+
+		<div class="w-25 d-flex justify-content-end align-items-end">
+			<div class="pe-1">
+				<button class="btn btn-sm btn-info"  id="get_jitsi_live_btn" {% if load_jitsi_script %} onclick="display_live_jitsi_rooms()" {% else %} onclick="server_closed()" {% endif %}>Live Jitsi</button>
+			</div>
+		</div>	
+
+	</div>
+
+	<div class="scrolling_table_fixed_head_rooms table-responsive pe-1" id="websocket_rooms">
+		<table class="table table-sm">
+		 <thead>
+		     <tr>
+		      <th class="ps-2 fixed_width_130px">Rooms</th>
+		      <th>In Room</th>	      
+		      <th class="text-center">Count</th>
+		    </tr>
+		  </thead>
+
+
+		  <tbody id="tbody_rooms_participants">
+	 	 	{% for room in rooms %}
+
+
+		     <tr class="room_row p-0 m-0" id="room_{{room.id}}">
+		       <td class="ps-2 py-0 fixed_width_130px">
+		       	<div class="fixed_width_130px">
+		       		<a class="p-0 m-0" href="{% url 'reading_sessions:room' room.slug %}">{{room}}</a> 
+		       	</div>
+		       </td>
+		      <td class="py-0 m-0" >
+		      	<div id="room_{{room.id}}_participants">
+		   		{% for part in room.participants.all%}
+		      	<div>
+		      		{{part}}
+		      	</div>
+		      	{% endfor%} 
+		      		
+		      	</div>
+
+		      </td>
+		      <td class="text-center py-0 m-0" >
+		      	<div id="room_{{room.id}}_count">
+		      		<!-- {{room.num_participants}}
+		      	</div> -->
+		      	
+		      </td>
+		      <td id="jitsi_participants_{{room_slug}}">
+		      </td>
+		      
+		    </tr>
+		    {% endfor %}
+		  </tbody>
+		</table> 
+	</div>
+
+	<div class="scrolling_table_fixed_head_rooms table-responsive pe-1 jitsi_meeting_rooms" id="jitsi_meeting_rooms">
+		<table class="table table-striped table-sm">
+		 <thead>
+		     <tr>
+		      <th class="ps-2 fixed_width_130px">Jitsi Rooms</th>
+		      
+		      <th class="text-center">Jitsi</th>
+
+		      <th class="text-center">Jitsi Count</th>
+		      <th class="text-center">WS Count</th>
+		      <th class="text-center">WS</th>
+
+		    </tr>
+		  </thead>
+		  <tbody id="tbody_rooms_participants_jitsi">
+		 	{% for room in rooms %}
+		     <tr class="jitsi_row_new p-0 m-0" id="jitsi_room_{{room.id}}">
+		       <td class="ps-2 py-0 fixed_width_130px">
+		       	<div>
+		       		<a class="p-0 m-0" href="{% url 'reading_sessions:room' room.slug %}">{{room}}</a>
+		       	</div>
+		       </td>
+		      <!--  <td> 
+		       {% if room.occupied %}
+		       Yes
+		       {% else %}
+		       No
+		       {% endif %}
+		       </td> -->
+		      <td class="py-0 m-0" id="jitsi_parts-{{room.id}}">
+		      	<!-- {% for part in room.jitsi_participants.all%}
+		      	<div>
+		      		{{part}}
+		      	</div>
+		      	{% endfor%} -->
+		      </td>
+		      <td class="text-center py-0 m-0" id="jitsi_count-{{room.id}}">
+		      	{{room.jitsi_num_participants}}
+		      </td>
+		      <td class="text-center py-0 m-0" id="ws_count-{{room.id}}">
+		      	{{room.num_participants}}
+		      </td>
+		      <td class="py-0 m-0" id="ws_parts-{{room.id}}">
+		      	<!-- {% for part in room.jitsi_participants.all%}
+		      	<div>
+		      		{{part}}
+		      	</div>
+		      	{% endfor%} -->
+		      </td>
+		      
+
+		      
+		    </tr>
+		    {% endfor %}
+		  </tbody>
+		</table> 
+	</div>
+
+	<div class="scrolling_table_fixed_head_rooms table-responsive pe-1 jitsi_live_rooms" id="jitsi_live_rooms">
+		<table class="table table-striped table-sm align-middle">
+		 <thead>
+		     <tr>
+		      <th class="ps-2 fixed_width_130px">Jitsi Live Rooms</th>
+		      
+		      
+
+		      <th class="text-center">Jitsi Count</th>
+		      <th class="text-center">Student Alone</th>		      
+		      <th class="text-center">Jitsi Members</th>
+		      <th class="text-center">J/WS Match</th>
+		      <th class="text-center">WS Members</th>
+		      <!-- <th class="text-center">WS</th> -->
+
+		    </tr>
+		  </thead>
+		  <tbody id="tbody_rooms_participants_jitsi_live">
+		 	{% for room in j_rooms %}
+		     <tr class="jitsi_row_live p-0 m-0" id="jitsi_room_live_{{room.room.id}}">
+		       <td class="ps-2 py-0 fixed_width_130px">
+		       	<div>
+		       		<a class="p-0 m-0" href="{% url 'reading_sessions:room' room.room.slug %}">{{room.room}}</a>
+		       	</div>
+		       </td>
+		      
+		      <td class="text-center py-0 m-0" id="live_count-{{room.room.id}}">
+		      	{{room.count}}
+		      </td>
+		      <td class="text-center py-0 m-0" id="student_alone-{{room.room.id}}">
+		      	{% if room.student_alone %}
+		      	Yes
+		      	{% endif %}
+		      	<!-- {{room.student_alone}} -->
+		      </td>
+		      
+		      <td class="py-0 m-0" id="live_jitsi_parts-{{room.room.id}}">
+		      	{% for part in room.participants.all %}
+		      	<div id="in_j_room-{{room.room.id}}" value="user_in_jitsi-{{part.id}}" onclick="adjust_participant(this)">
+		      		{{part}}
+		      	</div>
+		      	{% endfor%}
+		      </td>
+
+		      <td class="text-center py-0 m-0" id="mismatch-{{room.room.id}}">
+		      	<div>
+		      		{% if room.mismatch %}
+			      	<text id="j_ws_mismatch-{{room.room.id}}">No</text>
+			      	{% else %}
+			      	<text id="j_ws_mismatch-{{room.room.id}}"></text>
+			      	{% endif %}
+		      	</div>
+		      	<div class="p-1">
+		      		<button class="btn btn-link btn-sm" value="{{room.room.id}}" onclick="ajax_check_mismatch(this.value)">Check</button>
+		      	</div>
+		      	<div class="p-1">
+		      		<button class="btn btn-link btn-sm" value="{{room.room.id}}" onclick="api_check_room_participants(this.value)">API</button>
+		      	</div>
+		      	
+		      </td>
+		      <td class="py-0 m-0" id="ws_live-{{room.room.id}}">
+		      	{% for part in room.room.participants.all %}
+		      	<div id="in_ws_room-{{room.room.id}}" value = "user_in_websocket-{{part.id}}" onclick="adjust_participant(this)">
+		      		{{part}}
+		      	</div>
+		      	{% endfor%}
+		      </td>		      
+		    </tr>
+		    {% endfor %}
+		  </tbody>
+		</table> 
+	</div>
+
+</div>
+
+
+<button type="button" class="d-none btn btn-primary" data-bs-toggle="modal" data-bs-target="#adjustModal" id="adjust_user_btn"></button>
+
+<!-- Modal -->
+<div class="modal fade" id="adjustModal" tabindex="-1" aria-labelledby="adjustModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="adjustModalLabel">Adjust User - <span id="adjust_user_title"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="clear_adjust_form()"></button>
+      </div>
+      <div class="modal-body">
+      	<div>
+      		<text class="fw-bold">Room Type: </text><text id="room_click_type"></text>
+      	</div>
+      	<form id="adjust_form">
+      		<div>
+      			<text class="fw-bold">User ID: </text><input type="text" name="adjust_user_id" value="" id="adjust_user_id">
+      		</div>
+      		<div>
+      			<text class="fw-bold">Room ID: </text><input type="text" name="adjust_ws_room" value="" id="adjust_ws_room">
+      		</div>
+      		
+      		
+      		<div class="form-check">
+					  <input class="form-check-input" type="checkbox" value="True" id="remove_from_websocket" name="remove_from_websocket">
+					  <label class="form-check-label" for="remove_from_websocket">
+					    Remove from Websocket Room
+					  </label>
+					</div>
+
+      		
+      	</form>
+      	
+        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close_adjust"onclick="clear_adjust_form()">Close</button>
+        <button type="button" class="btn btn-primary" onclick="submit_adjust_ajax()">Submit</button>
+      </div>
+    </div>
+  </div>
+</div> 
+
+
+<script type="text/javascript">
+	
+function clear_adjust_form(){
+	console.log("Closing Adjust Clear form")
+	document.getElementById("adjust_form").reset()
+}
+
+
+	function server_closed() {
+		console.error("Jitsi Server Off")
+	}
+
+function show_rooms(){
+    let websocket_rooms = document.getElementById('websocket_rooms');
+    let jitsi_meeting_rooms = document.getElementById('jitsi_meeting_rooms');
+    websocket_rooms.style.display = "block";
+    jitsi_meeting_rooms.style.display = "none";
+
+  }
+</script>
+
+

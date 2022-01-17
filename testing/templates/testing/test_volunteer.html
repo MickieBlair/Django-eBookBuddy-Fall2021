@@ -1,0 +1,13 @@
+{% extends 'testing/testing_base.html' %}
+
+{% load static %}
+
+{% block content %}
+{{ token|json_script:"token" }}
+{{ role|json_script:"role" }}
+{{ room_name|json_script:"room_name" }}
+<div class="react" id="react">
+		
+</div>
+{% include 'testing/snippets/jitsi_script.html' %}
+{% endblock content %}

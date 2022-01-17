@@ -1,0 +1,26 @@
+{{ logged_in_user.id|json_script:"user_id" }}
+{{ user_role|json_script:"user_role" }}
+{{ room.name|json_script:"room_name" }}
+{{ room.id|json_script:"room_id" }}
+{{ room.slug|json_script:"room_slug" }}
+{{ server_time_entry_start|json_script:"server_time_entry_start" }}
+{{ server_time_entry_end|json_script:"server_time_entry_end" }}
+{{ server_time.start_time|json_script:"server_start" }}
+{{ server_time.end_time|json_script:"server_end" }}
+{{ server_time.offset|json_script:"offset" }}
+
+
+{{ todays_jitsi_chat_room.id|json_script:"todays_jitsi_chat_room_id" }}
+{{ todays_staff_chat_room.id|json_script:"todays_staff_chat_room_id" }} 
+
+{{ token|json_script:"token" }}
+
+
+{{ entry_allowed|json_script:"entry_start" }}
+{{ entry_end|json_script:"entry_end" }}
+
+{{orientation_today|json_script:"orientation_today" }}
+{{show_orientation_button|json_script:"show_orientation_button" }}
+{{day_with_o_meeting.date|json_script:"day_with_o_meeting_date" }}
+{{day_with_o_meeting.time_start|json_script:"day_with_o_meeting_time_start" }}
+{{day_with_o_meeting.time_end|json_script:"day_with_o_meeting_time_end" }}

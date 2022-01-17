@@ -1,0 +1,62 @@
+{% extends 'site_admin/admin_base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="mt-1">
+{% include 'site_admin/snippets/buttons.html' %}
+{% include 'site_admin/snippets/django_messages_snippet.html' %}
+</div>
+
+<div class="py-3">
+	<div class="py-3">
+		<a class="btn btn-primary" href="{% url 'site_admin:process_evaluations' %}">Process Evaluations</a>
+	</div>
+
+	<div class="py-3">
+		<a class="btn btn-primary" href="{% url 'site_admin:create_avatars' %}">Create Avatars</a>
+	</div>
+
+	<div class="py-3">
+		<a class="btn btn-primary" href="{% url 'site_admin:team_meetings' %}">Create Team Meetings</a>
+	</div>	
+	
+	<div class="">
+		<h5>Initial Upload</h5>
+		<form method="POST" enctype="multipart/form-data">
+		    {% csrf_token %}
+		    {{ form.as_p }}
+
+		    <input type="submit" class="btn btn-success" value="Submit">
+		</form>
+	</div>
+	<div class="pt-3">	
+		<h5>Initial Data</h5>
+		<ol>
+			<li>Roles</li>
+			<li>Days(Sun-Sat)</li>
+			<li>Genders (M & F)</li>
+			<li>Languages(Eng & Span)</li>
+			<li>Room Types</li>
+			<li>Match Types, Temporary Match Types</li>
+			<li>Match Status Options</li>
+			<li>Note Groups</li>
+			<li>Note Categories</li>
+			<li>Rooms - Lobby, Pending, 60 Breakout</li>
+			<li>Reading Levels (A-Z)</li>
+			<li>Buddy Admin Staff Profile and User Session Status</li>
+			<li>Grades</li>
+			<li>Schools</li>
+			<li>Mega Teams</li>
+			<li>Teams</li>
+			<li>Secondary Roles</li>
+			<li>Arrival Description </li>
+			<li>Follow Up Type</li>
+		</ol>
+		<a class="btn btn-primary" href="{% url 'site_admin:initial_data' %}">Execute</a>
+	</div>
+</div>
+
+
+{% endblock content %}

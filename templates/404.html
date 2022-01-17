@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+	<div class="card mt-5">
+		<div class="card-header text-center custom_bg_blue_gradient">
+			<h1 class="">Oops, Page Not Found</h1>
+		</div>
+		<div class="card-body text-center">
+			<div>
+				<img class="button_fixed_150" src="{% static 'images/books.png' %}">
+			</div>
+			<div class="py-5">
+				<a class="fixed_width_btn btn btn-primary btn-lg" href="{% url 'home' %}">
+				Back to Home
+			</a>
+			</div >				
+		</div>
+		<div class="card-footer text-center">
+			<h5> For assistance: <a href="mailto: admin@ebookbuddy.org">Email: admin@ebookbuddy.org</a></h5>			
+		</div>
+	</div>	
+</div>
+
+{% endblock content %}

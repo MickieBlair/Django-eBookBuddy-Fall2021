@@ -1,0 +1,252 @@
+<div class="text-center pt-2 w-100">
+  <button class="btn btn_staff_sidebar" data-bs-toggle="modal" data-bs-target="#create_room_Modal" id="manual_redirect_btn">
+    <h6 class="link_text">Manual</h6>
+    <h6 class="link_text">Redirect</h6>  
+  </button>
+</div>
+
+<div class="modal fade" id="create_room_Modal" tabindex="-1" aria-labelledby="createRoomModalLabel" aria-hidden="true" >
+  <div class="modal-dialog modal-dialog-scrollable modal-fullscreen p-5">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="d-inline-flex w-100">
+          <div class="d-flex justify-content-left flex-grow-1 align-items-center">
+            <h5 class="modal-title" id="createRoomModalLabel">Manually Redirect Users </h5>
+          </div>
+
+          <div class="d-flex justify-content-center align-items-center">
+            <h6 class="m-0 pe-3">Current Location - {{room}}</h6>
+          </div>
+          <div class="d-flex justify-content-left align-items-center">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="close_create_room()"></button>
+          </div>
+          
+        </div>
+        
+        
+      </div>
+      <div class="modal-body">
+        <div>
+          <div class="d-inline-flex w-100">
+            <div>
+              <label class="new_room_label text-center w-100">To Create a New Room, Enter the Name.</label>
+            </div>
+            <div class="ps-3 fixed_width_new_room">
+              <input type="text" name="room_to_create" class="fixed_width_new_room" id="new_room_name" onclick="clear_error()">
+            </div>
+            
+            
+          </div>
+          
+        </div>
+      	
+      	<div class="row pt-3">
+      		<div class="col border">
+      			<h5 class="text-center pt-2">Students</h5>
+      			<div class="w-100 d-grid justify-content-center" id="students_logged_in">
+
+              {% for manual_user in all_students %}
+      				<div class="user_logged_in" id="manual_redirect_user-{{manual_user.id}}">
+                
+      					<input type="checkbox" name="user_in" class="user_in_check" onclick="clear_error()" value="{{manual_user.id}}">
+                <label class="user_in_label">{{manual_user}} in <span id="manual_user_location_{{manual_user.id}}">{{manual_user.session_status.room}}</span></label>
+                
+      				</div>
+              {% endfor %}
+      				
+      			</div>
+      			
+      		</div>
+      		<div class="col border">
+      			<h5 class="text-center pt-2">Volunteers</h5>
+      			<div class="d-grid justify-content-center" id="vols_logged_in">
+              {% for manual_user in all_volunteers %}
+      				<div class="user_logged_in" id="manual_redirect_user-{{manual_user.id}}">
+      					<input type="checkbox" name="user_in" class="user_in_check" onclick="clear_error()" value="{{manual_user.id}}">
+      					<label class="user_in_label">{{manual_user}} in <span id="manual_user_location_{{manual_user.id}}">{{manual_user.session_status.room}}</span></label>
+      				</div>
+              {% endfor %}
+      				
+      			</div>
+      		</div>
+      		<div class="col border">
+      			<h5 class="text-center pt-2">Staff</h5>
+      			<div class="d-grid justify-content-center" id="staff_logged_in">
+              {% for manual_user in all_staff %}
+      				<div class="user_logged_in" id="manual_redirect_user-{{manual_user.id}}">
+      					<input type="checkbox" name="user_in" class="user_in_check" onclick="clear_error()" value="{{manual_user.id}}">
+      					<label class="user_in_label">{{manual_user}} in <span id="manual_user_location_{{manual_user.id}}">{{manual_user.session_status.room}}</span></label>
+      				</div>
+              {% endfor %}
+      				
+      			</div>
+      		</div>
+          <div class="col border">
+            <h5 class="text-center pt-2 mb-0">Existing Rooms </h5>
+            <div class="clear_existing_div w-100 text-center" onclick="clear_existing()">Clear Choices</div>
+            <div class="d-grid justify-content-center" id="all_rooms">
+              {% for room in rooms %}
+              <div class="room_row_div border d-inline-flex px-1 py-1 w-100">
+                
+                  <div class="d-flex justify-content-center align-items-center">
+                    <input type="radio" name="manual_room" class="room_radio_manual" value = {{room.id}} onclick="clear_error()">
+                  </div>
+                  <div class="w-100 ">
+                    <!-- <div class="w-100 d-inline-flex flex justify-content-start"> -->
+                      <label class="room_row_label ps-3 fw-bold">{{room}}:</label>
+                      <text class="w-100 count_row_label">count - <span id="manual_room_count-{{room.id}}">{{room.num_participants}}</span></text>
+                    <!-- </div> -->
+<!--                     <div class="w-100 d-flex justify-content-start">
+                      <text class="w-100 ps-3">count - <span id="manual_room_count-{{room.id}}">{{room.num_participants}}</span></text>
+                    </div>   -->                  
+                  </div>      
+              </div>
+              {% endfor %}
+              
+            </div>
+          </div>
+
+      		
+      	</div>
+
+      </div>
+      <div class="modal-footer">
+      	<div class="error w-100 text-center" id="create_room_error"></div>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close_create_room" onclick="close_create_room()" >Close</button>
+        <button type="button" class="btn btn-primary" onclick="create_room_with_users()">Create and Redirect</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  function clear_existing(){
+    let existing_room = document.querySelector('input[name="manual_room"]:checked')
+    if(existing_room){
+      existing_room.checked=false;
+    }
+    
+  }
+  
+  function create_room_with_users(){
+    // console.log("creating room!");
+
+    let close_room_btn = document.getElementById('close_create_room');
+        
+        
+    let users_to_add = []
+    let new_room_input_elem = document.getElementById('new_room_name')
+    let new_room_name = new_room_input_elem.value
+
+    let existing_room = document.querySelector('input[name="manual_room"]:checked')
+
+    var checkboxes_selected = document.querySelectorAll('input[name="user_in"]:checked');
+
+    for (var checkbox of checkboxes_selected) {
+      // console.log(checkbox)
+        users_to_add.push(checkbox.value);
+      }
+
+    if (new_room_name !=""){
+        // console.log("new_room_name", new_room_name)
+        if (existing_room){
+          let error_div = document.getElementById('create_room_error');
+          error_div.innerHTML = "Only select one option.  New Room or Existing Room"
+
+        } else{
+          $.ajax({
+          type: 'GET',
+          url: "{% url 'reading_sessions:ajax_check_name' %}",
+          data: {"room_name": new_room_name},
+          success: function (response) {
+            if(response["valid"]){
+
+
+                if(users_to_add.length != 0){
+                   match_socket_private.send(JSON.stringify({
+                        "command": "manual_redirect",
+                        "to_room_id": response["new_room_id"],
+                        "from_user": user_id,
+                        "users_to_send": users_to_add
+                    }));  
+                   
+                   close_room_btn.click();
+                } else {
+                    let error_div = document.getElementById('create_room_error');
+                    error_div.innerHTML = "Please add users to redirect."
+                }
+         
+            } else{
+                // console.log("Room Exists")
+                let error_div = document.getElementById('create_room_error');
+                error_div.innerHTML = "Room with that name already exists. Try Again."
+            }
+          },
+          error: function (response) {
+              console.log(response)
+          }
+        })
+
+        }
+
+        
+
+                    
+    } else {
+      let existing_room_id = "";
+        if(existing_room){
+          existing_room_id = existing_room.value
+        } else{
+          existing_room_id = "";
+        }
+        
+        if (existing_room_id != ""){
+           // console.log(existing_room_id) 
+           if(users_to_add.length != 0){
+                   match_socket_private.send(JSON.stringify({
+                        "command": "manual_redirect",
+                        "to_room_id": existing_room_id,
+                        "from_user": user_id,
+                        "users_to_send": users_to_add
+                    })); 
+                   
+                   close_room_btn.click();
+                } else {
+                    let error_div = document.getElementById('create_room_error');
+                    error_div.innerHTML = "Please add users to redirect."
+                }
+        }else{
+          let error_div = document.getElementById('create_room_error');
+          error_div.innerHTML = "Room Required."  
+        }            
+    }   
+    }
+
+    function close_create_room(){
+        // console.log("Close Create Room")
+        let new_room_element = document.getElementById('new_room_name');
+        new_room_element.value = "";
+
+        let error_div = document.getElementById('create_room_error');
+        error_div.innerHTML = "";
+
+        let existing_room = document.querySelector('input[name="manual_room"]:checked');
+        if(existing_room){
+          existing_room.checked = false;
+        }
+        
+
+        var checkboxes_all = document.querySelectorAll(".user_in_check");
+
+        for(let item of checkboxes_all){
+            item.checked = false;
+        }
+
+    }
+
+    function clear_error(){
+      let error_div = document.getElementById('create_room_error');
+      error_div.innerHTML = "";
+    }
+
+</script>

@@ -1,0 +1,121 @@
+{% extends 'site_admin/admin_base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="mt-1">
+{% include 'site_admin/snippets/buttons.html' %}
+{% include 'site_admin/snippets/django_messages_snippet.html' %}
+</div>
+
+<div class="row pt-3">
+  <div class="col px-5 mx-auto">
+    <div class="card mx-auto">
+      <div class="card-header custom_bg_blue">
+        <h4 class="w-100 text-center fw-bold">Edit Schedule</h4>
+        <h4 class="w-100 text-center fw-bold">{{match}}</h4>
+      </div>
+      <div class="card-body card_background_match">
+        <form method="POST">
+        	{% csrf_token %}
+
+          <input type="hidden" name="semester" id="id_semester" value={{form.initial.semester.id}}>
+
+          <input type="hidden" name="student" id="id_student" value={{form.initial.student.id}}>
+
+          <input type="hidden" name="volunteer" id="id_volunteer" value={{form.initial.volunteer.id}}>
+
+          <input type="hidden" name="match_active" id="id_match_active" value={{form.initial.match_active}}>
+
+          <div class="text-center">
+            <h5 class="">Scheduled Sessions for Match</h5>
+          </div>
+
+          
+        	<div class="row pt-1 my-1 "> 
+
+                {% for day in days %}
+                <div class="col-lg-3 col-md-4 col-sm-6 mx-auto pt-3 pb-1 border background_white sessions_grid">
+                    <h5 class="text-center mb-0 pb-1 border-bottom">{{day}}</h5>
+
+                    <div class="mx-auto  pt-3 ">
+                    {% for slot in day_time_slots %}
+                        {% if slot.day == day %}
+                        <div class="">
+                            <input type="radio" class="roles_radio all_slots {{day}}_session" name="{{day}}_session" value="{{slot.id}}" onclick="select_scheduled_slots()" {% if slot in form.initial.scheduled_slots%} checked {% endif %}>
+                           <label class="ps-2"><span class="fw-bold">{{slot.session_slot}}:</span> {{slot.time_start}}-{{slot.time_end}} </label> 
+                        </div>                    
+                        {% endif %}                        
+                    {% endfor %}  
+                    </div>
+
+                    <div class="text-center d-grid align-content-end pt-2">
+                        <div class="clear_button mx-auto" id="{{day}}_clear" onclick="clear_choices(this)">Clear</div>                  
+                      </div>
+                </div>
+                {% endfor %}
+        	</div>
+
+          <div class="d-none">
+            <select name="scheduled_slots" id="id_scheduled_slots" multiple>
+              {% for slot in day_time_slots %}
+                <option class="select_options" id="slot_{{slot.id}}" value="{{slot.id}}" {% if slot in form.initial.scheduled_slots%} selected {% endif %}>{{slot}} </option>
+              {% endfor %}
+            </select>
+          </div>
+          <script type="text/javascript">
+
+            function clear_choices(element){
+              let day = element.id.split("_")[0]
+              let for_day_radios = "." + day + "_session"
+              let all_day_radios = document.querySelectorAll(for_day_radios)
+              for(let item of all_day_radios){
+                item.checked = false;
+              }
+              select_scheduled_slots()
+            }
+
+            function select_scheduled_slots(){
+              clear_error()
+              const all_slots = document.querySelectorAll(".all_slots")
+              const all_select_options = document.querySelectorAll(".select_options")
+              for(let item of all_select_options){
+                item.selected = false;
+              }
+
+              for(let item of all_slots){
+                if(item.checked){
+                  let select_option_id = "slot_" + item.value
+                  let option_to_select = document.getElementById(select_option_id)
+                   if(option_to_select){
+                    option_to_select.selected = true;
+                  }
+                }
+              }           
+            }
+          </script>
+
+            <div class="text-center pt-3 fw-bold">
+                {% for field in form %}
+                        <p>
+                          {% for error in field.errors %}
+                            <p class="error_form" style="color: red">{{field.label}}: {{ error }}</p>
+                          {% endfor %}
+                        </p>
+                    {% endfor %}
+                    
+                    {% if form.non_field_errors %}
+                      <div style="color: red">
+                        <p class="error_form" >{{registration_form.non_field_errors}}</p>
+                      </div>
+                        
+                    {% endif %}
+              </div>
+          <button class="w-100 btn btn-lg btn-success my-3" type="submit">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

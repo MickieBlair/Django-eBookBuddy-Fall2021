@@ -1,0 +1,68 @@
+{% extends 'site_admin/admin_base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="mt-1">
+{% include 'site_admin/snippets/buttons.html' %}
+{% include 'site_admin/snippets/django_messages_snippet.html' %}
+</div>
+
+<div class="row">
+  <div class="col">
+      <div>
+        <h2 class="pt-2 border-bottom">Rooms</h2>
+      </div>
+      <div>
+        <h5>Total Rooms = {{count}}</h5>
+      </div>
+  </div>
+
+</div>
+
+<div class="table-responsive pt-1">
+        <table class="table table-striped table-sm align-middle">
+          <thead>
+            <tr>
+              <th>Room ID</th>
+              <th>Name</th>              
+              <th>Room Type</th>
+              <th>Count</th>
+              <th>In Room</th>
+              
+            </tr>
+          </thead>
+          <tbody>
+          	{% for room in all_rooms %}
+            <tr>
+              <td>
+                {{room.id}}       
+              </td>
+              <td>
+                {{room.name}}       
+              </td>
+
+              <td>
+                {{room.room_type.letter}}
+              </td>
+              <td>
+                {{room.num_participants}}
+              </td>
+              <td>
+                {% for user in room.in_room %}
+                <div>
+                  {{user.full_name}}
+                </div>
+                {% endfor %}
+              </td>
+            </tr>
+            {% endfor %}
+           
+
+          </tbody>
+        </table>
+      </div>
+
+
+{% endblock content %}

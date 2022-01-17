@@ -1,0 +1,177 @@
+{% extends 'site_admin/admin_base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="mt-1">
+{% include 'site_admin/snippets/buttons.html' %}
+{% include 'site_admin/snippets/django_messages_snippet.html' %}
+</div>
+
+<div class="row">
+  <div class="col">
+      <div>
+        <div class="">
+          <h2 class="pt-2 border-bottom">Session Evaluations</h2>
+        </div>
+        <div>
+          <h5 class="pt-0">Total Evaluations - {{all_evals.count}}</h5>
+        </div>
+      </div>  
+  </div>
+  <div class="col d-flex justify-content-end align-items-center">
+<a class="btn btn-warning" href="{% url 'site_admin:download_evaluation_report' %}">Download</a>
+    </div> 
+</div>
+
+
+    
+
+      <!-- <div class="table-responsive pt-1" style="overflow-x:auto;">
+        <table class="table table-striped table-sm align-middle" > -->
+      <div class="evaluation_table_div pt-1">
+        <table class="evaluation_table_table" >
+          <thead class="eval_thead">
+            <tr class="">
+              <th class="ps-2">ID</th>
+              <th class="eval_width_150">Date</th>
+              <th class="eval_width_250">Completed By</th> 
+              <th class="text-center eval_width_100">Read With Scheduled</th> 
+              <th class="text-center eval_width_100">Temp Student Assigned</th>
+              <th class="text-center eval_width_250">For Student</th>
+              <th class="text-center eval_width_150">Scheduled Student Attendance</th> 
+              <th class="text-center eval_width_150">Level Assessment Performed</th>
+              <th class="text-center eval_width_150">Level From Assessment</th>
+              <th class="text-center eval_width_150">Books Read</th>
+              <th class="text-center eval_width_150">Level Of Books Read</th> 
+              <th class="text-center eval_width_150">Engagement</th> 
+              <th class="text-center eval_width_150">Word Recognition</th>
+              <th class="text-center eval_width_150">Pronunciation / Fluency</th>
+              <th class="text-center eval_width_150">Vocabulary</th>
+              <th class="text-center eval_width_150">Comprehension</th>  
+              <th class="eval_width_400 text-center">Session Comment</th>
+              <th class="eval_width_400 text-center">Social Emotional Learning Comment</th>  
+              <th class="text-center eval_width_150">Needs Follow Up</th>  
+              <th class="text-center eval_width_150">Follow Up Type</th>
+              <th class="eval_width_400 text-center">Follow Up Comment</th>          
+              
+              <!-- <th class="text-center">Sessions</th>
+              <th class="text-center"> All Complete</th>
+              <th class="text-center">Attendance</th>
+              <th class="text-center"></th>
+              {% if user.is_superuser %}
+                <th class="text-center">Recreate</th>
+              {% endif %} -->
+              
+           </tr>
+          </thead>
+          <tbody>
+            
+          	{% for eval in all_evals %}
+            <tr class="eval_table_row border-bottom">
+              <td class="ps-2">
+                {{eval.id}}       
+              </td>
+              <td class="eval_width_150">
+                {{eval.date}}       
+              </td>
+
+              <td class="eval_width_300">
+                <!-- <text class="fw-bold">{{eval.completed_by.username}}:  --></text><text>{{eval.completed_by.full_name}}</text>
+              </td>
+
+              <td class="text-center">
+                {% if eval.read_with_scheduled %}
+                Yes
+                {% else %}
+                No
+                {% endif %}              
+              </td>
+              <td class="text-center">
+                {% if eval.temp_student_assigned %}
+                Yes
+                {% else %}
+                No
+                {% endif %}              
+              </td>
+
+              <td class="text-center">
+              {% if eval.get_student %}                  
+                <!-- <text class="fw-bold">{{eval.get_student.username}}:  --></text><text>{{eval.get_student.full_name}}</text> 
+              {% else %}
+                {{eval.get_student}}
+              {% endif %}   
+              </td>
+              <td class="text-center">
+                {{eval.scheduled_student_attendance}}
+              </td>
+              <td class="text-center">
+                {% if eval.level_assessment_performed %}
+                Yes
+                {% else %}
+                No
+                {% endif %}              
+              </td>
+              <td class="text-center">
+                {{eval.assessment_level}}
+              </td>
+              <td class="text-center">
+                {{eval.books_read}}
+              </td>
+              <td class="text-center">
+                {{eval.get_level_read_str}}
+               <!--  {% for level in eval.level_today.all %}
+                <div>
+                  {{level}}
+                </div>
+                
+                {% endfor %} -->
+              </td>
+              <td class="text-center">
+                {{eval.engagement}}
+              </td>
+              <td class="text-center">
+                {{eval.word_recognition}}
+              </td>
+               <td class="text-center">
+                {{eval.pronunciation_fluency}}
+              </td>
+               <td class="text-center">
+                {{eval.vocabulary}}
+              </td>
+               <td class="text-center">
+                {{eval.comprehension}}
+              </td>
+              <td class="ps-3">
+                {{eval.session_comment}}
+              </td>
+               <td class="ps-3">
+                {{eval.social_emotional_learning_comment}}
+              </td>
+               <td class="text-center">
+                {% if eval.follow_up_needed %}
+                Yes
+                {% else %}
+                No
+                {% endif %}              
+              </td>
+              <td class="text-center"> 
+                {{eval.follow_up_type}}
+              </td>
+               <td class="ps-3">
+                {{eval.follow_up_comment}}
+              </td>
+
+              
+                    
+            </tr>
+            {% endfor %}
+            
+
+          </tbody>
+        </table>
+      </div>
+
+
+{% endblock content %}

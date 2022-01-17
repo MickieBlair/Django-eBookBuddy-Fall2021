@@ -1,0 +1,17 @@
+<div class="d-none">
+	{% for room in rooms %}
+	<a class="clickable_links" href="{% url 'reading_sessions:room' room.slug %}" id="get_room_link-{{room.id}}">{{room.name}}</a>
+	{% endfor %}
+
+	{% if request.user.role.name == "Student" %}
+		<a href="{% url 'reading_sessions:student_home' %}" id="landing_link">Student Home</a>
+
+	{% elif request.user.role.name == "Volunteer" %}
+		<a href="{% url 'reading_sessions:volunteer_home' %}" id="landing_link">Volunteer Home</a>
+
+	{% elif request.user.role.name == "Staff" %}
+		<a href="{% url 'reading_sessions:staff_home' %}" id="landing_link">Staff Home</a>
+	{% endif %}
+
+	<a href="{% url 'reading_sessions:initial_entry' %}" id="initial_entry_link">Entry</a>
+</div>

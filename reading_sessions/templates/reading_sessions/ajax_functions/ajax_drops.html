@@ -1,0 +1,36 @@
+<script type="text/javascript">
+	function post_ajax_drop(user_id, room_id){
+		console.error("POST DROP", user_id, room_id)
+		let payload = {
+            
+            "user_id": user_id,
+            "room_id": room_id,
+          }
+
+        let web_url = "{% url 'reading_sessions:get_drop_for_user' %}"
+
+
+        console.error("POST DROP payload", payload)
+        console.error("POST DROP url", web_url)
+
+        $.ajax({
+        type: 'GET',
+        url: web_url, // production
+        data: payload,
+        timeout: 5000,
+        success: function (response) {
+               if(response["valid"]){
+                
+                console.error("\n\n\nDROP VALID Response", response);
+                
+                
+               } else{
+               	console.error("\n\n\nDROP INVALID Response", response);
+               }
+             },
+             error: function (response) {
+             console.log(response)
+             },
+      });
+	}
+</script>

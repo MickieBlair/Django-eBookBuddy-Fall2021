@@ -1,0 +1,59 @@
+<div class="text-center pt-2 w-100">
+  <button class="btn btn_staff_sidebar" id="staff_chat_btn" onclick="determine_button(this)">
+    <h6 class="link_text">Staff Chat</h6>
+    <!-- <h6 class="link_text">Chat</h6> -->
+    <h6 class="red_link_text">(<span id="new_staff_chat_messages">0</span>)</h6> 
+  </button>
+</div>
+
+<div class="d-none">
+  <button value ="{{user.id}}" onclick="ajax_staff_reset()" id="staff_reset_count">Reset</button>
+</div>
+
+<script type="text/javascript">
+
+  function ajax_staff_reset(){
+    let url = "{% url 'reading_sessions:staff_reset_count' %}"
+    console.log(url);
+        $.ajax({
+      type: 'GET',
+      url: url,
+      data: {"user_id": user_id},
+      success: function (response) {
+        if(response["valid"]){
+          console.log(response) 
+          adjust_staff_count_button(response["unread_staff_count"])               
+        }
+      },
+      error: function (response) {
+          console.log(response)
+      }
+    })
+  }
+
+
+
+  function adjust_staff_count_button(count){
+    // console.log("ADJUST STAFF COUNT", count)
+    let new_staff_chat_messages =document.getElementById('new_staff_chat_messages');
+    new_staff_chat_messages.innerHTML = count;
+    let staff_chat_btn_show = document.getElementById('staff_chat_btn_show')
+ 
+    let staff_chat_btn = document.getElementById('staff_chat_btn');
+
+    if(staff_chat_btn){ 
+      if(count == 0){
+        staff_chat_btn.setAttribute('class', 'btn btn_staff_sidebar ');
+
+      } else {
+        staff_chat_btn.setAttribute('class', 'btn sidebar_link_notification');
+        play_notification_sound()
+        // let staff_message_play = document.getElementById('staff_message_play');
+        // staff_message_play.click();
+      }
+    } else{
+      console.log("Else", inner_staff_chat_div)
+    }
+  }
+
+</script>

@@ -1,0 +1,88 @@
+<script type="text/javascript">
+
+let input_msg = document.getElementById('id_chat_message_input');
+let private_msg_content = document.getElementById('private_msg_content')
+// let text_test_div = document.getElementById('text_test_div');
+
+input_msg.addEventListener('focusin', (event) => {
+  event.target.style.background = '';
+  //text_test_div.innerHTML = "focusin"
+});
+
+input_msg.addEventListener('focusout', (event) => {
+  event.target.style.background = '';
+  window.scrollTo(0, 0);
+  // text_test_div.innerHTML = getComputedStyle(main_content_div).cssText
+  //text_test_div.innerHTML = "focusout"
+});
+
+private_msg_content.addEventListener('focusin', (event) => {
+  event.target.style.background = '';
+  //text_test_div.innerHTML = "focusin"
+});
+
+private_msg_content.addEventListener('focusout', (event) => {
+  event.target.style.background = '';
+  window.scrollTo(0, 0);
+  // text_test_div.innerHTML = getComputedStyle(main_content_div).cssText
+  //text_test_div.innerHTML = "focusout"
+});
+
+
+	//Non Staff Functions
+	const left_pane_non_staff = document.getElementById('left_pane_non_staff');
+	const non_staff_left_pane_title = document.getElementById('left_pane_title')
+
+	const room_chat_div_non_staff = document.getElementById('room_chat_div_non_staff');
+	const private_msgs_div_non_staff = document.getElementById('private_msgs_div_non_staff');
+	const non_staff_chat = document.getElementById('non_staff_chat');
+	const non_staff_room_chat_btn = document.getElementById('non_staff_room_chat_btn');
+	const non_staff_private_messages_btn = document.getElementById('non_staff_private_messages_btn');
+
+	function open_left_pane(button_element){
+	  // console.log("button", button_element)
+	  let title = button_element.getAttribute('value')
+
+	  left_pane_non_staff.style.display = "inline-flex";
+	  
+	  if(button_element.id == "non_staff_room_chat_btn"){
+	    open_room_chat()
+	  } else if (button_element.id == "non_staff_private_messages_btn"){
+	    open_private_messages()
+	  }
+	}
+
+	function close_left_pane(button_element){
+	  // console.log("button", button_element)
+	  left_pane_non_staff.style.display = "none";
+	  room_chat_div_non_staff.style.display="none";
+	  private_msgs_div_non_staff.style.display = "none";
+	}
+
+
+	function open_room_chat() {
+	  // console.log("open vol chat")
+	  room_chat_div_non_staff.style.display="flex";
+	  private_msgs_div_non_staff.style.display = "none";
+	  let input_msg = document.getElementById('id_chat_message_input');
+	  
+	  ajax_room_reset();
+	}
+
+	function open_private_messages() {
+	  // console.log("open private_messages")
+	  private_msgs_div_non_staff.style.display = "flex";
+	  room_chat_div_non_staff.style.display="none";
+
+	  if(document.getElementById('new_room_chat_messages')){
+	  	let new_room_chat_messages_count = document.getElementById('new_room_chat_messages').innerHTML;
+	  }
+
+	  
+
+	}
+
+
+
+
+</script>

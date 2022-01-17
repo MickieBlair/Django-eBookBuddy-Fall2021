@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<!-- <div class="p-3">
+	{% if logged_in_user %}
+		<h3>{{logged_in_user}} - {{logged_in_user.role.name}}</h3>
+
+		<div class="text-center p-3">
+			<a class="btn btn-primary" href="{url 'reading_sessions:initial_entry'}">Join Session</a>
+		</div>
+	{% endif %}
+
+	{% if logged_in_user.role.name == "Staff" %}
+		<div class="text-center p-3">
+			<a class="btn btn-primary" href="{% url 'site_admin:admin_home' %}">Admin Home</a>
+		</div>
+
+	{% endif %}
+
+	{% if logged_in_user.is_superuser %}
+		<div class="text-center p-3">
+			<a class="btn btn-primary" href="{% url 'admin:index' %}">Django Admin</a>
+		</div>
+		<div class="text-center p-3">
+			<a class="btn btn-info" href="{ url 'reading_sessions:testing_home' }">Testing Home</a>
+		</div>
+	{% endif %}
+</div> -->
+{% endblock content %}

@@ -1,0 +1,106 @@
+{% extends 'site_admin/admin_base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="mt-1">
+{% include 'site_admin/snippets/buttons.html' %}
+{% include 'site_admin/snippets/django_messages_snippet.html' %}
+</div>
+
+<div class="row">
+    <div class="col d-flex justify-content-start">
+      <div>
+        <div class="">
+          <h2 class="pt-2 border-bottom">Semesters</h2>
+        </div>
+        <div>
+          <h5 class="pt-0">Total Semesters - {{count}}</h5>
+        </div>
+      </div>    
+    </div>
+  </div>
+
+  {% if all_semesters.count != 0 %}
+      <div class="table-responsive pt-1">
+        <table class="table table-striped table-sm align-middle">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Semester</th>
+              <th>Dates</th>
+              <th class="text-center">Matches</th>
+              <th class="text-center">Sessions</th>              
+              <th class="text-center">Active Semester</th>
+              <th></th>             
+              <th>Last Updated</th>
+              
+
+            </tr>
+          </thead>
+          <tbody>
+
+            {% for semester in all_semesters %}
+            <tr>
+              <td class="">{{semester.id}}</td>
+              <td class="">{{semester.name}}</td>
+              <td class="">
+                <div>
+                  <text class="fw-bold">Start: </text> {{semester.start_date}}
+                </div>
+                <div>
+                  <text class="fw-bold">End: </text> {{semester.end_date}}
+                </div>
+              </td>        
+              <td class="text-center">
+                    <div> 
+                      <text class="fw-bold"> Total: </text>{{semester.scheduled_match_semester.all.count}}
+                    </div>
+                    <div>
+                      <a href="{% url 'site_admin:scheduled_matches' semester.id 'Semester' 'Active' %}">View/Edit Matches</a> 
+                      
+                      <!-- {% if semester.scheduled_match_semester.count == 0 %}
+                        <a href="url 'site_admin:semester_scheduled_matches' semester.id %}">Add Match</a>
+                      {% else %} -->
+                        
+                      <!-- {% endif %} -->
+                    </div>                      
+                  </td>
+                  <td class="text-center">
+                      <div> 
+                        <text class="fw-bold"> Total: </text>{{semester.active_sessions_in_semester.count}}
+                      </div>
+                      <div>
+                        {% if semester.active_sessions_in_semester.count == 0 %}
+                          <a href="{% url 'site_admin:create_sessions' semester.id %}">Create Sessions</a>
+                        {% else %}
+                          <a href="{% url 'site_admin:sessions_by_semester' semester.id 'All' %}">View/Edit Sessions</a>
+                        {% endif %}
+                      </div>
+                        
+                    </td>
+              <td>
+                <input type="checkbox" class="mx-auto checkbox active_semester" name="active_semester" id="active_semester-{{semester.id}}" value="{{semester.id}}"
+                  onclick="window.location.assign('{% url 'site_admin:make_semester_active' semester.id %}')" {% if semester.active_semester %} checked {% endif %} > 
+              </td> 
+              <td>
+                <a class="" href="{% url 'site_admin:edit_semester' semester.id %}">Edit Name/Dates</a>
+              </td>    
+
+             <td class="px-2">
+                <text id="last_updated_semester-{{semester.id}}">{{semester.last_updated}}</text>
+            </td>
+            </tr>
+            {% endfor %}
+
+          </tbody>
+        </table>
+      </div>
+  {% else %}
+    <div class="text-center mt-5 bg_custom_light_gray">
+      <h2 class="p-3"> No Semesters </h2>
+    </div>
+  {% endif %}
+
+{% endblock content %}

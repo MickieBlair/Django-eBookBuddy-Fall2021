@@ -1,0 +1,150 @@
+<script type="text/javascript">
+	let this_count = 0
+	let online = "Initial"
+	const max_tries = 5
+     let current_tries = 0
+
+	function handleConnectionChange(event){
+	    if(event.type == "offline"){
+	        console.error("You lost connection.");
+	        online = "You lost connection."
+	    }
+	    if(event.type == "online"){
+	        console.error("You are now back online.");
+	        online = "You are now back online."
+	    }
+	    
+	    console.error(new Date(event.timeStamp));
+	}
+	
+	window.addEventListener('online', handleConnectionChange);
+	window.addEventListener('offline', handleConnectionChange);
+
+	function check_all_connections(){
+		var connected = navigator.onLine;
+		var all_ws_connected = false;
+
+		let status_check = status_socket_private.readyState;
+		console.log("\n\n\nStatus_check", status_check)
+
+		let match_check = match_socket_private.readyState
+		console.log("Match check", match_check)
+
+		let staff_check = "None"
+
+		if (user_role == "Staff"){
+			staff_check = staff_chat_socket.readyState
+			console.log("Staff check", staff_check)
+
+			if(match_check==1 && status_check==1 && staff_check==1){
+				all_ws_connected = true
+			}else{
+				all_ws_connected = false;
+			}
+		} else{
+			if(match_check==1 && status_check==1){
+				all_ws_connected = true
+			}else{
+				all_ws_connected = false;
+			}
+
+		}
+
+		
+
+		this_count++
+
+		console.log("this_count", this_count)
+		console.log("online", online)
+		console.log("connected", connected)
+		let max_reached = false
+		if (current_tries < max_tries){
+			max_reached = false
+		} else{
+			max_reached = true
+			// clearInterval(check_connections_interval)
+		}
+		console.log("current_tries", current_tries)
+		console.log("max_reached", max_reached)
+
+		payload = {
+            "csrfmiddlewaretoken": "{{ csrf_token }}",
+            "user_id": user_id,
+            "room_id": room_id,
+            "status_check": status_check,
+            "match_check": match_check,
+            "staff_check": staff_check,
+            "all_connected": all_ws_connected,
+            "max_reached": max_reached,
+            "this_count": this_count,
+          }
+
+        $.ajax({
+        type: 'POST',
+        dataType: "json",
+        url: "{%url 'reading_sessions:ajax_connection_status' %}", // production
+        data: payload,
+        timeout: 5000,
+        success: function (response) {
+        	console.log("ajax_connection_status Response", response);
+        	if(response['staff']){
+        		console.log("Problem users")
+        		let parse_problem_users = JSON.parse(response['problem_list'])
+        		for(let item of parse_problem_users){
+        			console.log(item)
+        		}
+        	}
+
+        	if(response['has_status_redirect']){
+        		let redirect_action = response['status_redirect_room']
+        		if (redirect_action =="Initial_Entry"){
+        			let initial_e_link = document.getElementById('initial_entry_link')
+        			initial_e_link.click()
+        		} else {
+        			let room_status_link = document.getElementById('get_room_link-' + redirect_action)
+        			room_status_link.click()
+        		}
+        		
+        	} else{
+        		if(all_ws_connected){
+        		current_tries = 0
+        	} else{
+        		if(current_tries < max_tries){
+        			if(status_check != 1){
+        				connect_status_socket()	
+        			}
+
+        			if(match_check!=1){
+        				connect_ws()	
+        			}
+        			if(user_role =="Staff"){
+        				if(staff_check!=1){
+        					staff_chat_connect_ws()
+        				}
+        				
+        			}
+
+        			current_tries++
+        		}else{
+        			console.log("Max TRIES reached")
+        			// post_ajax_drop(user_id, room_id)
+        			// clearInterval(check_connections_interval)
+        		}
+        	}
+
+        		console.log("Current Tries", current_tries)
+
+        	}
+        	
+        
+             },
+             error: function (response) {
+             console.log(response)
+             },
+      });
+	}
+
+
+	const check_connections_interval = setInterval(check_all_connections, 60000)
+	
+</script>

@@ -1,0 +1,159 @@
+<div class="scrolling_table_fixed_head table-responsive pe-1" id="table_div_for-{{session.id}}-{{session.day_time.session_slot}}-{{type_match}}">
+    <table class="table table-striped table-sm align-middle">
+      <thead>
+        <tr>          
+          <th class="fixed_width_type ps-1">Type</th>          
+          <th class="ps-1">Student</th>
+          <th class="ps-1">Volunteer</th>
+          <th class="fixed_width_complete text-center">Complete</th>
+          <th class="fixed_width_status text-center">Status</th>
+        </tr>
+      </thead>
+  
+      <tbody id="tbody_{{session.id}}-{{session.day_time.session_slot}}-{{type_match}}">
+        
+        
+        {% for match_status in session.all_match_statuses %}
+
+        <tr class="all_match_row" id="match_status_row-{{match_status.id}}">
+          <td class="ps-1">
+            {{match_status.get_type}}
+          </td>
+
+          <td class="ps-1 " >
+            <div class="d-inline-flex w-100 " id="online_{{match_status.get_student.id}}" >
+              <div type="button" class="d-grid justify-content-center align-items-center px-1" data-bs-toggle="modal" data-bs-target="#userprofileModal" onclick="show_only_profile('member_profile_{{match_status.get_student.id}}')">
+                <i class="fas fa-user profile_icon user_offline status_icon_{{match_status.get_student.id}}" id="status_icon_{{match_status.get_student.id}}"></i>
+              </div>
+
+              <!-- <div> -->
+                <!-- {% if match_status.get_student.session_status.needs_new_buddy %} d-none {% endif %} -->
+                <div >
+                  <div class="username_small_bold">
+                    <text>{{match_status.get_student.username}}: </text>
+                    {% if match_status.display_student_location %}
+                    <text class="the_member_location-{{match_status.get_student.id}}" id="id-match-user-location_{{match_status.id}}-{{match_status.get_student.id}}">
+                      {% if match_status.display_student_location %}
+                        {% if match_status.student_online %}
+                          {% if match_status.get_student.session_status.room %}
+                            <a href="{% url 'reading_sessions:room' match_status.get_student.session_status.room.slug %}">{{match_status.get_student.session_status.room.name}}</a>
+                          {% endif%}
+                        {% endif %}
+                      {% endif %}                      
+                    </text> 
+                    {% endif %}
+                      
+                  </div>
+                  <div class="full_name">
+                    {{match_status.get_student.full_name}}
+                  </div>
+                </div>
+              <!-- </div>               -->
+            </div>
+            
+          </td>
+
+          <td class="ps-1">
+            <div class="d-inline-flex w-100" id="online_{{match_status.get_buddy.id}}" data-bs-toggle="modal" data-bs-target="#userprofileModal" value={{match_status.get_buddy.id}}>
+              <div type="button" class="d-grid justify-content-center align-items-center px-1" data-bs-toggle="modal" data-bs-target="#userprofileModal" onclick="show_only_profile('member_profile_{{match_status.get_buddy.id}}')"
+              >
+                <i class="fas fa-user profile_icon user_offline status_icon_{{match_status.get_buddy.id}}" id="status_icon_{{match_status.get_buddy.id}}"></i>                
+              </div>
+
+              <!-- <div> -->
+                <!-- {% if match_status.get_buddy.session_status.needs_new_buddy %} d-none{% endif %}  -->
+                <div >
+                  <div class="username_small_bold"> 
+                    <text>{{match_status.get_buddy.username}}:</text>
+                    {% if match_status.display_buddy_location %}
+                    <text class="the_member_location-{{match_status.get_buddy.id}}" id="id-match-user-location_{{match_status.id}}-{{match_status.get_buddy.id}}">
+                      {% if match_status.display_buddy_location %}
+                        {% if match_status.buddy_online %}
+                          {% if match_status.get_buddy.session_status.room %}
+                            <a href="{% url 'reading_sessions:room' match_status.get_buddy.session_status.room.slug %}">{{match_status.get_buddy.session_status.room.name}}</a>
+                          {% endif%}
+                        {% endif %}
+                      {% endif %} 
+                    </text>
+                    {% endif %}
+                     <!-- <a class="fw-bold" href="">{{match_status.get_buddy.session_status.room.name}}</a>  -->
+                    
+                  </div>
+                  <div class="full_name">
+                    {{match_status.get_buddy.full_name}}
+                  </div>
+                </div>
+              <!-- </div>               -->
+            </div>
+          </td>
+
+          <td class="text-center">
+            {% if match_status.both_online %}
+              <i class="fas fa-check match_check_green" id="match_status_complete_{{match_status.id}}"></i>
+            {% else %}
+              <i class="fas fa-times match_times_red" id="match_status_complete_{{match_status.id}}"></i>
+            {% endif %}
+          </td>
+
+          <td class="text-center" id="match_status_info_{{match_status.id}}">
+            {{match_status.status}}
+          </td>          
+        </tr>
+        {% endfor %}
+      </tbody>
+        
+    </table>
+    {% if session.all_match_statuses.count == 0%}
+    <div class="border p-3 mb-3 bg_custom_light_gray" id="no_matches_{{session.id}}-{{session.day_time.session_slot}}-{{type_match}}">
+      <!-- <button onclick="insert_before()">Insert First</button> -->
+
+      <!-- <button onclick="insert_last()">Insert Last</button> -->
+
+      <h5 class="text-center" id="title_no_matches_{{session.id}}-{{session.day_time.session_slot}}-{{type_match}}">No Matches</h5>
+    </div>
+    {% endif %}
+  </div>
+
+  <script type="text/javascript">
+
+    // let nodes = document.querySelectorAll('.all_match_row');
+    // let first = nodes[0];
+    // let last = nodes[nodes.length- 1];
+
+    function insert_before(){
+      let table_matches = document.getElementById('tbody_97-A-all')
+      let all_rows = document.querySelectorAll('.all_match_row');
+
+      let first = all_rows[0]
+
+      console.log(first)
+
+      let newly_complete = document.getElementById('match_status_row-447')
+
+      table_matches.prepend(newly_complete);
+
+      // table_matches.insertBefore(newly_complete, first);
+    }
+
+    
+
+    function insert_last(){
+      let table_matches = document.getElementById('tbody_97-A-all')
+      let all_rows = document.querySelectorAll('.all_match_row');
+      let last = all_rows[all_rows.length- 1];
+
+      console.log(last)
+
+      let newly_complete = document.getElementById('match_status_row-420')
+
+      console.log(newly_complete)
+
+      table_matches.append(newly_complete);
+    }
+
+
+    function insertAfter(newNode, existingNode) {
+        existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
+    }
+
+  </script>

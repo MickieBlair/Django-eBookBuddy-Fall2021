@@ -1,0 +1,272 @@
+{% extends 'site_admin/admin_base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="mt-1">
+{% include 'site_admin/snippets/buttons.html' %}
+{% include 'site_admin/snippets/django_messages_snippet.html' %}
+</div>
+
+<div class="row py-3">
+  <div class="col-lg-10 col-md-10 col-sm-10 mx-auto">
+    <div class="card mx-auto">
+      <div class="card-header custom_bg_blue">
+        <div class="d-inline-flex align-content-center w-100 ">
+          <div class="d-flex align-items-center flex-grow-1">
+            <h3 class="w-100 fw-bold m-0">{{member.role.name}} Profile - {{member.full_name}}</h3>
+          </div>
+          <div class="d-flex align-items-center">
+            <a class="btn btn-warning my-1" href="{% url 'site_admin:edit_student_profile' member.id %}">Edit Student Profile</a>
+          </div>
+        </div>        
+      </div>
+      <div class="card-body pb-0"> 
+
+        <div class="row pb-3">
+          <div class="col">
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Needs Match:</label> 
+              <text class="">
+                {% if member.student_profile.match_needed %}
+                      <text> Yes </text>
+                    {% else %}
+                      <text> No </text>
+                    {% endif %}
+                </text>
+            </div>
+            {% if not member.student_profile.match_needed %}
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Buddy:</label> 
+              <text class="">
+                {{member.session_status.scheduled_match.volunteer.full_name}}
+                </text>
+            </div>
+            {% endif %}
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Gender:</label> 
+              <text class="">{{member.student_profile.gender}}</text>
+            </div>
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Primary Language:</label> 
+              <text class="">{{member.student_profile.primary_lang}}</text>
+            </div>
+
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Secondary Language:</label> 
+              <text class="">{{member.student_profile.secondary_lang}}</text>
+            </div>
+
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">School:</label> 
+              <text class="">{{member.student_profile.school}}</text>
+            </div>
+
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Grade:</label> 
+              <text class="">{{member.student_profile.grade}}</text>
+            </div>
+
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Contact Person:</label> 
+              <text class="">{{member.student_profile.contact_person}}</text>
+            </div>
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Contact Relationship:</label> 
+              <text class="">{{member.student_profile.contact_relationship}}</text>
+            </div>
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Contact Phone:</label> 
+              <text class="">{{member.student_profile.contact_number}}</text>
+            </div>
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Email:</label> 
+              <a href="mailto: {{member.email}}">{{member.email}}</a>
+            </div>
+
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Comment:</label> 
+              <text class="">{{member.student_profile.comment}}</text>
+            </div>
+            
+          </div>
+          <div class="col">
+            <div class="border mb-2 bg-light">
+              <h4 class="text-center pt-2">Reading Levels</h4>
+              <div class="d-grid justify-content-center pb-2"> 
+                <ul class="p-0 m-0" >   
+                  <li>
+                    <div class="d-inline-flex">
+                      <div class="fixed_width_75_bold">Initial: </div>
+                      <div>{{member.student_progress.starting}}</div>
+                    </div>
+                    
+                  </li>
+                  <li>
+                    <div class="d-inline-flex">
+                      <div class="fixed_width_75_bold">Current: </div>
+                      <div>{{member.student_progress.current}}</div>
+                    </div>
+                  </li>  
+                  <li>
+                    <div class="d-inline-flex">
+                      <div class="fixed_width_75_bold">Final: </div>
+                      <div>{{member.student_progress.end}}</div>
+                    </div>
+                  </li>                 
+                </ul>
+
+              </div>
+            </div>
+            <div class="border">
+              <h5 class="text-center pt-2">Scheduled Day/Time/Slots</h5>
+              <div class="d-grid justify-content-center pb-2"> 
+                {% if member.student_profile.scheduled_day_time_slots.all.count != 0 %}         
+                  <ul class="available_slots_ul" >                    
+                      {% for slot in member.student_profile.scheduled_day_time_slots.all %}
+                      <li class ="py-1">{{slot.get_name_time}}</li>
+                      {% endfor %}
+                  </ul>
+                  {% else %}
+                    <h6 class="bg-light m-0 p-2">No Scheduled Session Slots</h6>
+                  {% endif %}
+              </div>
+            </div>
+
+            <div class="border">
+              <h5 class="text-center pt-2">Available Day/Time/Slots</h5>
+              <div class="d-grid justify-content-center pb-2"> 
+                {% if member.student_profile.available_day_time_slots.all.count != 0 %}         
+                  <ul class="available_slots_ul" >                    
+                      {% for slot in member.student_profile.available_day_time_slots.all %}
+                      <li class ="py-1">{{slot}}</li>
+                      {% endfor %}
+                  </ul>
+                  {% else %}
+                    <h6 class="bg-light m-0 p-2">No Available Session Slots In Profile</h6>
+                  {% endif %}
+              </div>
+            </div>      
+            
+          </div>      
+        </div> 
+        <div class="border-top pt-3">
+          <h4> Student Progress </h4>
+          <div class="d-none reading_level_chart">
+            <canvas id="progress_chart" class="w-100"></canvas>
+          </div>
+          
+          <div class="table-responsive pt-1">
+            <table class="table table-striped table-sm align-middle">
+              <thead>
+                      <tr>                        
+                        <th>Session</th>
+                        <th>Reading Level</th>
+                        <th>Assessment By</th>
+                        <th>Date Accessed</th>                        
+                        
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for level in member.student_progress.level_progress.all %}
+                        <tr>
+                          <td class="px-2">{{level.session}}</td>
+                          <td class=""></td>
+                          <td class=""></td>
+                          <td class=""></td>                          
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+            </table>
+          </div>
+        </div> 
+        <div class="border-top pt-3">
+          <h4> Notes Relating to User </h4>
+          <div class="ps-2 pt-3">
+            <h5 class="border-bottom">Student Profile</h5>
+            <div class="ps-3">
+              {% if member.student_profile.profile_notes.all.count != 0 %} 
+              <ul>
+                {% for note in member.student_profile.profile_notes.all %}
+                <li>
+                  {{note.date_created}} - {{note.content}} - {{note.author}}
+                </li>
+                {% endfor %}
+              </ul>             
+                
+              {% else %}
+                <div>
+                  No Notes
+                </div>
+              {% endif %}              
+            </div>     
+          </div>
+          <div class="ps-2 pt-3">
+            <h5 class="border-bottom">Scheduled Match Notes</h5>
+            <div class="ps-3">
+              {% if scheduled_matches.all.count != 0 %}              
+                {% for match in scheduled_matches %}
+                <div>
+                  <h6><text class="fw-bold">With: </text>{{match.volunteer}} - {{match.status_text}}</h6>
+                  <ul>
+                    {% for note in match.notes.all %}
+                    <li>{{note.date_created}} - {{note.content}} - {{note.author}}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+                {% endfor %}
+              {% else %}
+                <div>
+                  No Notes
+                </div>
+              {% endif %}              
+            </div>          
+              
+          </div>
+          <div class="ps-2 pt-3">
+            <h5 class="border-bottom">Temporary Match Notes</h5>
+            temporary_match_notes - Active and Inactive
+          </div>
+        </div>        	
+      </div>
+      <div class="card-footer">
+        <div class="row">
+            <div class="col">
+              <label for="" class="fw-bold text-muted pe-2">Created:</label>
+              <text class="text-muted">{{member.student_profile.date_created}}</text>
+            </div>
+            <div class="col d-flex justify-content-end">
+              <label for="" class="fw-bold text-muted pe-2">Last Updated:</label>
+              <text class="text-muted">{{member.student_profile.last_updated}}</text>
+            </div>          
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
+</script>
+
+<script type="text/javascript">
+var xValues = [50,60,70,80,90,100,110,120,130,140,150];
+// var xValues = []
+var yValues = [7,8,8,9,9,9,10,11,14,14,15];
+
+new Chart("progress_chart", {
+  type: "line",
+  data: {
+    labels: xValues,
+    datasets: [{
+      backgroundColor: "rgba(0,0,0,1.0)",
+      borderColor: "rgba(0,0,0,0.1)",
+      data: yValues
+    }]
+  }
+});
+</script>
+
+{% endblock content %}

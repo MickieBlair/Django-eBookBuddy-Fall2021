@@ -1,0 +1,101 @@
+{% extends 'site_admin/admin_base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="mt-1">
+{% include 'site_admin/snippets/buttons.html' %}
+{% include 'site_admin/snippets/django_messages_snippet.html' %}
+</div>
+
+<div class="row pt-5">
+  <div class="col-lg-7 col-md-9 col-sm-11 mx-auto">
+    <div class="card mx-auto">
+      <div class="card-header custom_bg_blue">
+        <h1 class="h3 mb-3 w-100 text-center fw-bold mt-2">New Semester</h1>
+      </div>
+      <div class="card-body" onclick="clear_errorlist()">
+        <form method="POST">
+        	{% csrf_token %}
+
+        	<div class="fieldWrapper my-1 text-center">
+        		<label for="id_name" class="fixed_width_bold_label">Name:</label>
+            <input type="text" name="name" maxlength="100" class="fixed_width_input2"  id="id_name" 
+            {% if form.name.value %} value="{{form.name.value}}" {% endif %}>
+            <div>
+              {% if form.name.errors %}
+                <ul class="error_list pb-3">
+                {% for error in form.name.errors %}
+                    <li>{{ error|escape }}</li>
+                {% endfor %}
+                </ul>
+              {% endif %}
+            </div>
+        	</div>
+
+        	<div class="fieldWrapper my-1 text-center">
+        		<label for="id_start_date" class="fixed_width_bold_label">Start Date:</label>
+            <input type="date" name="start_date" id="id_start_date" class="fixed_width_input2"  
+            {% if form.start_date.value %} value="{{form.start_date.value}}" {% endif %}>
+            <div>
+              {% if form.start_date.errors %}
+                <ul class="error_list pb-3">
+                {% for error in form.start_date.errors %}
+                    <li>{{ error|escape }}</li>
+                {% endfor %}
+                </ul>
+              {% endif %}
+            </div>
+       	  </div>
+
+          <div class="fieldWrapper my-1 text-center">
+              <label for="id_end_date" class="fixed_width_bold_label">End Date:</label>
+              <input type="date" name="end_date" id="id_end_date" class="fixed_width_input2" 
+              {% if form.end_date.value %} value="{{form.end_date.value}}" {% endif %} >
+              <div>
+                {% if form.end_date.errors %}
+                  <ul class="error_list pb-3">
+                  {% for error in form.end_date.errors %}
+                      <li>{{ error|escape }}</li>
+                  {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+          </div>
+
+          <div class="fieldWrapper my-1 text-center">
+            <div class="d-inline-flex">
+                <label for="id_end_date" class="fixed_width_bold_label">Active Semester:</label>
+                <div class="fixed_width_input2">
+                  <input type="checkbox" name="active_semester" id="id_active_semester" class="checkbox"  {% if form.active_semester.value == True %}checked {% endif %}>
+                  
+                </div>
+            </div>
+            <div>
+                {% if form.active_semester.errors %}
+                  <ul class="error_list pb-3">
+                  {% for error in form.active_semester.errors %}
+                      <li>{{ error|escape }}</li>
+                  {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+          </div>
+
+          <div class="my-3 text-center red">
+            {% if form.non_field_error %}
+              {{ form.non_field_errors }}
+            {% endif %}
+          </div>
+
+          <button class="w-100 btn btn-lg btn-success my-3" type="submit">Create</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock content %}
+

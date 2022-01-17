@@ -1,0 +1,104 @@
+<span class="d-none page-number" id="id_page_number">1</span>
+
+<div class="modal fade" id="peopleModal" tabindex="-1" aria-labelledby="peopleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="peopleModalLabel">In Room</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="close_people_in_room(this.id)" id="non_staff_people_in_room_close"></button>
+      </div>
+      <div class="modal-body">
+        <ul class="people_in_room " id="people_in_room-{{room.id}}">
+        	{% for member in members %}
+        	<li class="pb-3 in_room_participant_profile" id="in_room-{{member.id}}">
+        		<div class="card">
+        			<div class="card-header p-0" id="profile_header-{{member.id}}" onclick="show_profile_body('profile_body-{{member.id}}')">
+        				<div class="d-inline-flex w-100 p-0 m-0">
+        					<div class="flex-grow-1 d-flex justify-content-start align-items-center">
+        						<div class="ps-1">
+        							{{member.username}} - {{member.full_name}}
+        						</div>
+        						
+        					</div>
+<!--         					{% if member != logged_in_user %}
+        					<div class="d-flex justify-content-end align-items-center">  
+        						<div>
+        							<button class="btn btn-sm btn-primary">Send Message</button>  
+        						</div> 
+        					 	 						
+        					</div>
+        					{% endif %}   -->      					
+        				</div>
+        				
+        			</div>
+        			<div class = "card-body profile_body" id="profile_body-{{member.id}}">
+        				{{member.profile.contact_number}}
+        			</div>        			
+        		</div>
+
+        	</li>        	
+        	{% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card w-100 m-1 room_chat_height_non_staff">
+ 	<div class="card-header bg_chat_header">
+		<div class="row ">
+			<div class="col">
+				<h5 class="m-0">{{room.name}} Chat</h5>
+			</div>
+			<div class="col d-flex justify-content-end">
+				<div class="people_count" type="button" data-bs-toggle="modal" data-bs-target="#peopleModal">
+					<div class="align-items-center justify-content-center">
+						<i class="fas fa-user person_icon"></i>
+					</div>
+					<div id="id_connected_users">
+						3
+					</div>					
+				</div>				
+			</div>			
+		</div>
+	</div>
+	<div class="card-body room_chat_card">
+
+		<div class="d-flex flex-row justify-content-center" id="id_chatroom_loading_spinner_container">
+			<div class="spinner-border text-primary"  id="id_chatroom_loading_spinner" role="status"  style="display: none; ">
+				<span class="sr-only">Loading...</span>
+			</div>
+		</div>
+		<div class="d-flex room_chat_log" id="id_chat_log">
+<!-- 			{% for msg in messages %}
+			<div class="message_container">
+				<div class="top_div">
+					<div class="name">
+						{{msg.user}} 
+					</div>
+					<div class="time">
+						@ {{msg.timestamp}}
+					</div>
+				</div>
+				<div class="message_div">
+					<p class="msg_p">
+					{{msg.content}}
+					</p>
+				</div>
+				
+			</div>
+			{% endfor %}		 -->		
+		</div>
+			
+			
+		
+	</div>
+	<div class="card-footer">
+		<div class="chat_input">
+			<input id="id_chat_message_input" type="text" class="chat_input_message">
+			<input id="id_chat_message_submit" type="button" value="Send" class="send_button mt-2">
+		</div>
+	</div> 
+	
+</div>
+

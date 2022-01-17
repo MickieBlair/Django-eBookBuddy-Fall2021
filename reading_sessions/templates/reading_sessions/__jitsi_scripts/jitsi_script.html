@@ -1,0 +1,97 @@
+<!-- <script src='https://reading.sessions-ebookbuddy.org/external_api.js'></script> -->
+<script src='https://semester.sessions-ebookbuddy.org/external_api.js'></script>
+
+<script>
+
+console.log("JITSI_ROOM {{room.name}}")
+
+// const domain = "reading.sessions-ebookbuddy.org";
+const domain = "semester.sessions-ebookbuddy.org";
+
+
+// const participants_list = document.getElementById('participants_list')
+const token = JSON.parse(document.getElementById('token').textContent);
+// console.log("Token", token)
+
+// buttons =[ 'microphone', 'camera', 'closedcaptions', 'desktop', 'embedmeeting', 'fullscreen', 'fodeviceselection', 'profile', 'recording', 'livestreaming', 'etherpad', 'sharedvideo', 'shareaudio', 'settings', 'raisehand', 'videoquality', 'filmstrip', 'invite', 'feedback', 'stats', 'shortcuts','tileview', 'select-background', 'download', 'help', 'mute-everyone', 'mute-video-everyone', 'security', 'localrecording']
+
+// localRecording: {
+//              enabled: true,
+//          },
+
+let buttons = ""
+let localRecoding_enabled = false;
+let fileRecordingsServiceEnabled = false;
+let fileRecordingsEnabled =false;
+let startAudioMuted = false;
+let startVideoMuted =  false;
+
+if(user_role == "Staff"){
+  localRecoding_enabled = true;
+  fileRecordingsServiceEnabled = true;
+  fileRecordingsEnabled: true;
+
+  buttons = ['microphone', 'camera', 'closedcaptions', 'desktop', 'fodeviceselection', 'raisehand','videoquality', 'filmstrip', 'invite', 'stats', 'tileview',  'mute-everyone', 'mute-video-everyone', 'chat'];
+} else{
+  buttons =[ 'microphone', 'camera', 'fodeviceselection', 'raisehand', 'videoquality', 'filmstrip', 'tileview', 'desktop', 'chat'];
+}
+
+if("{{user.username}}" == "Buddy_Admin" || "{{user.username}}" == "Mickie" || "{{user.username}}" == "Adolfo"){
+  console.log("\n\nStart Muted/Video Off");
+  startAudioMuted = true;
+  startVideoMuted =  true;
+} else{
+  ("\n\nStart On/On");
+  startAudioMuted = false;
+  startVideoMuted =  false;
+}
+//  
+//console.log("USER Name", username)
+//console.log("USER ROLE", startAudioMuted, startVideoMuted)   
+ 
+var options = {
+  roomName: "{{room.name}}",
+  jwt: token,
+  width: "100%",
+  height: "100%",
+  parentNode: document.querySelector('#room_video'),
+  configOverwrite: {
+        toolbarButtons: buttons,
+        localRecording: {
+             enabled: localRecoding_enabled,
+         },
+         fileRecordingsServiceEnabled: fileRecordingsServiceEnabled,
+         fileRecordingsEnabled: fileRecordingsEnabled,
+         startWithAudioMuted: startAudioMuted,
+         startWithVideoMuted: startVideoMuted,
+  },
+  interfaceConfigOverwrite: {
+    filmStripOnly: true
+  }
+}
+
+//console.log("USER ROLE", user_role, options)
+console.error("Options", options)
+var api = new JitsiMeetExternalAPI(domain, options);
+
+
+
+
+// api.addEventListener('onConferenceFailed', function(event) {
+//   console.error("\n\n\nCONFERENCE onConferenceTerminated", event)
+//             // // when host has joined the video conference 
+//             // if (event.role == 'moderator') {
+//             //     api.executeCommand('password', pass);
+//             // }
+//           })
+
+// api.addEventListener('onConnectionError', function(event) {
+//   console.error("\n\n\nCONFERENCE onConferenceTerminated", event)
+//             // // when host has joined the video conference 
+//             // if (event.role == 'moderator') {
+//             //     api.executeCommand('password', pass);
+//             // }
+//           })
+
+
+</script>

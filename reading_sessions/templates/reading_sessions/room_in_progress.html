@@ -1,0 +1,43 @@
+{% extends 'reading_sessions/reading_session_base.html' %}
+
+{% load static %}
+
+{% block content %}
+{% include 'reading_sessions/base_snippets/sounds.html' %}
+
+
+{% if user_role == "Staff" %}
+	{% block staff %}
+	{% include 'reading_sessions/staff_content/staff_content.html' %}
+	{% endblock staff %}
+{% else %}
+	{% block other%}
+	{% include 'reading_sessions/non_staff_content/non_staff_content.html' %}
+	{% endblock other%}
+{% endif %} 
+
+{% block json_constants %}
+
+	{% include 'reading_sessions/room_script_constants.html' %}
+
+{% endblock json_constants %}
+
+{% if load_jitsi_script %}
+
+{% include 'reading_sessions/__jitsi_scripts/jitsi_script.html' %}
+{% include 'jitsi_data/consumer_jitsi_script.html' %}
+
+{% endif %}
+
+
+
+{% block websocket %}
+
+	{% include 'websockets/connect_websockets.html' %}
+
+{% endblock websocket %}
+
+<!-- include 'reading_sessions/ajax_functions/ajax_drops.html' %} -->
+<!-- include 'reading_sessions/ajax_functions/ajax_help_requests.html' %} -->
+
+{% endblock content %}

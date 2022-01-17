@@ -1,0 +1,121 @@
+<script type="text/javascript">
+	let check_connections_interval = null
+	// check_connections_interval = setInterval(check_all_connections, 30000)
+	let this_count = 0
+	let online = "Initial"
+	const max_tries = 5
+     let current_tries = 0
+
+	function handleConnectionChange(event){
+	    if(event.type == "offline"){
+	        console.error("You lost connection.");
+	        online = "You lost connection."
+	    }
+	    if(event.type == "online"){
+	        console.error("You are now back online.");
+	        online = "You are now back online."
+	    }
+	    
+	    console.error(new Date(event.timeStamp));
+	}
+	
+	window.addEventListener('online', handleConnectionChange);
+	window.addEventListener('offline', handleConnectionChange);
+
+	function check_all_connections(){
+		var navigator_connected = navigator.onLine;
+		var all_ws_connected = false;
+
+		let status_check = status_socket_private.readyState;
+		// console.log("\n\n\nStatus_check", status_check)
+
+		let match_check = match_socket_private.readyState
+		// console.log("Match check", match_check)
+
+		let staff_check = "None"
+
+		if (user_role == "Staff"){
+			staff_check = staff_chat_socket.readyState
+			// console.log("Staff check", staff_check)
+
+			if(match_check==1 && status_check==1 && staff_check==1){
+				all_ws_connected = true
+				clearInterval(check_connections_interval)
+			}else{
+				all_ws_connected = false;
+			}
+		} else{
+			if(match_check==1 && status_check==1){
+				all_ws_connected = true
+				clearInterval(check_connections_interval)
+			}else{
+				all_ws_connected = false;
+			}
+
+		}
+
+		
+
+		this_count++
+
+		console.log("this_count", this_count)
+		console.log("online", online)
+		console.log("navigator_connected", navigator_connected)
+		console.log("all_ws_connected", all_ws_connected)
+
+		payload = {
+            "csrfmiddlewaretoken": "{{ csrf_token }}",
+            "user_id": user_id,
+            "status_check": status_check,
+            "match_check": match_check,
+            "staff_check": staff_check,
+
+          }
+
+        $.ajax({
+        type: 'POST',
+        dataType: "json",
+        url: "{%url 'reading_sessions:ajax_connection_status' %}", // production
+        data: payload,
+        timeout: 5000,
+        success: function (response) {
+        	console.log("ajax_connection_status Response", response);
+        	if(all_ws_connected){
+        		current_tries = 0
+        	} else{
+        		if(current_tries < max_tries){
+        			if(status_check != 1){
+        				connect_status_socket()	
+        			}
+
+        			if(match_check!=1){
+        				connect_ws()	
+        			}
+        			if(user_role =="Staff"){
+        				if(staff_check!=1){
+        					staff_chat_connect_ws()
+        				}
+        				
+        			}
+
+        			current_tries++
+        		}else{
+        			console.log("Max TRIES reached")
+        			post_ajax_drop(user_id, room_id)
+        			
+        		}
+        	}
+
+        		console.log("Current Tries", current_tries)
+        
+             },
+             error: function (response) {
+             console.log(response)
+             },
+      });
+	}
+
+
+	
+	
+</script>

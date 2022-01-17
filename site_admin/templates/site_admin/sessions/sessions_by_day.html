@@ -1,0 +1,226 @@
+{% extends 'site_admin/admin_base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="mt-1">
+{% include 'site_admin/snippets/buttons.html' %}
+{% include 'site_admin/snippets/django_messages_snippet.html' %}
+</div>
+
+<div class="">
+  <h2 class="pt-2 border-bottom">{{semester}} - Days With Sessions</h2>
+</div>
+
+<div class="row border-bottom">
+  <div class="col">
+    <div class="text-center">
+      <div class="">
+        <h5 class="pt-0">Total Days:</h5>
+      </div>
+      <div class="">
+        <h6 class="pt-0">{{count}}</h6>
+      </div>
+    </div>    
+  </div>
+  <div class="col">
+    <div class="text-center">
+      <div class="">
+        <h5 class="pt-0">Total Sessions:</h5>
+      </div>
+      <div class="">
+        <h6 class="pt-0">{{semester.active_sessions_in_semester.count}}</h6>
+      </div>
+    </div>    
+  </div>
+</div>
+
+
+<div class="table-responsive pt-1">
+  <table class="table table-striped table-sm align-middle">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Date</th>
+        <th>Week</th>
+        <th>Sessions</th>
+        <th class="text-center">
+          <div class="d-inline-flex">
+             <div><a class="bg-dark text-white px-1" href="{% url 'site_admin:sessions_by_day' semester.id '-all_complete' %}"><i class="fas fa-sort-up"></i></a></div>
+          <div>
+            <div>All</div><div>Complete</div> 
+          </div>
+           <div>
+             <a class="bg-dark text-white px-1" href="{% url 'site_admin:sessions_by_day' semester.id 'all_complete' %}"><i class="fas fa-sort-down"></i></a>
+           </div>
+          </div>
+         
+          
+        </th>  
+        <th class="text-center"><div>Total Day</div> <div>Scheduled Matches</div></th>
+        <th class="text-center"><div>Total Day</div> <div>Temporary Matches</div></th>
+        <th class="text-center"><div>Total Matches</div></th>
+        <th class="text-center"><div>Total Complete </div> <div>(Sch and Temp)</div></th>
+        
+        <th class="text-center"><div>Total Day</div> <div>Successful Scheduled</div></th>
+           
+       <!-- <th>Report</th>  -->
+             
+     <!--     <th class="text-center">Scheduled Matches</th>
+        <th class="text-center">Session Attendance</th>
+        <th class="text-center">Successful Percent</th>
+        <th class="text-center">Last Updated</th> -->
+
+      </tr>
+    </thead>
+    <tbody>
+    	{% for day in days_in_semester %}
+      <tr id ="day-{{day.id}}">
+        <td>
+          {{day.id}}       
+        </td>
+
+        <td>
+          {{day.date}}       
+        </td>
+        <td>
+          {{day.week}}       
+        </td>
+        <td>
+          {% for session in day.day_sessions.all %}
+          <div>
+            {{session.day_time}}
+          </div>            
+          {% endfor %}
+        </td>
+        <td class="text-center">
+          <div>
+            <div class="d-flex justify-content-center align-items-center">
+              {% if day.all_complete %}                   
+                <i class="fas fa-check  match_check_green"></i>
+              {% else %}
+                <i class="fas fa-times match_times_red"></i>
+              {% endif %}
+           </div> 
+          </div>
+          <div class="pt-3">
+             
+           {% if user.is_superuser %}
+        
+          <div >
+              <a class="btn btn-primary btn-sm"href="{% url 'site_admin:staff_mark_day_complete' day.id %}">Mark As Complete</a>
+            </div>
+        
+        {% endif %}  
+          </div>
+         
+        
+        </td>
+        <td class="text-center">
+           {{day.active_scheduled_matches_in_day}}
+          <!--{{day.total_active_scheduled}} -->
+        </td>
+        <td class="text-center">
+          <!-- {{day.temporary_matches_in_day}} -->
+          {{day.total_temporary}}
+        </td>
+        <td class="text-center">
+          <!-- {{day.total_matches_day}} -->
+          {{day.total_matches}}
+        </td>
+        <td class="text-center">
+          <!-- {{day.total_complete_reading}} -->
+          {{day.total_complete_reading_count}}
+        </td>
+        <td class="text-center">
+          <div>
+            <!-- {{day.total_complete_scheduled_matches_func}} -->
+            {{day.total_complete_scheduled_matches}}
+          </div>
+          <div ><h3 class="ps-3">{% if day.percent_successful_matches_str == 'Not Calculated' %}N/A
+          {% else %}{{day.percent_successful_matches_str}}{% endif %}</h3></div>
+
+        </td>
+
+        <!-- <td>
+          Report
+        </td> -->
+           
+
+       <!--  <td>
+          {{session.day_time.time_start}} - {{session.day_time.time_end}}
+        </td>
+
+        <td class="text-center">
+          <div class="d-flex justify-content-center align-items-center">
+
+              {% if session.session_complete %}                   
+                <i class="fas fa-check  match_check_green"></i>
+              {% else %}
+                <i class="fas fa-times match_times_red"></i>
+              {% endif %}
+           </div> 
+          {% if user.is_superuser %} -->
+<!--                <div class="d-flex justify-content-center align-items-center">
+            <input type="checkbox" class="checkbox mark_session_complete" name="session_complete" 
+                id="mark_session_complete-{{session.id}}" value="{{session.id}}"
+                onclick="get_url('url 'site_admin:mark_session_complete' %}')" {% if session.session_complete %} checked {% endif %} > 
+            </div>    -->           
+         <!--  {% endif %}
+        </td>
+        <td class="text-center">
+              <div> 
+                  <text class="fw-bold"> Active Total: </text>{{session.active_scheduled_matches_in_session.count}}
+                </div>
+                <div>
+                  <a href=" url 'site_admin:active_session_scheduled_matches' session.id %}">View Matches</a>
+                </div>            
+      </td>
+      <td class="text-center">
+        {% if session.session_complete %}
+            <div> 
+                <text class="fw-bold"> Successful Total: </text>{{session.number_successful_matches}}
+            </div>
+            <div>
+                <a href="url 'site_admin:attendance_by_session' session.id %}">View Attendance</a>
+            </div>
+        {% else %}
+
+        {% if user.is_superuser %}
+
+            {% if session.session_csv %} -->
+            <!-- <div>CSV Exist</div> -->
+            <!-- {% else %} -->
+            <!-- <div>Create CSV</div> -->
+           <!--  {% endif %}
+        {% endif %}
+        <div>
+          <text class=""> Available After Day's</text>
+        </div>
+        <div>
+          <text class=""> Sessions Are Complete </text>
+        </div>
+        {% endif %}     
+        
+      </td>
+      <td class="text-center">
+        {% if session.session_complete %}
+        <h4 class="fw-bold">{{session.percent_successful_matches}}</h4>
+        {% else %}
+          <h5 class="fw-bold">N/A</h5>
+        {% endif %}
+
+      </td>
+        <td class="text-center"><text id="session_last_updated-{{session.id}}">{{session.last_updated}}</text></td> -->
+
+      </tr>
+      {% endfor %}
+      
+
+    </tbody>
+  </table>
+</div>
+
+{% endblock content %}
+

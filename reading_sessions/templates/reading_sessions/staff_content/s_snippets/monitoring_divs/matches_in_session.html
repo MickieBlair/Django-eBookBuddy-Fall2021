@@ -1,0 +1,302 @@
+<div class="h-100 outer_session_div" id="outer_session_div_{{session.day_time.session_slot}}">
+<div class="session_slot_attendance h-100" id="attendance_for_{{session.day_time.session_slot}}">
+  <div class="">
+    <h5 class="border-bottom">{{session}} - {{session.day_time.time_start}} Matches</h5>
+  </div>
+  <div class="row m-0 p-0">
+    <div class="col d-flex justify-content-center align-items-end m-0 p-0">      
+        <div>
+          <h6 class="pt-0">Scheduled: <span id="scheduled_count-{{session.id}}">{{session.active_scheduled_matches_in_session.count}}</span></h6>
+        </div>
+    </div> 
+    <div class="col d-flex justify-content-center align-items-end m-0 p-0">      
+        <div>
+          <h6 class="pt-0">Temporary: <span id="temp_match_count-{{session.id}}">0</span></h6>
+        </div>
+    </div>
+
+    <div class="col d-flex justify-content-center align-items-end m-0 p-0">      
+        <div>
+          <h6 class="pt-0">Matches Reading: <span id="total_complete-{{session.id}}">0</span></h6>
+        </div>
+    </div>
+  </div>
+
+  <div class="h-100 session_tab_content" id="session_tab_content_{{session.day_time.session_slot}}">
+
+    <ul class="nav nav-tabs me-1" id="matchTab_{{session.day_time.session_slot}}" role="tablist">
+
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active nav_tab_button_border" id="all-match-tab_{{session.day_time.session_slot}}" data-bs-toggle="tab" data-bs-target="#all-matches_{{session.day_time.session_slot}}" type="button" role="tab" aria-controls="all-matches_{{session.day_time.session_slot}}" aria-selected="true" value="all-matches">All</button>
+      </li>
+
+<!--       <li class="nav-item" role="presentation">
+        <button class="nav-link  nav_tab_button_border" id="incomplete-match-tab_{{session.day_time.session_slot}}" data-bs-toggle="tab" data-bs-target="#incomplete-matches_{{session.day_time.session_slot}}" type="button" role="tab" aria-controls="incomplete-matches_{{session.day_time.session_slot}}" aria-selected="true" value="incomplete-matches">Incomplete</button>
+      </li> -->
+<!--       <li class="nav-item" role="presentation">
+        <button class="nav-link nav_tab_button_border" id="complete-match-tab_{{session.day_time.session_slot}}" data-bs-toggle="tab" data-bs-target="#complete-matches_{{session.day_time.session_slot}}" type="button" role="tab" aria-controls="complete-matches_{{session.day_time.session_slot}}" aria-selected="true" value="complete-matches" >Complete</button>
+      </li> -->
+
+      
+    </ul>
+
+    <div class="tab-content h-100" id="matchTabContent_{{session.day_time.session_slot}}">
+      <div class="tab-pane show active h-100" id="all-matches_{{session.day_time.session_slot}}" role="tabpanel" aria-labelledby="all-match-tab_{{session.day_time.session_slot}}" >
+
+        {% include 'reading_sessions/staff_content/s_snippets/monitoring_divs/session_match_table.html' with session=session type_match='all'%}
+
+      </div>
+<!--       <div class="tab-pane  h-100" id="incomplete-matches_{{session.day_time.session_slot}}" role="tabpanel" aria-labelledby="incomplete-match-tab_{{session.day_time.session_slot}}" >
+
+        {include 'reading_sessions/staff_content/s_snippets/monitoring_divs/session_match_table.html' with session=session type_match='incomplete' }
+        
+    </div> -->
+
+<!--       <div class="tab-pane show h-100" id="complete-matches_{{session.day_time.session_slot}}" role="tabpanel" aria-labelledby="complete-match-tab_{{session.day_time.session_slot}}" >
+
+        {include 'reading_sessions/staff_content/s_snippets/monitoring_divs/session_match_table.html' with session=session type_match='complete'}
+
+      </div> -->
+
+      
+
+    </div>
+  </div>
+  
+
+
+
+</div>
+
+</div>
+
+
+
+
+
+<!-- <div class="attendance_records" id="attendance_for_{{session.day_time.session_slot}}">
+  Records
+</div> -->
+<!-- 	<div class="">
+	  <h4 class="pt-2 border-bottom">{{session}}: Scheduled Matches</h4>
+	</div>
+
+
+<div class="row">
+  <div class="col">      
+      <div>
+        <h5 class="pt-0">Total Matches - {{session.active_scheduled_matches_in_session.count}}</h5>
+      </div>
+  </div>
+
+  <div class="col d-flex justify-content-center align-items-end">      
+      <div>
+        <h5 class="pt-0">Unmatched Students - <span class="pending_student_count"></span> </h5>
+      </div>
+  </div>
+
+  <div class="col d-flex justify-content-end align-items-end">      
+      <div>
+        <h5 class="pt-0">Available Volunteers - <span class="available_volunteer_count"></span></h5>
+      </div>
+  </div> -->
+
+  <!-- <div class="col d-flex justify-content-end align-items-end"> -->
+    <!-- <h5 class="pt-0 fw-bold">Successful Percent - {{session.percent_successful_matches}}</h5> -->
+    <!-- </div>  -->
+<!-- </div>
+
+    
+{% if session.active_scheduled_matches_in_session.count != 0 %} 
+      <div class="table-responsive pt-1">
+        <table class="table table-striped table-sm">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Volunteer</th>
+              <th class="text-center">Both Online</th>
+              <th class="text-center">Status</th>
+            </tr>
+          </thead>
+          <tbody id="scheduled_match_table_body">
+
+          	{% for record in session.active_attendance_records %}
+           
+            <tr class="scheduled_match_row">
+              <td>
+              	<div>
+
+                  <i class="fas {% if record.scheduled_match_status.student_online %}fa-check match_check_green{% else %} fa-times match_times_red {% endif %}" id="user_{{record.match.student.id}}">
+                    
+                  </i><text class="ps-2">{{record.match.student.full_name}}</text></div>
+                <div >
+                  <a id="user_location_{{record.match.student.id}}" href=""></a>
+                </div>                                
+              </td> 
+              <td>
+              	<div>
+                   <i class="fas {% if record.scheduled_match_status.volunteer_online %}fa-check match_check_green{% else %} fa-times match_times_red {% endif %}" id="user_{{record.match.volunteer.id}}">
+                   </i>
+
+                  <text class="ps-2">{{record.match.volunteer.full_name}}</text></div>
+                <div >
+
+                  <a id="user_location_{{record.match.volunteer.id}}" {% if record.match.volunteer.user_location.in_room %}
+                     href="{{record.match.volunteer.user_location.room.room_url}}"
+                    {% else %}
+                    href=""
+                    {% endif %}
+                    >
+                    {% if record.match.volunteer.user_location.in_room %}
+                      {{record.match.volunteer.user_location.room.name}}
+                    {% endif %}
+                  </a>
+                </div>
+              </td>
+              <td>
+                <div class="text-center">
+
+                  <i class="fas {% if record.scheduled_match_status.both_online %}fa-check match_check_green{% else %} fa-times match_times_red {% endif %}" id="match_success_{{record.id}}">
+                   </i>
+                </div>                              
+              </td>
+
+              <td>
+                <div class="text-center">
+                  {% if record.member_reassigned %}
+                    {% for note in record.get_reassigned_status_notes %}
+                    <div>
+                      {{note.content}}
+                    </div>
+ -->
+                 <!--  <div id="match_status_student_{{record.id}}">
+                    Student Status
+                  </div>
+                  <div id="match_status_volunteer_{{record.id}}">
+                    Volunteer Status
+                  </div> -->
+                  <!--   {% endfor %}
+                  {% endif %} -->
+                  <!-- <div>
+                    Student Reassigned
+                  </div>
+                  <div>
+                    Volunteer Reassigned
+                  </div> -->
+<!--                 </div>                              
+              </td>
+                                       
+            </tr>
+            {% endfor %}
+
+          </tbody>
+        </table>
+      </div>
+
+  {% else %}
+  <div class="border text-center m-3 bg_custom_light_gray">
+    <h4 class="m-0 p-3"> No Matches in Session</h4>    
+  </div>
+  {% endif %}
+</div>
+
+
+<div class= "temp_attendance_records" id="temp_attendance_for_{{session.day_time.session_slot}}">
+  <div class="">
+    <h4 class="pt-2 border-bottom">Temporary Matches - {{session.day_time.session_slot}}</h4>
+  </div>
+
+  <div class="row">
+    <div class="col">      
+        <div>
+          <h5 class="pt-0">Total Temporary Matches - <span id="temp_match_count"></span>0</h5>
+        </div>
+    </div>
+  </div>
+
+        <div class="table-responsive pt-1">
+        <table class="table table-striped table-sm">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Volunteer</th>
+              <th class="text-center">Both Online</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="temp_match_table_body">
+
+            {% for record in session.active_attendance_records %}
+           
+            <tr class="temp_match_row">
+              <td>
+                <div >
+
+                  <i class="fas {% if record.scheduled_match_status.student_online %}fa-check match_check_green{% else %} fa-times match_times_red {% endif %}" id="user_{{record.match.student.id}}">
+                    
+                  </i><text class="ps-2">{{record.match.student.full_name}}</text></div>
+                <div class="text-center">
+                  <a id="user_location_{{record.match.student.id}}" href=""></a>
+                </div>                                
+              </td> 
+              <td>
+                <div >
+                   <i class="fas {% if record.scheduled_match_status.volunteer_online %}fa-check match_check_green{% else %} fa-times match_times_red {% endif %}" id="user_{{record.match.volunteer.id}}">
+                   </i>
+
+                  <text class="ps-2">{{record.match.volunteer.full_name}}</text></div>
+                <div >
+
+                  <a id="user_location_{{record.match.volunteer.id}}" {% if record.match.volunteer.user_location.in_room %}
+                     href="{{record.match.volunteer.user_location.room.room_url}}"
+                    {% else %}
+                    href=""
+                    {% endif %}
+                    >
+                    {% if record.match.volunteer.user_location.in_room %}
+                      {{record.match.volunteer.user_location.room.name}}
+                    {% endif %}
+                  </a>
+                </div>
+              </td>
+              <td>
+                <div class="text-center">
+
+                  <i class="fas {% if record.scheduled_match_status.both_online %}fa-check match_check_green{% else %} fa-times match_times_red {% endif %}" id="match_success_{{record.id}}">
+                   </i>
+                </div>                              
+              </td>
+
+              <td>
+                <div class="text-center">
+                  {% if record.member_reassigned %}
+                    {% for note in record.get_reassigned_status_notes %}
+                    <div>
+                      {{note.content}}
+                    </div> -->
+
+                 <!--  <div id="match_status_student_{{record.id}}">
+                    Student Status
+                  </div>
+                  <div id="match_status_volunteer_{{record.id}}">
+                    Volunteer Status
+                  </div> -->
+                   <!--  {% endfor %}
+                  {% endif %} -->
+                  <!-- <div>
+                    Student Reassigned
+                  </div>
+                  <div>
+                    Volunteer Reassigned
+                  </div> -->
+<!--                 </div>                              
+              </td>
+                                       
+            </tr>
+            {% endfor %}
+
+          </tbody>
+        </table>
+      </div>
+
+</div> -->

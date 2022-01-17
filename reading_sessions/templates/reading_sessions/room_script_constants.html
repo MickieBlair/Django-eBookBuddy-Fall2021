@@ -1,0 +1,15 @@
+<script type="text/javascript">
+	const user_id = JSON.parse(document.getElementById('user_id').textContent);
+	const user_role = JSON.parse(document.getElementById('user_role').textContent);
+	const room_name = JSON.parse(document.getElementById('room_name').textContent);
+	const room_id = JSON.parse(document.getElementById('room_id').textContent);
+	const room_slug = JSON.parse(document.getElementById('room_slug').textContent);
+
+	console.log("user_id", user_id)
+	console.log("user_role", user_role)
+	console.log("room_name", room_name)
+	console.log("room_id", room_id)
+	console.log("room_slug", room_slug)
+
+	const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; 
+</script>

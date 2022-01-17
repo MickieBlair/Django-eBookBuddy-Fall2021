@@ -1,0 +1,20 @@
+<div class="bottom_bar_non_staff" id="bottom_bar_non_staff">
+
+	{% include 'reading_sessions/button_snippets/_button_scripts.html' %}
+
+	<!--{% include 'reading_sessions/button_snippets/non_staff_room_chat.html' %}-->
+
+	{% include 'reading_sessions/button_snippets/non_staff_private_messages.html' %}
+
+	{% if user_role == "Volunteer" %}
+		{% include 'reading_sessions/button_snippets/non_staff_student_profile.html' %}
+	{% endif %}
+	
+	{% include 'reading_sessions/button_snippets/help_request.html' %}
+
+	{% include 'reading_sessions/button_snippets/leave_room.html' %}
+
+	{% include 'reading_sessions/button_snippets/full_screen.html' %}
+
+	{% include 'reading_sessions/button_snippets/exit_full_screen.html' %}
+</div>

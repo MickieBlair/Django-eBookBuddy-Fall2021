@@ -1,0 +1,443 @@
+{% block room_chat_script %}
+
+
+<script type="text/javascript">
+
+const todays_jitsi_chat_room_id = JSON.parse(document.getElementById('todays_jitsi_chat_room_id').textContent);
+
+console.log("todays_jitsi_chat_room_id", todays_jitsi_chat_room_id)
+	
+	// Correctly decide between ws:// and wss://
+	// var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+	if (ws_scheme == "ws"){
+		var ws_path = ws_scheme + '://' + window.location.host + "/jitsi_chat/" + todays_jitsi_chat_room_id + "/"; // development
+	} else if (ws_scheme == "wss"){
+		var ws_path = ws_scheme + '://' + window.location.host + ":8001/jitsi_chat/" +todays_jitsi_chat_room_id + "/"; // production
+	} else {
+		// console.log("Else ws_scheme", ws_scheme)
+	}
+
+let room_chat_socket = ""
+
+	function roomchat_connect_ws(){
+		console.log("\n\n\n****ROOM CHAT CONNECTING")
+			room_chat_socket = new WebSocket(ws_path);
+
+	// Handle incoming messages
+	room_chat_socket.onmessage = function(message) {
+		// console.log("Got chat websocket message " + message.data);
+		var jitsi_data = JSON.parse(message.data);
+		// console.log("\n\n\nROOM TOP",jitsi_data)
+
+		// display the progress bar?
+		displayChatroomLoadingSpinner(jitsi_data.display_progress_bar)
+
+		// Handle errors (ClientError)
+		if (jitsi_data.error) {
+			console.error(jitsi_data.error + ": " + jitsi_data.message)
+			showClientErrorModal(jitsi_data.message)
+			return;
+		}
+		// Handle joining (Client perspective)
+		if (jitsi_data.join) {
+			console.log("Joining public room " + jitsi_data.join);
+			getRoomChatMessages(room_chat_socket)
+		}
+
+		// Handle getting a message
+		if (jitsi_data.msg_type == 0) {
+
+			if (jitsi_data.meeting_room_id == {{room.id}}){
+				// console.log("Yes IN THE SAME ROOM as Sent")
+				appendChatMessage(jitsi_data, true, true)
+
+				let all_unread_counts = JSON.parse(jitsi_data.room_msg_counts)
+
+				// console.log("New Message", all_unread_counts,)
+				// console.log("!!!!!!!!!!!!!!!!1ROOM DATA", jitsi_data)
+				let data_counts = all_unread_counts.room_unread_counts
+				// console.log("!!!!!!ROOM data_counts", data_counts)
+				if(data_counts){
+					let index = data_counts.findIndex(function (user) {
+						console.log("**********USER", user)
+						return user.userID === user_id;
+					});
+						// console.log("Index", index)
+					let user_new_count = data_counts[index].unread_count;
+					// console.log("user_new_count line 155", user_new_count)
+					adjust_user_unread_number(user_new_count)
+
+				} else{
+					console.error("No Data Counts Room Chat Consumer HTML")
+				}
+				
+				
+
+			} else {
+
+				// console.log("DIFFERENT ROOMS!!!!!!!!!!")
+			}
+			
+
+		}
+		// Handle getting the connected_user count
+		if (jitsi_data.msg_type == 1) {
+			// console.log("Type 1", jitsi_data)
+			let users_in_room = JSON.parse(jitsi_data['users_in_room']).chat_participants
+			setConnectedUsersCount(jitsi_data['jitsi_room_users'], users_in_room)
+		}
+		// new payload of messages coming in from backend
+		if(jitsi_data.messages_payload){
+			// console.log("\n\n\nIncoming")
+			// console.log("\n\n\njitsi_data.messages", jitsi_data.messages)
+			// console.log("\n\n\njitsi_data.new_page_number", jitsi_data.new_page_number)
+			// console.log("\n\n\njitsi_data.unread_counts", jitsi_data.unread_counts)
+			handleMessagesPayload(jitsi_data.messages, jitsi_data.new_page_number,  jitsi_data.unread_counts)
+		}
+
+
+
+	};
+
+
+			room_chat_socket.addEventListener("open", function(e){
+	console.log("Public Public ChatSocket addEventListener OPEN", room_chat_socket)
+		// join chat room
+		if("{{request.user.is_authenticated}}"){
+			room_chat_socket.send(JSON.stringify({
+				"command": "join",
+				"room": todays_jitsi_chat_room_id,
+				"jitsi_room": {{room.id}},
+			}));
+		}
+	})
+
+	room_chat_socket.onclose = function(e) {
+		console.error('Public ChatSocket closed.');
+		room_chat_socket = ""
+		// if(current_count <= max_count){
+  //       	roomchat_connect_ws()
+  //       } else {
+  //       	console.error("***ROOM CHAT MAX COUNT REACHED**");
+  //       }
+		
+	};
+
+	room_chat_socket.onOpen = function(e){
+		console.log("Public ChatSocket onOpen", e , room_chat_socket)
+		if (user_role == "Staff"){
+			// console.log("\n\n\n****STAFF MEMBER CONNECT TO STAFF CHAT")
+			
+		}
+	}
+
+	room_chat_socket.onerror = function(e){
+        console.log('Public ChatSocket error', e)
+    }
+
+    if (room_chat_socket.readyState == WebSocket.OPEN) {
+    	console.log("Public ChatSocket OPEN")
+    } else if (room_chat_socket.readyState == WebSocket.CONNECTING){
+        console.log("Public ChatSocket connecting..")
+    }
+
+
+
+
+
+	document.getElementById('id_chat_message_input').focus();
+	document.getElementById('id_chat_message_input').onkeyup = function(e) {
+		if (e.keyCode === 13 && e.shiftKey) {  // enter + return
+			// Handled automatically by textarea
+		}
+		else if(e.keyCode === 13 && !e.shiftKey){ // enter + !return
+			document.getElementById('id_chat_message_submit').click();
+		}
+	};
+
+    document.getElementById('id_chat_message_submit').onclick = function(e) {
+
+    console.log("clicking room chat send", room_chat_socket)
+		let thismessageInputDom = document.getElementById('id_chat_message_input');
+		let thismessage = thismessageInputDom.value;
+		room_chat_socket.send(JSON.stringify({
+			"command": "send",
+			"message": thismessage,
+			"room_id": todays_jitsi_chat_room_id,
+			"meeting_room": "{{room}}",
+			"meeting_room_id": "{{room.id}}"
+		}));
+		thismessageInputDom.value = '';
+	};
+
+	}
+
+roomchat_connect_ws()
+
+	function appendChatMessage(jitsi_data, maintainPosition, isNewMessage){
+		let message = jitsi_data['message']
+		let msg_id = jitsi_data['msg_id']
+		let uName = jitsi_data['username']
+		let user_id_chat = jitsi_data['user_id']
+		let timestamp = jitsi_data['natural_timestamp']
+		let date_time = jitsi_data['date_time']
+		let meeting_room = jitsi_data['meeting_room_name']
+		let meeting_room_id_msg =jitsi_data['meeting_room_id']
+		let  msg = message + '\n';
+		let  username = uName + ": "
+		createChatMessageElement(msg, msg_id, username, user_id_chat, timestamp, date_time, meeting_room, meeting_room_id_msg, maintainPosition, isNewMessage)
+
+	}
+
+	function handleMessagesPayload(messages, new_page_number, unread_counts){
+		// console.log("HANDLE ROOM", messages)
+		// console.log("HANDLE ROOM", new_page_number)
+		// console.log("HANDLE ROOM", unread_counts)
+		if(messages != null && messages != "undefined" && messages != "None"){
+			setPageNumber(new_page_number)
+			messages.forEach(function(message){
+				appendChatMessage(message, true, false)
+			})
+		}
+		else{
+			setPaginationExhausted() // no more messages
+		}
+
+		let room_all_unread_counts = JSON.parse(unread_counts)
+		// console.log("ROOM handleMessagesPayload", room_all_unread_counts, typeof(room_all_unread_counts))
+		let data_counts = room_all_unread_counts.room_unread_counts
+		// console.log("ROOM data_counts", data_counts)
+		if(data_counts){
+			let index = data_counts.findIndex(function (user) {
+				return user.userID === user_id;
+			});
+			// console.log("Index", index)
+			let user_new_count = data_counts[index].unread_count;
+			// console.log("user_new_count line 257", user_new_count)
+			adjust_user_unread_number(user_new_count)
+		}else{
+			console.error("No DATA Counts handleMessagesPayload")
+		}
+		
+
+	}
+
+	function setPageNumber(pageNumber){
+		document.getElementById("id_page_number").innerHTML = pageNumber
+	}
+
+	function setPaginationExhausted(){
+		setPageNumber("-1")
+	}
+
+	/*
+		Retrieve the chat room messages given the page number.
+	*/
+	function getRoomChatMessages(room_chat_socket){
+		var pageNumber = document.getElementById("id_page_number").innerHTML
+		if(pageNumber != "-1"){
+			setPageNumber("-1") // Do not allow any other queries while one is in progress
+			room_chat_socket.send(JSON.stringify({
+				"command": "get_room_chat_messages",
+				"room_id": todays_jitsi_chat_room_id,
+				"jitsi_room": {{room.id}},
+				"page_number": pageNumber,
+			}));
+		}
+	}
+
+	/*
+		Get the next page of chat messages when scrolls to bottom
+	*/
+	document.getElementById("id_chat_log").addEventListener("scroll", function(e){
+		var chatLog = document.getElementById("id_chat_log")
+		chatLog.addEventListener("scroll", function(e){
+			if ((Math.abs(chatLog.scrollTop) + 2) >= (chatLog.scrollHeight - chatLog.offsetHeight)) {
+				getRoomChatMessages()
+			}
+		});
+	})
+
+
+
+	function createChatMessageElement(message, msg_id, username, user_id_chat, timestamp, date_time,  meeting_room, meeting_room_id_msg, maintainPosition, isNewMessage){
+		var chatLog = document.getElementById("id_chat_log")
+
+		var newMessageDiv = document.createElement("div")
+		newMessageDiv.classList.add("message_container")
+		var top_div = document.createElement("div")
+		top_div.classList.add("top_div")
+		var message_div = document.createElement("div")
+		message_div.classList.add("message_div")
+		var msg_p = document.createElement("p")
+		msg_p.innerHTML = message
+		message_div.appendChild(msg_p)
+		var name = document.createElement("div")
+		name.classList.add("name")
+		name.innerHTML = username
+		var time = document.createElement("div")
+		time.classList.add("time")
+		time.innerHTML = timestamp
+		top_div.appendChild(name)
+		top_div.appendChild(time) 
+    newMessageDiv.appendChild(top_div)
+
+		let message_in_room = document.createElement('div');
+		message_in_room.classList.add('in_room');
+		message_in_room.innerHTML = "In: " + meeting_room
+		newMessageDiv.appendChild(message_in_room)
+		newMessageDiv.appendChild(message_div)
+
+		if(isNewMessage){
+			chatLog.insertBefore(newMessageDiv, chatLog.firstChild)
+		}
+		else{
+			chatLog.appendChild(newMessageDiv)
+		}
+		
+		if(!maintainPosition){
+			chatLog.scrollTop = chatLog.scrollHeight
+		}
+
+		// now that a default image is showing, load the actual image.
+		// preloadImage(profile_image, profile_image_id) // called from base_js.html
+	}
+
+	function adjust_user_unread_number(count){
+		// console.log("\n\n\n\n\nADJUST USER UNREAD NUMBER, room_chat_consumer.html", count)
+		
+
+		if(user_role == "Staff"){
+			// console.log("STAFF COUNT", count)
+			let room_chat_div = document.getElementById('room_chat_btn_show')	
+
+
+			if (room_chat_div.currentStyle) {
+			    var displayStyle = room_chat_div.currentStyle.display;
+			} else if (window.getComputedStyle) {
+			    var displayStyle = window.getComputedStyle(room_chat_div, null).getPropertyValue("display");
+			}
+			// console.log("displayStyle", displayStyle)
+
+			if(room_chat_div){
+				if(displayStyle == "none"){
+				let element = document.getElementById('new_room_chat_messages')					
+					if(element){
+					element.innerHTML = count;
+				}	
+					// console.log("Printing new element", element)
+				} else{
+					// console.log("In the ELSE")
+				}
+			}
+		} else{
+			// console.log("NON STAFF ADJUSTING", count)
+			// new_room_chat_messages
+			if (room_chat_div_non_staff.currentStyle) {
+			    var non_staff_displayStyle = room_chat_div_non_staff.currentStyle.display;
+			} else if (window.getComputedStyle) {
+			    var non_staff_displayStyle = window.getComputedStyle(room_chat_div_non_staff, null).getPropertyValue("display");
+			}
+
+
+			if(room_chat_div_non_staff){
+				if(non_staff_displayStyle == "none"){	
+				let element = document.getElementById('new_room_chat_messages')				
+					if(element)	{
+					element.innerHTML = count;
+				}	
+				}
+
+			}
+
+		}
+		
+	}
+
+	// function selectUser(user_id){
+	// 	// Weird work-around for passing arg to url
+	// 	var url = "url 'account:view' user_id=53252623623632623".replace("53252623623632623", user_id)
+	// 	var win = window.open(url, "_blank")
+	// 	win.focus()
+	// }
+
+	function showClientErrorModal(message){
+		document.getElementById("id_client_error_modal_body").innerHTML = message
+		document.getElementById("id_trigger_client_error_modal").click()
+	}
+
+	function displayChatroomLoadingSpinner(isDisplayed){
+		var spinner = document.getElementById("id_chatroom_loading_spinner")
+		if(isDisplayed){
+			spinner.style.display = "block"
+		}
+		else{
+			spinner.style.display = "none"
+		}
+	}
+
+	function setConnectedUsersCount(count, users_in_room){
+		// console.log("setConnectedUsersCount",count, users_in_room)
+		element = document.getElementById("id_connected_users")
+		element.innerHTML = count
+
+		// for(let item of users_in_room){
+		// 	console.log("User", item)
+		// }
+	}
+
+function ajax_room_reset(){
+	let url = "{% url 'reading_sessions:ajax_room_reset' %}"
+	// console.log(url);
+	    $.ajax({
+	  type: 'GET',
+	  url: url,
+	  data: {"user_id": user_id},
+	  success: function (response) {
+	    if(response["valid"]){
+	      // console.log(response) 
+	      adjust_room_count_button(response["unread_count"])               
+	    }
+	  },
+	  error: function (response) {
+	      console.log(response)
+	  }
+	})
+}
+
+  // new_room_chat_messages
+
+function adjust_room_count_button(count){
+    let new_room_chat_messages =document.getElementById('new_room_chat_messages');
+    new_room_chat_messages.innerHTML = count;
+  }
+</script>
+
+
+<!-- Client Error MODAL -->
+<button type="button" id="id_trigger_client_error_modal" class="d-none btn btn-primary" data-toggle="modal" data-target="#id_client_error_modal">
+</button>
+<div class="modal fade" id="id_client_error_modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Socket Client Error</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="id_client_error_modal_body">Something went wrong.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" id="id_client_error_modal_close_btn">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Client Error MODAL -->
+
+
+
+
+{% endblock room_chat_script %}

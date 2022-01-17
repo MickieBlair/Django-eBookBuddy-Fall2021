@@ -1,0 +1,209 @@
+{% extends 'site_admin/admin_base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="mt-1">
+{% include 'site_admin/snippets/buttons.html' %}
+{% include 'site_admin/snippets/django_messages_snippet.html' %}
+</div>
+
+<div class="row pt-3">
+  <div class="col px-5 mx-auto">
+    <div class="card mx-auto">
+      <div class="card-header custom_bg_blue">
+        <h3 class="w-100 text-center fw-bold">Match for {{semester}}</h3>
+      </div>
+      <div class="card-body card_background_match">
+        <form method="POST">
+        	{% csrf_token %}
+          <input type="hidden" name="semester" id="id_semester" value={{semester.id}}>
+        	<div class="row">
+            <div class="col">
+              <h4 class="text-center">Available Students - {{available_students.count}}</h4>
+              {% if available_students.count > 0 %}
+	              <div class="table-responsive pt-1">
+	              	<table class="table table-striped table-sm align-middle">
+	              		<thead>
+			            <tr>
+			              <th>Username</th>
+			              <th>Name</th>
+			              <th>Available</th>
+			              <th></th>		              
+			            </tr>
+			          </thead>
+			          <tbody>
+			          	{% for student in available_students %}
+				          	<tr class="m-0 p-0">
+				          		<td class="m-0 ps-1">{{student.username}}</td>
+				          		<td class="m-0 p-0"><text class="fw-bold">{{student.full_name}}</text> - {{student.student_profile.gender}}</td>
+				          		<td class="m-0 p-0">
+				          			{% if student.student_profile.available_day_time_slots.all.count > 0 %}
+				          				{% for item in student.student_profile.available_day_time_slots.all %}
+			                              <div>
+			                                {{item}}
+			                              </div>
+			                              {% endfor %}
+		                          	{% else %}
+		                             	 <div>No Information </div>
+		                          	{% endif %}
+				          		</td>
+				          		<td class=""><input type="radio" name="student" class="match_radio" value="{{student.id}}" onclick="clear_error()"></td>
+				          	</tr>
+			          	{% endfor %}
+			          </tbody>
+	              	</table>
+	              </div>
+	          {% else %}
+                <div>
+                  <h4 class="red text-center">No Available Students</h4>
+                </div>
+              {% endif %}
+
+            </div>
+            <div class="col">
+              <h4 class="text-center">Available Volunteers - {{available_volunteers.count}}</h4> 
+               {% if available_volunteers.count > 0 %}
+	              <div class="table-responsive pt-1">
+	              	<table class="table table-striped table-sm align-middle">
+	              		<thead>
+			            <tr>
+			              <th>Username</th>
+			              <th>Name</th>
+			              <th>Available</th>
+			              <th></th>		              
+			            </tr>
+			          </thead>
+			          <tbody>
+			          	{% for volunteer in available_volunteers %}
+				          	<tr class="m-0 p-0">
+				          		<td class="m-0 ps-1">{{volunteer.username}}</td>
+				          		<td class="m-0 p-0"><text class="fw-bold">{{volunteer.full_name}}</text> - {{volunteer.volunteer_profile.gender}}</td>
+				          		<td class="m-0 p-0">
+				          			{% if volunteer.volunteer_profile.available_day_time_slots.all.count > 0 %}
+				          				{% for item in volunteer.volunteer_profile.available_day_time_slots.all %}
+			                              <div>
+			                                {{item}}
+			                              </div>
+			                              {% endfor %}
+		                          	{% else %}
+		                             	 <div>No Information </div>
+		                          	{% endif %}
+				          		</td>
+				          		<td class=""><input type="radio" name="volunteer" class="match_radio" value="{{volunteer.id}}" onclick="clear_error()"></td>
+				          	</tr>
+			          	{% endfor %}
+			          </tbody>
+	              	</table>
+	              </div>
+	          {% else %}
+                <div>
+                  <h4 class="red text-center">No Available Volunteers</h4>
+                </div>
+              {% endif %}
+            </div>            
+          </div>
+
+          <div class="text-center border-top mt-3">
+            <h4 class="pt-2">Choose Sessions for Match</h4>
+          </div>
+
+           <div class="row pt-1 my-1 "> 
+                {% for day in days %}
+                <div class="col-lg-3 col-md-4 col-sm-6 mx-auto pt-3 pb-1 border background_white sessions_grid">
+                    <h5 class="text-center mb-0 pb-1 border-bottom">{{day}}</h5>
+                    <!-- d-grid justify-content-center -->
+                    <div class="mx-auto  pt-3 ">
+                    {% for slot in day_time_slots %}
+                        {% if slot.day == day %}
+                        <div class="">
+                            <input type="radio" class="roles_radio all_slots {{day}}_session" name="{{day}}_session" value="{{slot.id}}" onclick="select_scheduled_slots()" {% if slot in form.initial.scheduled_slots%} checked {% endif %}>
+                           <label class="ps-2"><span class="fw-bold">{{slot.session_slot}}:</span> {{slot.time_start}}-{{slot.time_end}} </label> 
+                        </div>                    
+                        {% endif %}                        
+                    {% endfor %}  
+                    </div>
+
+                    <div class="text-center d-grid align-content-end pt-2">
+                        <div class="clear_button mx-auto" id="{{day}}_clear" onclick="clear_choices(this)">Clear</div>                  
+                      </div>
+                </div>
+                {% endfor %}
+          </div>
+
+          <div class="d-none">
+            <div class="d-grid justify-content-center pt-3">
+              <h3 >Match Active:</h3> 
+              <div class="d-grid justify-content-center">
+                <input type="checkbox" class="checkbox" name="match_active" id="id_match_active" checked>
+              </div>
+            </div>
+          </div>
+
+          
+          <div class="d-none">
+            <select name="scheduled_slots" id="id_scheduled_slots" multiple>
+              {% for slot in day_time_slots %}
+                <option class="select_options" id="slot_{{slot.id}}" value="{{slot.id}}">{{slot}}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <script type="text/javascript">
+
+            function clear_choices(element){
+              let day = element.id.split("_")[0]
+              let for_day_radios = "." + day + "_session"
+              let all_day_radios = document.querySelectorAll(for_day_radios)
+              for(let item of all_day_radios){
+                item.checked = false;
+              }
+              select_scheduled_slots()
+            }
+
+            function select_scheduled_slots(){
+              clear_error()
+              const all_slots = document.querySelectorAll(".all_slots")
+              const all_select_options = document.querySelectorAll(".select_options")
+              for(let item of all_select_options){
+                item.selected = false;
+              }
+
+              for(let item of all_slots){
+                if(item.checked){
+                  let select_option_id = "slot_" + item.value
+                  let option_to_select = document.getElementById(select_option_id)
+                   if(option_to_select){
+                    option_to_select.selected = true;
+                  }          
+                }
+              }           
+            }
+          </script>
+
+            <div class="text-center pt-3 fw-bold">
+                {% for field in form %}
+                        <p>
+                          {% for error in field.errors %}
+                            <p class="error_form" style="color: red">{{field.label}}: {{ error }}</p>
+                          {% endfor %}
+                        </p>
+                    {% endfor %}
+                    
+                    {% if form.non_field_errors %}
+                      <div style="color: red">
+                        <p class="error_form" >{{form.non_field_errors}}</p>
+                      </div>
+                        
+                    {% endif %}
+              </div>
+
+
+          <button class="w-100 btn btn-lg btn-success my-3" type="submit">Create Match and Schedule</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

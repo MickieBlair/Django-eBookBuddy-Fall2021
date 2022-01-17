@@ -1,0 +1,91 @@
+<div class="modal fade" id="read_private_msg_Modal" tabindex="-1" aria-labelledby="read_private_msg_Modal_Label" aria-hidden="true" >
+  <div class="modal-dialog modal-lg custom_height_private_modal"> <!-- modal-dialog-scrollable -->
+    <div class="modal-content custom_height_private_modal_content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="read_private_msg_Modal_Label"> Private Chat with <span id="conversation_other_user">User</span></h3>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="close_view_private_messages()"></button>
+      </div>
+      <div class="modal-body custom_height_private_modal_body">
+        <div>
+          <span class="d-none page-number" id="id_private_page_number">1</span>
+        </div>
+        <div class="d-flex flex-row justify-content-center" id="id_private_chatroom_loading_spinner_container">
+          <div class="spinner-border text-primary"  id="id_private_chatroom_loading_spinner" role="status"  style="display: none; ">
+            <span class="sr-only">Loading...</span>
+          </div>
+         </div>
+       <div class="d-flex private_chat_log border" id="id_private_chat_log">
+                      
+        </div>
+<!--         <div class="d-flex room_chat_log" id="id_chat_log">
+        </div> -->
+
+        <div class="d-flex flex-row chat-message-input-container align-content-center">
+            <textarea class="flex-grow-1 chat-message-input" id="id_private_chat_message_input"></textarea>
+
+              <button class="btn btn-primary chat-message-submit-button m-1">
+              <span id="id_private_chat_message_submit" class="material-icons">Send
+              </span>
+            </button>
+
+            
+          </div>
+     
+		
+      </div>
+      <div class="modal-footer">
+        
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close_view_private_message" onclick="close_view_private_messages()" >Close</button>
+
+       <!--  <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="mark_all_as_done" onclick="mark_all_as_done()" >Mark All As Done</button> -->
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script type="text/javascript">
+ // var close_view_private_message = document.getElementById('close_view_private_message');
+
+
+
+//      function mark_as_done(request_id, send_to_staff){
+//         // console.log("send_json_redirect", element)
+
+//         statusSocket.send(JSON.stringify({
+//                 "command": "mark_help_request_done",
+//                 "user_id": user_id,
+//                 "request_id": parseInt(request_id),
+//                 "send_to_staff": send_to_staff,
+//             }));
+
+//         let help_row_element = document.getElementById('help_row_' + request_id);
+//          console.log("help_row_element", help_row_element)
+//         if(help_row_element){
+//         	help_row_element.remove();
+//         }
+//         // close_help_modal.click()
+// // parseInt(element.getAttribute('value'))
+//     }
+
+    // function mark_all_as_done(){
+    //     console.log("mark_all_as_done")
+    //     var individual_buttons = document.querySelectorAll(".individual_help_request");
+    //     var individual_buttons_length = individual_buttons.length
+    //     console.log("individual_buttons_length", individual_buttons_length)
+
+    //     for(let [index, item]  of individual_buttons.entries()){
+    //         let individual_redirect_id = item.getAttribute('value');
+    //         // mark_as_done(individual_redirect_id, true)
+    //         console.log(index, individual_redirect_id)
+    //         if(index != individual_buttons_length -1){
+    //         	mark_as_done(individual_redirect_id, false)
+    //         } else{
+    //         	mark_as_done(individual_redirect_id, true)
+    //         }
+    //     }
+
+    //     close_help_modal.click()
+    // }
+
+</script>

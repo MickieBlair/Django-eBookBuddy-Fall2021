@@ -1,0 +1,58 @@
+<script type="text/javascript">
+
+function get_room_participants(){
+  const numberOfParticipants = api.getNumberOfParticipants();
+  console.log("numberOfParticipants", numberOfParticipants);
+
+  let participants = api.getParticipantsInfo();
+  console.log("Room participants", participants, typeof(participants));
+  let people_in_room = JSON.stringify(participants)
+
+  // payload = {
+  //   count: numberOfParticipants,
+  //   participants: people_in_room,
+  // }
+
+	// $.ajax({
+	// 	type: 'GET',
+	// 	url: "url 'reading_sessions:jitsi_room_participants' jitsi_room.id",
+	// 	data: payload,
+	// 	success: function (response) {
+	// 	if(response["valid"]){
+	// 	console.log(response)              
+	// 	}
+	// 	},
+	// 	error: function (response) {
+	// 	console.log(response)
+	// 	}
+	// });
+
+  // fetch('http://meeting.sessions-ebookbuddy.org/all-rooms')
+  // .then(response => {
+  //   response.json()
+  //   console.log("response.json()", response.json())
+  // })
+  // .then(data => {
+  //   console.log("Data", data)
+  // });
+
+    $.ajax({
+      type: 'GET',
+      url: "https://reading.goebookbuddy.org/all-rooms",
+      success: function (response) {
+        console.log("Success")
+        console.log(response)
+      },
+      error: function (response) {
+        console.log("Fail")
+          console.log(response)
+      }
+    });
+
+  // const displayName = api.getDisplayName(participantId);
+  // console.log("displayName", displayName);
+
+  // const email = api.getEmail(participantId);
+}
+
+</script>

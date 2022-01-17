@@ -1,0 +1,82 @@
+        <div class="row">
+          <div class="col">
+
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Gender:</label> 
+              <text class="">{{member.staff_profile.gender}}</text>
+            </div>
+
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Primary Language:</label> 
+              <text class="">{{member.staff_profile.primary_lang}}</text>
+            </div>
+
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Secondary Language:</label> 
+              <text class="">{{member.staff_profile.secondary_lang}}</text>
+            </div>
+
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Phone:</label> 
+              <text class="">{{member.staff_profile.contact_number}}</text>
+            </div>
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Email:</label> 
+              <a href="mailto: {{member.email}}">{{member.email}}</a>
+            </div>
+
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Comment:</label> 
+              <text class="">{{member.staff_profile.comment}}</text>
+            </div>
+            
+          </div>
+<!--           <div class="col">
+            <h5 class="text-center">Available Day/Time/Slots</h5>
+            <div class="d-grid justify-content-center">          
+              <ul class="available_slots_ul" >
+                {% for slot in volunteer.volunteer_profile.available_day_time_slots.all %}
+                <li class ="py-1">{{slot}}</li>
+                {% endfor %}
+              </ul>
+            </div>
+            
+          </div>  -->
+                   
+        </div> 
+        <div class="border-top pt-3">
+          <h4> Notes Relating to member </h4>
+          <div class="ps-2 pt-3">
+            <h5 class="border-bottom">Staff Profile</h5>
+                        <div class="ps-3">
+              {% if member.staff_profile.profile_notes.all.count != 0 %} 
+              <ul>
+                {% for note in member.staff_profile.profile_notes.all %}
+                <li>
+                  {{note.date_created}} - {{note.content}} - {{note.author}}
+                </li>
+                {% endfor %}
+              </ul>             
+                
+              {% else %}
+                <div>
+                  No Notes
+                </div>
+              {% endif %}              
+            </div> 
+          </div>
+
+        </div> 
+
+        <div class="row card-footer">
+            <div class="col">
+              <label for="" class="fw-bold text-muted pe-2">Created:</label>
+              <text class="text-muted">{{member.staff_profile.date_created}}</text>
+            </div>
+            <div class="col d-flex justify-content-end">
+              <label for="" class="fw-bold text-muted pe-2">Last Updated:</label>
+              <text class="text-muted">{{member.staff_profile.last_updated}}</text>
+            </div>          
+          </div> 
+
+

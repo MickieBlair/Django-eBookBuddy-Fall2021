@@ -1,0 +1,41 @@
+<button type="button" class="btn btn-warning button_bottom_toolbar" data-bs-toggle="modal" data-bs-target="#helpModal">
+  Help
+</button>
+
+<div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="helpModalLabel">Send Help Request to Staff</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input id="from_user" type="hidden" value = "{{logged_in_user.id}}">
+        <input id="from_room" type="hidden" value = "{{room.id}}">
+        <h5 class="pb-3">Let us know what you need, so we can send the right person to help you!</h5>
+        <textarea class="form-control" id="message_content" name="help_request" rows=5></textarea> 
+
+      
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="close_send_help_request" data-bs-dismiss="modal">Close</button>
+
+        <button type="button" class="btn btn-primary" id="send_help" onclick="ask_for_help()">Send Request</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script type="text/javascript">
+	var helpModal = document.getElementById('helpModal')
+	var myInput = document.getElementById('message_content')
+
+	helpModal.addEventListener('shown.bs.modal', function () {
+	  myInput.focus()
+	})
+
+
+	
+
+</script>

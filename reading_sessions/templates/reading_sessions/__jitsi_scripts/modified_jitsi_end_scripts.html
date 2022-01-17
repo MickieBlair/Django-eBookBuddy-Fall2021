@@ -1,0 +1,678 @@
+<script type="text/javascript">
+console.log("Loading End Scripts")
+let roomName = "";
+let jitsi_id = "";
+let displayName = "";
+let jitsi_data_state 
+let connected = false
+let checking
+
+function get_socket_state(){
+  console.log("Checking")
+  jitsi_data_state = jitsi_data_Socket.readyState
+  if (jitsi_data_state == 1){
+    connected = true
+    clearInterval(checking)
+  }
+  return jitsi_data_state
+}
+
+function send_room_data(server, room_name, roomData, joining, sender_id){
+    server.send(JSON.stringify({
+            "command": "in_room",
+            "jitsi_room":room_name,
+            "participants": roomData,
+            "joining": joining,
+            "sender_id": sender_id,
+            "time_now": Date.now(),
+          }));
+}
+
+
+function get_in_room(joining){
+  const getRoomData = async () => {
+      console.log("getting room data");
+      const data = api.getParticipantsInfo()
+      return data;
+    };
+
+    getRoomData().then(roomData => {
+
+      console.log("the data", roomData);
+
+      getSocket().then(function(server) {
+          send_room_data(server, room_name, roomData, joining, user_id)
+      }).catch(function(err) {
+          // error here
+      });
+
+    });
+
+};
+
+api.addEventListener("videoConferenceJoined", function(e){  
+  console.error("\n\nvideoConferenceJoined",event)
+  get_in_room(true); 
+});
+
+api.addEventListener("videoConferenceLeft", function(e){
+  console.error("\n\nvideoConferenceLeft",event)   
+  get_in_room(false); 
+});
+
+api.addEventListener("participantJoined", function(e){
+  console.error("\n\nparticipantJoined",event)
+  // get_in_room(); 
+});
+
+api.addEventListener("participantLeft", function(e){
+  console.error("\n\nparticipantLeft",event)
+  // get_in_room(); 
+});
+
+
+
+api.addEventListener("errorOccurred", function(e){
+  errorOccurred(e)
+  });
+
+function errorOccurred(event) {
+  console.error("\n\nerrorOccurred",event)
+}
+
+
+
+api.addEventListener("readyToClose", function(e){
+  readyToClose(e)
+  });
+
+function readyToClose(event) {
+  console.error("\n\nreadyToClose",event)
+}
+
+api.addEventListener("suspendDetected", function(e){
+  suspendDetected(e)
+  });
+
+function suspendDetected(event) {
+  console.error("\n\nsuspendDetected",event)
+}
+
+// if(user_role == "Staff"){
+if(user_role == "Staff"){
+    const jitsi_btn_rooms = document.getElementById('get_jitsi_part_btn')
+    const get_jitsi_live_btn = document.getElementById('get_jitsi_live_btn')
+
+    if(jitsi_btn_rooms){
+      jitsi_btn_rooms.addEventListener("click", function(e){
+        let websocket_rooms = document.getElementById('websocket_rooms');
+        let jitsi_meeting_rooms = document.getElementById('jitsi_meeting_rooms');
+        let jitsi_live_rooms = document.getElementById('jitsi_live_rooms');
+        websocket_rooms.style.display = "none";
+        jitsi_meeting_rooms.style.display = "block";
+         jitsi_live_rooms.style.display = "none";
+
+        ajax_get_jitsi_rooms();  
+
+      })
+    }
+
+    if(get_jitsi_live_btn){
+      get_jitsi_live_btn.addEventListener("click", function(e){
+        let websocket_rooms = document.getElementById('websocket_rooms');
+        let jitsi_meeting_rooms = document.getElementById('jitsi_meeting_rooms');
+        let jitsi_live_rooms = document.getElementById('jitsi_live_rooms');
+        websocket_rooms.style.display = "none";
+        jitsi_live_rooms.style.display = "block";
+        jitsi_meeting_rooms.style.display = "none";
+
+        
+
+      })
+    }
+  }
+
+  function get_jitsi_rooms() {
+
+    const numberOfParticipants = api.getNumberOfParticipants();
+    console.log("\n\n\nNumber In Room", numberOfParticipants);
+
+    let participants = api.getParticipantsInfo();
+    // console.log("Room participants", participants, typeof(participants));
+    let people_in_room = JSON.stringify(participants)
+    for (let item of participants){
+      console.log("Participant ", item.displayName)
+    }
+    let string_list  = ""
+    $.ajax({
+        type: 'GET',
+        url: "https://semester.sessions-ebookbuddy.org/all-rooms",
+        success: function (response) {
+          // console.log("\n all-rooms call success for user_id", user_id)
+          console.log("all-rooms response", response) 
+
+        },
+        error: function (response) {
+          console.log("Fail")
+            console.log(response)
+        }
+      }).done(function( response ) {
+          let json_rooms = JSON.parse(response)
+          console.log("\n\n\n\n\njson_rooms", json_rooms, typeof(json_rooms)) 
+          let room_list = {}
+          for (let item of json_rooms.rooms){
+            //console.log("item", item)
+
+
+            //console.log("room", item.jid)
+            let slug = item.jid.split('@')[0].replaceAll('%20', '-')
+            //console.log("\n\nslug", slug)
+
+            let room_parts = []
+            let participants = item.participants
+            for (let item of participants){
+              //console.log("participants", item.display_name)
+              room_parts.push(item.display_name)
+            }
+            room_list[slug] = room_parts
+
+            //console.log("Room List", room_list, typeof(room_list))
+            string_list  = JSON.stringify(room_list)
+             //console.log("Room List", room_list, typeof(room_list))
+          }
+
+          payload = {
+            "csrfmiddlewaretoken": "{{ csrf_token }}",
+            "rooms_str": string_list,
+          }
+
+        $.ajax({
+        type: 'POST',
+        dataType: "json",
+        url: "{%url 'reading_sessions:ajax_by_room_participants' %}", // production
+        data: payload,
+        timeout: 5000,
+        success: function (response) {
+               if(response["valid"]){
+                
+                console.log("DJANGO Response", response);
+                let json_rooms = JSON.parse(response['rooms'])
+                // console.log("JSON Rooms", json_rooms, typeof(json_rooms))
+
+                // let jitsi_rows = document.querySelectorAll('.jitsi_row');
+                // for(let item of jitsi_rows){
+                //   item.remove()
+                // }
+
+                let table_for_jitsi = document.getElementById('tbody_rooms_participants_jitsi');
+                for (let item of json_rooms.jitsi_rooms){
+                  // console.log("item of json_rooms.jitsi_rooms", item);
+                  // let the_room_count = item.jitsi_count
+                    let jitsi_part = document.getElementById('jitsi_parts-'+ item.room_id)
+                    jitsi_part.innerHTML = ""
+
+                    let jitsi_people = item.jitsi_participants
+
+                    for(let item of jitsi_people){
+                      // console.log("J Person", item)
+                      let new_j = document.createElement('div')
+                      new_j.innerHTML = item.username + ": " + item.full_name
+                      jitsi_part.appendChild(new_j)
+   
+                      }
+
+                      let ws_part = document.getElementById('ws_parts-'+ item.room_id)
+                      ws_part.innerHTML = ""
+
+                      let ws_people = item.participants
+                      for(let item of ws_people){
+                        // console.log("WS Person", item)
+                        let new_ws = document.createElement('div')
+                        new_ws.innerHTML = item.username + ": " + item.full_name
+                        ws_part.appendChild(new_ws)
+                      }
+
+                      let jitsi_count = document.getElementById('jitsi_count-'+ item.room_id)
+                      jitsi_count.innerHTML = item.jitsi_count
+                      let ws_count = document.getElementById('ws_count-'+ item.room_id)
+                      ws_count.innerHTML = item.count
+
+                      let room_row_id = "jitsi_room_" + item.room_id
+                      let room_row_j = document.getElementById(room_row_id)
+                      if(room_row_j){
+                        if (table_for_jitsi){
+                          if(parseInt(jitsi_count) !=0){
+                            table_for_jitsi.append(room_row_j)
+                          }else{
+                            table_for_jitsi.prepend(room_row_j)
+                          }
+                          
+                        }else{
+                        console.log("table_for_jitsi")
+                      }
+
+                      } else{
+                        console.log("no_room_j")
+                      }
+                }
+               }
+             },
+             error: function (response) {
+             console.log(response)
+             },
+      });
+
+
+
+      });
+
+
+
+  }
+
+
+  function ajax_get_jitsi_rooms() {
+    // console.log("\n\n\nJITSI get_room_participants");
+
+    //const numberOfParticipants = api.getNumberOfParticipants();
+    //console.log("\n\n\nNumber In Room", numberOfParticipants);
+
+    //let participants = api.getParticipantsInfo();
+    // console.log("Room participants", participants, typeof(participants));
+   // let people_in_room = JSON.stringify(participants)
+   // for (let item of participants){
+    //	console.log("Participant ", item.displayName)
+   // }
+
+    
+
+    // $.ajax({
+      //   type: 'GET',
+      //   dataType: "json",
+      //   url: "{% url 'reading_sessions:ajax_get_room_participants' %}",
+      //   success: function (response) {
+      //     console.log("ajax_get_room_participants response", response)
+
+      //     let json_rooms = JSON.parse(response['rooms'])
+      //     for (let item of json_rooms.rooms){
+      //       let jitsi_part = document.getElementById('jitsi_parts-'+ item.room_id)
+      //       jitsi_part.innerHTML = ""
+      //       let jitsi_people = item.jitsi_participants
+      //       for(let item of jitsi_people){
+      //         console.log("J Person", item)
+      //         let new_j = document.createElement('div')
+      //         new_j.innerHTML = item.username + ": " + item.full_name
+      //         jitsi_part.appendChild(new_j)
+      //       }
+
+            
+      //       let ws_part = document.getElementById('ws_parts-'+ item.room_id)
+      //       ws_part.innerHTML = ""
+      //       let ws_people = item.participants
+      //       for(let item of ws_people){
+      //         console.log("WS Person", item)
+      //         let new_ws = document.createElement('div')
+      //         new_ws.innerHTML = item.username + ": " + item.full_name
+      //         ws_part.appendChild(new_ws)
+      //       }
+
+
+            
+      //       let jitsi_count = document.getElementById('jitsi_count-'+ item.room_id)
+      //       jitsi_count.innerHTML = item.jitsi_count
+      //       let ws_count = document.getElementById('ws_count-'+ item.room_id)
+      //       ws_count.innerHTML = item.count
+      //       // console.log("room", item)
+      //     } 
+      //   },
+      //   error: function (response) {
+      //     console.log("Fail")
+      //       console.log(response)
+      //   }
+      // })
+
+      //   $.ajax({
+      //   type: 'GET',
+      //   url: "https://semester.sessions-ebookbuddy.org/all-rooms",
+      //   success: function (response) {
+      //     // console.log("\n all-rooms call success for user_id", user_id)
+      //     // console.log("all-rooms response", response) 
+      //     let json_rooms = JSON.parse(response['rooms'])
+      //     for (let item of json_rooms.rooms){
+      //       console.log("room", item)
+      //     }
+      //   },
+      //   error: function (response) {
+      //     console.log("Fail")
+      //       console.log(response)
+      //   }
+      // })
+
+
+
+    //     .done(function( response ) {
+    //     // console.log("*******\n\n\n\n DONE")
+    //     // let payload = JSON.parse(response) //.replace(/%20/g, ' ');
+
+    //     payload = {
+    //       "csrfmiddlewaretoken": "{{ csrf_token }}",
+    //        "rooms_str": response,
+    //     }
+    //     $.ajax({
+    //       type: 'POST',
+    //       dataType: "json",
+    //       url: "url 'reading_sessions:jitsi_room_participants' %}", // production
+    //       data: payload,
+    //       timeout: 5000,
+    //       success: function (response) {
+    //              if(response["valid"]){
+                  
+    //               // console.log("DJANGO Response", response);
+    //               let json_rooms = JSON.parse(response['rooms'])
+    //               // console.log("JSON Rooms", json_rooms, typeof(json_rooms))
+
+    //               let jitsi_rows = document.querySelectorAll('.jitsi_row');
+    //               for(let item of jitsi_rows){
+    //                 item.remove()
+    //               }
+
+    //               let table_for_jitsi = document.getElementById('tbody_rooms_participants_jitsi');
+    //               for (let item of json_rooms.jitsi_rooms){
+                    
+    //                 if(table_for_jitsi){
+    //                   let new_jitsi_row = create_jitsi_room_row(item)
+    //                   table_for_jitsi.appendChild(new_jitsi_row);
+    //                 }
+    //               }
+                
+    //              }
+    //            },
+    //            error: function (response) {
+    //            console.log(response)
+    //            },
+    //     });
+
+    //     // payload = {
+    //     //   "csrfmiddlewaretoken": "{{ csrf_token }}",
+    //     //   "rooms_str": response,
+    //     // }
+
+    //     // payload = {
+
+    //     // }
+    //     // let payload = response //.replace(/%20/g, ' ');
+    //     // console.log("PAYLOAD", payload)
+    //         // $.ajax({
+    //         //    type: 'GET',
+    //         //    url: "url 'reading_sessions:jitsi_room_participants' %}",
+    //         //    data: {rooms_str: payload},
+    //         //    success: function (response) {
+    //         //      if(response["valid"]){
+                  
+    //         //       // console.log("DJANGO Response", response);
+    //         //       let json_rooms = JSON.parse(response['rooms'])
+    //         //       // console.log("JSON Rooms", json_rooms, typeof(json_rooms))
+
+    //         //       let jitsi_rows = document.querySelectorAll('.jitsi_row');
+    //         //       for(let item of jitsi_rows){
+    //         //         item.remove()
+    //         //       }
+
+    //         //       let table_for_jitsi = document.getElementById('tbody_rooms_participants_jitsi');
+    //         //       for (let item of json_rooms.jitsi_rooms){
+                    
+    //         //         if(table_for_jitsi){
+    //         //           let new_jitsi_row = create_jitsi_room_row(item)
+    //         //           table_for_jitsi.appendChild(new_jitsi_row);
+    //         //         }
+    //         //       }
+                
+    //         //      }
+    //         //    },
+    //         //    error: function (response) {
+    //         //    console.log(response)
+    //         //    }
+    //         // });
+
+    // });
+
+
+  }
+
+
+
+  function api_get_by_room(){
+    console.log("Send to websocket to print all api by room")
+    match_socket_private.send(JSON.stringify({
+            "command": "get_api_participants",            
+        }));
+
+  }
+
+  function ajax_by_room_participants(room, participants){
+    console.log("in ajax_by_room_participants",room, participants)
+
+        payload = {
+          "csrfmiddlewaretoken": "{{ csrf_token }}",
+          "room": room,
+          "participants": participants,
+        }
+
+      $.ajax({
+        type: 'POST',
+        dataType: "json",
+        url: "{%url 'reading_sessions:ajax_by_room_participants' %}", // production
+        data: payload,
+        timeout: 5000,
+        success: function (response) {
+               if(response["valid"]){
+                
+                console.log("DJANGO Response", response);
+                // let json_rooms = JSON.parse(response['rooms'])
+                // // console.log("JSON Rooms", json_rooms, typeof(json_rooms))
+
+                // let jitsi_rows = document.querySelectorAll('.jitsi_row');
+                // for(let item of jitsi_rows){
+                //   item.remove()
+                // }
+
+                // let table_for_jitsi = document.getElementById('tbody_rooms_participants_jitsi');
+                // for (let item of json_rooms.jitsi_rooms){
+                  
+                //   if(table_for_jitsi){
+                //     let new_jitsi_row = create_jitsi_room_row(item)
+                //     table_for_jitsi.appendChild(new_jitsi_row);
+                //   }
+                // }
+              
+               }
+             },
+             error: function (response) {
+             console.log(response)
+             },
+      });
+
+  }
+
+  // // user_joined_room(e)
+  // connect_jitsi_data_ws()
+  // roomName = e.roomName.replaceAll("%20", " ");
+  // jitsi_id = e.id;
+  // displayName = e.displayName
+  // jitsi_data_Socket.send(JSON.stringify({
+  //         "command": "join",
+  //         "member_id": user_id,
+  //         "display_name": displayName,
+  //         "jitsi_id": jitsi_id,
+  //         "jitsi_room":roomName,
+  //       })); 
+
+
+
+  // jitsi_data_state = get_socket_state()
+  // console.log("jitsi readyState", jitsi_data_state)
+
+  // if(jitsi_data_state == 1){
+  //   console.log("jitsi data socket is open and ready")
+    
+
+  // }else{
+  //   console.log("jitsi_data_state is not ready", jitsi_data_state)
+  //   connected_state = "Not Connected"
+  //   checking = setInterval(get_socket_state, 10000)
+  // }
+
+
+
+  // while(!connected){
+  //   checking = setInterval(get_socket_state, 10000)
+
+  //   jitsi_data_state = get_socket_state()
+  //   console.log("Checking Inside while", jitsi_data_state)
+  //   if(jitsi_data_state == 1){
+  //     clearInterval(checking)
+  //     connected = true
+  //     send_room_data(room_name, roomData)
+
+  //   }
+  // }
+
+//   if (jitsi_data_state == 1){
+//     send_room_data(room_name, roomData)
+
+//   } else if(jitsi_data_state == 0){
+//     while (jitsi_data_state == 0) {
+//   // code block to be executed
+
+// }
+
+//     setTimeout(send_room_data(room_name, roomData), 10000)
+//   }else {
+//     connect_jitsi_data_ws()
+//     jitsi_data_Socket.send(JSON.stringify({
+//             "command": "in_room",
+//             "jitsi_room":room_name,
+//             "participants": roomData,
+//             "time_now": Date.now(),
+//           }));
+
+//     }
+  
+
+// });.then(socket => {
+
+// console.log("socket", socket) });
+
+//   // let participants =  await api.getParticipantsInfo()
+//   //  let jitsi_data_state = jitsi_data_Socket.readyState
+
+//   // if (jitsi_data_state == 1){
+//   //   jitsi_data_Socket.send(JSON.stringify({
+//   //           "command": "in_room",
+//   //           "jitsi_room":room_name,
+//   //           "participants": participants,
+//   //           "time_now": Date.now(),
+//   //         }));
+
+//   // } else{
+//   //   connect_jitsi_data_ws()
+//   //   jitsi_data_Socket.send(JSON.stringify({
+//   //           "command": "in_room",
+//   //           "jitsi_room":room_name,
+//   //           "participants": participants,
+//   //           "time_now": Date.now(),
+//   //         }));
+
+//   //   }
+    
+  
+  
+// }
+
+
+
+// function user_joined_room(event) {
+  // console.error("\n\nvideoConferenceJoined",event)
+  // roomName = event.roomName.replaceAll("%20", " ");
+  // jitsi_id = event.id;
+  // displayName = event.displayName
+
+  // get_in_room(roomName);   
+  // let jitsi_data_state = jitsi_data_Socket.readyState
+
+  // if (jitsi_data_state == 1){
+  //    jitsi_data_Socket.send(JSON.stringify({
+  //           "command": "join",
+  //           "member_id": user_id,
+  //           "display_name": displayName,
+  //           "jitsi_id": jitsi_id,
+  //           "jitsi_room":roomName,
+  //         })); 
+
+  // get_in_room(roomName);   
+
+  // } else{
+    // jitsi_data_Socket.open()
+    // jitsi_data_Socket.send(JSON.stringify({
+    //       "command": "join",
+    //       "member_id": user_id,
+    //       "display_name": displayName,
+    //       "jitsi_id": jitsi_id,
+    //       "jitsi_room":roomName,
+    //     })); 
+
+    //  get_in_room(roomName);   
+
+  // }
+ 
+ 
+// }
+
+
+
+
+// function videoConferenceLeft(event) {
+  // console.error("\n\nvideoConferenceLeft",event)
+  // let jitsi_data_state = jitsi_data_Socket.readyState
+  // if (jitsi_data_state == 1){
+
+  // jitsi_data_Socket.send(JSON.stringify({
+  //           "command": "leave",
+  //           "member_id": user_id,
+  //           "display_name": displayName,
+  //           "jitsi_id": jitsi_id,
+  //           "jitsi_room":roomName,
+  //         }));
+
+  // get_in_room(roomName); 
+  // } else{
+  //   jitsi_data_Socket.open()
+  //   jitsi_data_Socket.send(JSON.stringify({
+  //           "command": "leave",
+  //           "member_id": user_id,
+  //           "display_name": displayName,
+  //           "jitsi_id": jitsi_id,
+  //           "jitsi_room":roomName,
+  //         }));
+
+  // get_in_room(roomName); 
+  // } 
+// }
+// 
+
+
+
+
+// function participantJoined(event) {
+//   console.error("\n\nparticipantJoined", event)
+//   get_in_room(roomName); 
+// }
+
+
+
+// function participantLeft(event) {
+//   console.error("\n\nparticipantLeft",event)
+//   get_in_room(roomName); 
+// }
+
+</script>

@@ -1,0 +1,77 @@
+<div class="text-center pt-2 w-100">
+    <button class="btn btn_staff_sidebar" id="assessments_button" data-bs-toggle="modal" data-bs-target="#assessments_Modal">
+      <h6 class="link_text">Student Progress</h6>
+        <h6 class="red_link_text">(<span id="students_without">{{without_assessment}}</span>)</h6>  
+    </button>
+  </div>
+
+
+<div class="modal fade" id="assessments_Modal" tabindex="-1" aria-labelledby="assessments_ModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-fullscreen p-5">
+    <div class="modal-content ">
+      <div class="modal-header">
+        <h4 class="modal-title" id="assessments_ModalLabel">Student Assessments</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="scrolling_table_fixed_head fixed_height_match_table" id="">
+              <table class="table table-striped table-sm align-middle ">
+                <thead>
+                  <tr>  
+                     
+                    <th class="">Username</th>          
+                    <th class="">Full Name</th>          
+                    <th class="">Initial</th>
+                    <th class="">Current</th>
+                    <th class="">Last Update</th>
+                    <th class="">Missing</th>
+                    <th class="">Schedule</th>  
+                    <!-- <th class=""></th> -->
+                  </tr>
+                </thead>
+                <tbody class="h-100">
+                  {% for progress in current_students %}
+                  
+                  <tr>
+                    
+                    <td>{{progress.user.username}}</td>
+                    <td>{{progress.user.full_name}}</td>
+                    <td>{{progress.starting}}</td>
+                    <td>{{progress.current}}</td>
+                    <td>{{progress.last_assessed}}</td>
+                    <td>{% if not progress.starting %}
+                      <text class="red"> Yes </text>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <ul class="m-0 p-0">
+                        {% for session in progress.user.student_profile.scheduled_day_time_slots.all %}
+                        <li>{{session.get_short_name}}</li>
+                      {% endfor %}
+
+                        
+                      </ul>
+                                          </td>
+
+                  </tr>
+                  {% endfor %}                  
+                </tbody>
+              </table>
+            </div>
+        
+          
+           
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="close_help" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script type="text/javascript">
+
+	
+
+</script>

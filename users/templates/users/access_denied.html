@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+	<div class="card mt-5">
+		<div class="card-header text-center custom_bg_blue">
+			<h1 class="">Access Denied</h1>
+		</div>
+		<div class="card-body text-center">
+			<div class="py-3">
+				<h3>Staff Only</h3>
+			</div >	
+			<div class="pb-3">
+				<h5> For assistance: <a href="mailto: admin@ebookbuddy.org">Email: admin@ebookbuddy.org</a></h5>	
+			</div >		
+
+			<div class="py-4">
+				<a class="btn btn-primary" href="{%url 'home' %}">Return to Sessions Home</a>	
+			</div >			
+		</div>
+		<div class="card-footer text-center">
+			<div> <a class="nav-link text-center" href="{% url 'change_user' %}">Sign in as different user</a> </div>			
+		</div>
+	</div>	
+</div>
+
+{% endblock content %}

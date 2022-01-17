@@ -1,0 +1,77 @@
+
+{% extends 'site_admin/admin_base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="mt-1">
+{% include 'site_admin/snippets/buttons.html' %}
+{% include 'site_admin/snippets/django_messages_snippet.html' %}
+</div>
+
+<div class="row pt-5">
+  <div class="col-lg-6 col-md-8 col-sm-10 mx-auto">
+    <div class="card mx-auto">
+      <div class="card-header custom_bg_blue">
+        <h1 class="h3 mb-3 w-100 text-center fw-bold mt-2">Update User - {{edit_user}}<h1>
+      </div>
+      <div class="card-body">
+        <form method="POST">
+          {% csrf_token %}
+
+          <div class="fieldWrapper my-1 text-center">
+            <label for="id_username" class="fixed_width_bold_label">Username:</label>
+            <input type="text" id="id_username" name="username" class="fixed_width_input" placeholder="" value="{{form.initial.username}}" >
+            <div>
+          </div>
+
+          <div class="fieldWrapper my-1 text-center">
+            <label for="{{ update_user_form.email.id_for_label }}" class="fixed_width_bold_label">Email:</label>
+              <input type="email" id="id_email" name="email" class="fixed_width_input" placeholder="" value="{{form.initial.email}}">
+          </div>
+
+           <div class="fieldWrapper my-1 text-center">
+              <label for="id_first_name" class="fixed_width_bold_label">First Name:</label>
+              <input type="text" id="id_first_name" name="first_name" class="fixed_width_input" placeholder=""value="{{form.initial.first_name}}">
+            </div>
+
+            <div class="fieldWrapper my-1 text-center">
+              <label for="id_middle_name" class="fixed_width_bold_label">Middle Name:</label>
+              <input type="text" id="id_middle_name" name="middle_name" class="fixed_width_input" placeholder="" value="{{form.initial.middle_name}}" >
+            </div>
+
+            <div class="fieldWrapper my-1 text-center">
+              <label for="id_last_name" class="fixed_width_bold_label">Last Name:</label>
+              <input type="text" id="id_last_name" name="last_name" class="fixed_width_input" placeholder=""  value="{{form.initial.last_name}}">
+            </div>
+
+
+
+          <div class="text-center">
+                {% for field in form %}
+                        <p>
+                          {% for error in field.errors %}
+                            <p class="error_form" style="color: red">{{field.label}}: {{ error }}</p>
+                          {% endfor %}
+                        </p>
+                    {% endfor %}
+                    
+                    {% if form.non_field_errors %}
+                      <div style="color: red">
+                        <p class="error_form" >{{form.non_field_errors}}</p>
+                      </div>
+                        
+                    {% endif %}
+              </div>
+
+          <button class="w-100 btn btn-lg btn-dark my-3" type="submit">Submit Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock content %}
+

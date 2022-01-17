@@ -1,0 +1,371 @@
+
+
+<div class="modal fade" id="userprofileModal" tabindex="-1" aria-labelledby="userprofileModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-fullscreen p-3">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="userprofileModalLabel">Profile</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="card profile_card_staff_view" id="member_profile_{{member.id}}">
+          <div class="card-header">
+            <div class="d-inline-flex w-100">
+              <div class="d-flex flex-grow-1 ">
+                <h3 class="fw-bold m-0" id="profile_name"></h3>
+              </div>
+              
+              <div class="d-flex justify-content-end">
+                <h3 class="fw-bold m-0" id="profile_role"></h3>
+              </div>
+              
+            </div>
+            
+          </div>
+          <div class="card-body" id="profile_card_body">
+
+        <div class="row pb-3">
+          <div class="col">
+
+            <div id="div_email">
+              <div class="p-2 d-flex">
+                <label class="fixed_width_bold_label2">Email:</label> 
+                <a id="profile_email" >{{member.email}}</a>
+              </div>              
+            </div>
+            
+              <div id="div_phone">
+                <div class="p-2 d-flex">
+                  <label class="fixed_width_bold_label2">Phone:</label> 
+                  <text id="div_number"></text>
+                </div>                
+              </div>
+
+              <div id="div_contact_person">
+                <div class="p-2 d-flex">
+                  <label class="fixed_width_bold_label2">Contact Person:</label> 
+                  <text id="div_inner_contact"></text>
+                </div>                
+              </div>
+
+              <div class="p-2 d-flex">
+                <label class="fixed_width_bold_label2">Gender:</label> 
+                <text id="div_gender"></text>
+              </div>
+              <div class="p-2 d-flex">
+                <label class="fixed_width_bold_label2">Primary Language:</label> 
+                <text id="div_primary_lang"></text>
+              </div>
+
+              <div class="p-2 d-flex">
+                <label class="fixed_width_bold_label2">Secondary Language:</label> 
+                <text id="div_secondary_lang">{</text>
+              </div>
+              
+           
+
+
+
+            <div id="div_id_need_match">
+              <div class="p-2 d-flex">
+                <label class="fixed_width_bold_label2">Needs Match:</label> 
+                <text id="id_needs_match">     
+                  </text>
+              </div>              
+            </div>
+
+            
+
+
+            <div id="div_scheduled_buddy">             
+            
+              <div class="p-2 d-flex">
+                <label class="fixed_width_bold_label2">Buddy:</label> 
+                <text id="scheduled_buddy_name">
+                  
+                  </text>
+              </div>
+
+            </div>
+            
+            
+            <div id="div_school_grade">              
+            
+              <div class="p-2 d-flex">
+                <label class="fixed_width_bold_label2">School:</label> 
+                <text id="profile_school"></text>
+              </div>
+
+              <div class="p-2 d-flex">
+                <label class="fixed_width_bold_label2">Grade:</label> 
+                <text id="profile_grade"></text>
+              </div>
+
+            </div>
+
+
+            
+          </div>
+          <div class="col">
+            <div id="div_reading_levels">
+              <div class="border mb-2 bg-light">
+                <h4 class="text-center pt-2">Reading Levels</h4>
+                <div class="d-grid justify-content-center pb-2"> 
+                  <ul class="p-0 m-0" >   
+                    <li>
+                      <div class="d-inline-flex">
+                        <div class="fixed_width_75_bold">Initial: </div>
+                        <div>{{member.student_progress.starting}}</div>
+                      </div>
+                      
+                    </li>
+                    <li>
+                      <div class="d-inline-flex">
+                        <div class="fixed_width_75_bold">Current: </div>
+                        <div>{{member.student_progress.current}}</div>
+                      </div>
+                    </li>  
+                    <li>
+                      <div class="d-inline-flex">
+                        <div class="fixed_width_75_bold">Final: </div>
+                        <div>{{member.student_progress.end}}</div>
+                      </div>
+                    </li>                 
+                  </ul>
+
+                </div>
+              </div>              
+            </div>
+            <div id="div_scheduled_slots">
+              <div class="border">
+              <h5 class="text-center pt-2">Scheduled Day/Time/Slots</h5>
+              <div class="d-grid justify-content-center pb-2"> 
+                {% if member.student_profile.scheduled_day_time_slots.all.count != 0 %}         
+                  <ul class="p-0 m-0" id="ul_slots">                    
+                      
+                  </ul>
+                  {% else %}
+                    <h6 class="bg-light m-0 p-2">No Scheduled Session Slots</h6>
+                  {% endif %}
+              </div>
+            </div>  
+              
+            </div>
+            
+                      
+          </div>      
+        </div> 
+ 
+
+        <div class="row card-footer">
+            <div class="col">
+              <label for="" class="fw-bold text-muted pe-2">Created:</label>
+              <text class="text-muted" id="id_created"></text>
+            </div>
+            <div class="col d-flex justify-content-end">
+              <label for="" class="fw-bold text-muted pe-2">Last Updated:</label>
+              <text class="text-muted" id="id_updated"></text>
+            </div>          
+          </div>
+
+
+
+
+
+          </div>
+          
+        </div>
+        
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="close_help" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script type="text/javascript">
+
+//profile
+function show_only_profile(profile_card_id){
+  console.log("PROFILE CARD ID", profile_card_id)
+  let profile_to_get = profile_card_id.split("_")[2]
+
+    let web_url = "{% url 'reading_sessions:ajax_get_user_profile' %}"
+          $.ajax({
+          type: 'GET',
+          data:{'profile_to_get':  profile_to_get},
+          url: web_url, // production
+          timeout: 5000,
+          success: function (response) {
+            if(response['valid']){
+              // console.log(response['user_profiles'])  
+              let profiles = JSON.parse(response['user_profiles']).profiles
+              // console.log(profiles)
+              let profile_of_user = profiles[0]
+              console.log(profile_of_user)
+              let userprofileModalLabel_div = document.getElementById('userprofileModalLabel');
+              if(userprofileModalLabel_div){
+                userprofileModalLabel_div.innerHTML=profile_of_user.username + " Profile";
+              }
+
+              let profile_name_div = document.getElementById('profile_name');
+              if(profile_name_div){
+                profile_name_div.innerHTML=profile_of_user.full_name;
+              }
+
+               let profile_role_div = document.getElementById('profile_role');
+              if(profile_role_div){
+                profile_role_div.innerHTML=profile_of_user.role;
+              }
+
+              let profile_email_div = document.getElementById('profile_email');
+              if(profile_email_div){
+                profile_email_div.innerHTML=profile_of_user.email;
+                profile_email_div.setAttribute('href', "mailto: " + profile_of_user.email);
+              }
+
+              
+              let div_number = document.getElementById('div_number');
+              if(div_number){
+                div_number.innerHTML=profile_of_user.phone;
+              }
+              
+
+              let div_contact_person = document.getElementById('div_contact_person');
+              let div_inner_contact = document.getElementById('div_inner_contact')
+              if(div_contact_person){
+                if(profile_of_user.role == "Student"){
+                  div_contact_person.style.display = "block"
+                  div_inner_contact.innerHTML = profile_of_user.person;
+                 
+                } else{
+                  div_contact_person.style.display = "none"
+                  div_inner_contact.innerHTML = ""
+                }                
+              }
+
+              let id_needs_match = document.getElementById('id_needs_match');
+              if(id_needs_match){
+                id_needs_match.innerHTML=profile_of_user.match_needed;
+              }
+
+               let div_gender = document.getElementById('div_gender');
+              if(div_gender){
+                div_gender.innerHTML=profile_of_user.gender;
+              }
+
+               let div_primary_lang = document.getElementById('div_primary_lang');
+              if(div_primary_lang){
+                div_primary_lang.innerHTML=profile_of_user.p_lang;
+              }
+
+               let div_secondary_lang = document.getElementById('div_secondary_lang');
+              if(div_secondary_lang){
+                div_secondary_lang.innerHTML=profile_of_user.s_lang;
+              }
+
+              
+              let div_scheduled_buddy = document.getElementById('div_scheduled_buddy');
+              let scheduled_buddy_name = document.getElementById('scheduled_buddy_name')
+              if(div_scheduled_buddy){
+                if(profile_of_user.role != "Staff"){
+                  div_scheduled_buddy.style.display = "block"
+                  scheduled_buddy_name.innerHTML = profile_of_user.scheduled_buddy;
+                 
+                } else{
+                  div_scheduled_buddy.style.display = "none"
+                  scheduled_buddy_name.innerHTML = ""
+                }                
+              }
+
+              let div_school_grade = document.getElementById('div_school_grade');
+              let profile_school = document.getElementById('profile_school')
+              let profile_grade= document.getElementById('profile_grade')
+              if(div_school_grade){
+                if(profile_of_user.role == "Student"){
+                  div_school_grade.style.display = "block"
+                  profile_school.innerHTML = profile_of_user.school;
+                  profile_grade.innerHTML = profile_of_user.grade;
+                 
+                } else{
+                  div_school_grade.style.display = "none"
+                  profile_school.innerHTML = ""
+                  profile_grade.innerHTML = ""
+                }                
+              }
+
+               let id_created = document.getElementById('id_created');
+              if(id_created){
+                id_created.innerHTML=profile_of_user.created;
+              }
+
+               let id_updated = document.getElementById('id_updated');
+              if(id_updated){
+                id_updated.innerHTML=profile_of_user.updated;
+              }
+
+              let div_reading_levels = document.getElementById('div_reading_levels');
+              // let div_inner_contact = document.getElementById('div_inner_contact')
+              if(div_reading_levels){
+                if(profile_of_user.role == "Student"){
+                  div_reading_levels.style.display = "block"
+                  // div_inner_contact.innerHTML = profile_of_user.person;
+                 
+                } else{
+                  div_reading_levels.style.display = "none"
+                  // div_inner_contact.innerHTML = ""
+                }                
+              }
+
+               let div_scheduled_slots = document.getElementById('div_scheduled_slots');
+              let ul_slots = document.getElementById('ul_slots')
+              if(div_scheduled_slots){
+                if(profile_of_user.role != "Staff"){
+
+                  div_scheduled_slots.style.display = "block"
+                  ul_slots.innerHTML = ""
+                  if( profile_of_user.slots != "No Scheduled Slots"){
+                    for(let item of profile_of_user.slots){
+                    console.log("Slot", item.slot)
+
+                    let new_s = document.createElement('li')
+                    new_s.innerHTML = item.slot
+                    ul_slots.appendChild(new_s)
+                  } 
+
+                  }else{
+                    let new_s = document.createElement('li')
+                    new_s.innerHTML = profile_of_user.slots
+                    ul_slots.appendChild(new_s)
+
+                  }
+                  
+                 
+                } else {
+                  div_scheduled_slots.style.display = "none"
+                  ul_slots.innerHTML = ""
+                }                
+              }
+
+
+              
+
+
+            }
+                       
+
+        },
+        error: function (response) {
+        console.log(response)
+        },
+        });
+}
+
+
+
+
+</script>

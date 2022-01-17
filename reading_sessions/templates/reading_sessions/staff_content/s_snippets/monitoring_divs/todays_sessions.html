@@ -1,0 +1,55 @@
+
+{% if day_with_session.count == 0 %}
+<div id = "no_sessions_today">
+	No Sessions
+</div>
+{% else %}
+<div id = "all_sessions_div">
+	<h5 class='mb-3 mt-3'>Scheduled Sessions Today </h5>
+	<h6 class='border-bottom mb-0'>{{day_with_session.day}}, {{day_with_session.date}}</h6>
+	<div class="table-responsive pt-0" >
+		<table class="table table-striped table-sm align-middle">
+		 <thead>
+		     <tr>
+		      <th>Session</th>
+		      <th class="text-center">Match Count</th>
+		      <th class="text-center">Matches</th>
+		    </tr>
+		  </thead>
+		  <tbody>
+		 	{% for session in day_with_session.day_sessions.all %}
+		     <tr>
+		       <td>
+		       	<text class="fw-bold"> {{session.day_time.session_slot}}: </text>
+		       	<text class=""> {{session.day_time.time_start}}-{{session.day_time.time_end}}</text>
+		       </td>
+		      <td class="text-center">{{session.active_scheduled_matches_in_session.count}}</td>
+		      <td class="text-center">
+		      	<button class="btn btn_staff_sidebar" id="matches_{{session.day_time.session_slot}}_btn" value="{{session.day_time.session_slot}}" onclick="determine_session(this)">
+					<h6 class="link_text">View {{session.day_time.session_slot}}</h6>
+				</button>
+		      </td>
+		    </tr>
+		    {% endfor %}
+		  </tbody>
+		</table> 
+	</div>
+
+	<!-- <div>
+		All Semester Scheduled Matches Modal Button
+	</div> -->
+</div>
+
+<div  class="matches_in_session" id="matches_in_session">
+	{% for session in day_with_session.day_sessions.all %}
+		{% include 'reading_sessions/staff_content/s_snippets/monitoring_divs/matches_in_session.html' with session=session %}
+	{% endfor %}
+</div>
+
+{% endif %}
+
+
+
+
+
+

@@ -1,0 +1,234 @@
+{% extends 'site_admin/admin_base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="mt-1">
+{% include 'site_admin/snippets/buttons.html' %}
+{% include 'site_admin/snippets/django_messages_snippet.html' %}
+</div>
+
+<div class="row py-3">
+  <div class="col-lg-10 col-md-10 col-sm-10 mx-auto">
+    <div class="card mx-auto">
+      
+      <div class="card-header custom_bg_blue">
+        <h3 class="w-100 text-center fw-bold m-0">Edit {{member.full_name}}'s Profile</h3>
+        
+      </div>
+      <div class="card-body pb-0"> 
+        
+        <form method="POST">
+              {% csrf_token %}
+              <input type="hidden" id="id_user" name="user" class="" placeholder="" value="{{form.initial.user}}">
+        <div class="row">
+          <div class="col">
+              <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Mega Team:</label> 
+              <select name="mega" id="id_mega" class="fixed_width_input2">
+                <option value="">---------</option>
+                {% for mega in mega_teams %}
+                  <option value="{{mega.id}}" {% if form.initial.mega == mega %} selected {% endif %}>{{mega.name}}</option>
+                {% endfor %}
+              </select>
+              <div>
+                {% if form.mega.errors %}
+                  <ul class="error_list pb-3">
+                  {% for error in form.mega.errors %}
+                      <li>{{ error|escape }}</li>
+                  {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Team:</label> 
+              <select name="team" id="id_team" class="fixed_width_input2">
+                <option value="">---------</option>
+                {% for team in teams %}
+                  <option value="{{team.id}}" {% if form.initial.team == team %} selected {% endif %}>{{team.name}}</option>
+                {% endfor %}
+              </select>
+              <div>
+                {% if form.team.errors %}
+                  <ul class="error_list pb-3">
+                  {% for error in form.team.errors %}
+                      <li>{{ error|escape }}</li>
+                  {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Additional Roles:</label> 
+              <div>
+                <ul class="list-unstyled" >
+                  {% for role2 in secondary_roles %}
+                  <li class ="py-1">
+                  
+                  <div class="d-inline-flex">                  
+                    <div>
+                      <input type="checkbox" class="checkbox" name="role2" id="id_role2-{{role2.id}}" value="{{role2.id}}" {% if role2 in member.secondary_roles.all %} checked {% endif %} >
+                    </div>
+                    <div>
+                      <text class="fw-bold ps-3 pe-3">{{role2}}</text>
+                    </div>                         
+                  </div>
+
+                </li>
+                  {% endfor %}
+                </ul>
+              </div>
+
+              <div>
+                {% if form.secondary_roles.errors %}
+                  <ul class="error_list pb-3">
+                  {% for error in form.team.errors %}
+                      <li>{{ error|escape }}</li>
+                  {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Gender:</label> 
+              <select name="gender" id="id_gender" class="fixed_width_input2">
+                <option value="">---------</option>
+                {% for gender in genders %}
+                  <option value="{{gender.id}}" {% if form.initial.gender == gender %} selected {% endif %}>{{gender}}</option>
+                {% endfor %}
+              </select>
+              <div>
+                {% if form.gender.errors %}
+                  <ul class="error_list pb-3">
+                  {% for error in form.gender.errors %}
+                      <li>{{ error|escape }}</li>
+                  {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+            </div>
+                        
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Primary Language:</label> 
+              <select name="primary_lang" id="id_primary_lang" class="fixed_width_input2">
+                <option value="">---------</option>
+                {% for lang in languages %}
+                  <option value="{{lang.id}}" {% if form.initial.primary_lang == lang %} selected {% endif %}>{{lang}}</option>
+                {% endfor %}
+              </select>
+              <div>
+                {% if form.primary_lang.errors %}
+                  <ul class="error_list pb-3">
+                  {% for error in form.primary_lang.errors %}
+                      <li>{{ error|escape }}</li>
+                  {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Secondary Language:</label> 
+              <select name="secondary_lang" id="id_secondary_lang" class="fixed_width_input2">
+                <option value="">---------</option>
+                {% for lang in languages %}
+                  <option value="{{lang.id}}" {% if form.initial.secondary_lang == lang %} selected {% endif %}>{{lang}}</option>
+                {% endfor %}
+              </select>
+              <div>
+                {% if form.secondary_lang.errors %}
+                  <ul class="error_list pb-3">
+                  {% for error in form.secondary_lang.errors %}
+                      <li>{{ error|escape }}</li>
+                  {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+            </div>
+
+
+            <div class="p-2 d-flex">
+              <label class="fixed_width_bold_label2">Phone:</label> 
+              <input type="text" name="contact_number" maxlength="255" id="id_contact_number" class="fixed_width_input2" {% if form.initial.contact_number %} value="{{form.initial.contact_number}}" {% endif %}>
+              <div>
+                {% if form.contact_number.errors %}
+                  <ul class="error_list pb-3">
+                  {% for error in form.contact_number.errors %}
+                      <li>{{ error|escape }}</li>
+                  {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="p-2 d-flex">
+              <label class="fw-bold pe-3">Comment:</label>
+              <textarea name="comment" id="id_comment" maxlength="1000" class="w-100">{% if form.initial.comment %}{{form.initial.comment}} {% endif %}</textarea>
+
+
+            </div>
+            <div class="help_text pe-2">Max Length = 1000 characters</div>
+          </div>
+         <div class="col">
+  <!--            <h5 class="text-center">Available Day/Time/Slots</h5>
+            <div class="d-grid justify-content-center">          
+              <ul class="available_slots_ul_edit list-unstyled" >
+                {% for slot in slots %}
+                
+                <li class ="py-1">
+                  
+                  <div class="d-inline-flex">                  
+                    <div>
+                      <input type="checkbox" class="checkbox" name="day_time" id="id_day_time-{{slot.id}}" value="{{slot.id}}" {% if slot in member.student_profile.available_day_time_slots.all %} checked {% endif %} >
+                    </div>
+                    <div>
+                      <text class="fw-bold ps-3 pe-3">{{slot }}</text>
+                    </div>                         
+                  </div>
+
+                </li>
+                {% endfor %}
+              </ul>
+            </div>-->
+            
+          </div>
+          <div class="d-none">
+            {% for item in current_notes %}
+            <input type="text" name="profile_note" id="id_note-{{item.id}}" value="{{item.id}}">
+            {% endfor %}
+          </div>  
+                  
+        </div> 
+
+          <button class="w-100 btn btn-warning my-3" type="submit">Submit Changes</button>
+
+        </form> 
+
+      </div>
+      <div class="card-footer">
+        <div class="row mx-0 p-0">
+            <div class="col">
+              <label for="" class="fw-bold text-muted pe-2">Created:</label>
+              <text class="text-muted">{{form.initial.date_created}}</text>
+            </div>
+            <div class="col d-flex justify-content-end">
+              <label for="" class="fw-bold text-muted pe-2">Last Updated:</label>
+              <text class="text-muted">{{form.initial.last_updated}}</text>
+            </div> 
+                   
+          </div> 
+        <!-- <button type="submit" class="w-50 btn btn-lg btn-warning my-1">Submit Changes</a> -->
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+
+{% endblock content %}
+

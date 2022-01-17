@@ -1,0 +1,181 @@
+{% extends 'testing/testing_base.html' %}
+
+{% load static %}
+
+{% block content %}
+{{ room_name|json_script:"room_name" }}
+<div class="p-3">
+	{% if logged_in_user.is_superuser %}
+		<h3>{{logged_in_user}} - {{logged_in_user.role.name}}</h3>	
+
+		<div>
+			<div class="text-center">
+				<label class="fw-bold">Room Name:</label>
+			</div>
+			<div class="text-center">
+				<input type="text" name="room_name" id="room_name_element">
+			</div>
+		</div>
+
+		<div class="text-center p-3">
+			<button class="btn btn-primary" onclick="join_as_staff()">Join As Staff</button>
+			<div class="d-none">
+				
+			</div>
+			<a id="join_staff" href="{% url 'testing:testing_staff' room_name %}"></a>
+		</div>
+
+		<div class="text-center p-3">
+			<button class="btn btn-primary" onclick="join_as_student()">Join As Student</button>
+			<div class="d-none">
+				
+			</div>
+			<a id="join_student" href="{% url 'testing:testing_student' room_name %}"></a>
+		</div>
+
+		<div class="text-center p-3">
+			<button class="btn btn-primary" onclick="join_as_volunteer()">Join As Volunteer</button>
+			<div class="d-none">
+				
+			</div>
+			<a id="join_volunteer" href="{% url 'testing:testing_volunteer' room_name %}"></a>
+		</div>
+		<script type="text/javascript">
+ //   console.error("Loading the Page");
+ //   			const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws"; 
+
+ //   				if (ws_scheme == "ws"){
+	// 	console.log("ws_scheme", ws_scheme)
+	// 	status_ws_path = ws_scheme + '://' + window.location.host + "/status/";
+	// } else if (ws_scheme == "wss"){
+	// 	console.log("ws_scheme", ws_scheme)
+	// 	status_ws_path = ws_scheme + '://' + window.location.host + ":8001/status/";
+	// } else {
+	// 	console.log("Else ws_scheme", ws_scheme)
+	// }
+
+	// 		// const site_location = "match-pending"	
+	// 		// const status_ws_path ="wss://sessions-ebookbuddy.org:8001/status/"
+
+	// 		// const status_ws_path = ws_scheme + '://' + window.location.host + ":8001/status/";
+
+ //      console.log("status_ws_path", status_ws_path);
+	// 		const statusSocket = new WebSocket(status_ws_path);
+	// 		console.log("const status_ws_path", status_ws_path);
+	// 		statusSocket.onmessage = function(message) {
+	// 			let status_data = JSON.parse(message.data);
+	// 			console.log("Status Data", status_data)
+	// 			alert("Status Data  !!!!  " + status_data.username + " Joining")
+
+	// 			}
+
+	// 		statusSocket.onopen = function(e) {
+	// 	  console.log("statusSocket [open] Connection established");
+
+		  
+	// 	};
+
+	// statusSocket.addEventListener("open", function(e){
+	// 	console.log("Status Socket OPEN");
+ //   console.log("statusSocket [open] Connection established");
+	// 	if("{{request.user.is_authenticated}}"){
+	// 		statusSocket.send(JSON.stringify({
+	// 			"command": "join",
+	// 			"member_id": 1,
+	// 			"room_id": 1, 
+	// 		}))
+	// 	}			
+	// });	
+
+	// statusSocket.onerror = function(e){
+	// 	alert("FAILED  !!!!  ")
+	// 	console.log("Status Socket on error: " + JSON.stringify(e))
+	// 	console.log("Status ChatSocket ERROR code", e.code);
+	// 	console.log("Status ChatSocket ERROR reason", e.reason);
+	// 	console.log("Status ChatSocket ERROR message", e.message);
+	// };
+
+
+
+  //  	let socket = new WebSocket("wss://javascript.info/article/websocket/demo/hello");
+		// console.log(" javascript ", socket) 
+		// 	socket.onopen = function(e) {
+		//   console.log("[open] Connection established");
+		//   console.log("Sending to server");
+		//   socket.send("My name is John");
+		// };
+
+		// socket.onmessage = function(event) {
+		//   console.log(`[message] Data received from server: ${event.data}`);
+		// };
+
+		// socket.onclose = function(event) {
+		//   if (event.wasClean) {
+		//     console.log(`[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
+		//   } else {
+		//     // e.g. server process killed or network down
+		//     // event.code is usually 1006 in this case
+		//     console.log('[close] Connection died');
+		//   }
+		// };
+
+		// socket.onerror = function(error) {
+		//   console.log(`[error] ${error.message}`);
+		// };
+   
+
+			const room_name_element = document.getElementById('room_name_element');
+
+			function join_as_staff(){
+				let room_name_value = room_name_element.value;
+				// console.log("room_name_value", room_name_value);
+				room_name_value = room_name_value.replace(/ /g, "_")
+				// console.log("new room_name_value", room_name_value);
+				let staff_link = document.getElementById('join_staff');
+				// console.log("staff_link", staff_link);
+				let current_href = staff_link.href
+				// console.log("current_href", current_href)
+				let new_href = current_href.replace("Example_Room", room_name_value)
+				// console.log("new href", new_href)
+				staff_link.href=new_href;
+				staff_link.click()
+
+			}
+			function join_as_student(){
+				let room_name_value = room_name_element.value;
+				// console.log("room_name_value", room_name_value);
+				room_name_value = room_name_value.replace(/ /g, "_")
+				// console.log("new room_name_value", room_name_value);
+				let student_link = document.getElementById('join_student');
+				// console.log("staff_link", staff_link);
+				let current_href = student_link.href
+				// console.log("current_href", current_href)
+				let new_href = current_href.replace("Example_Room", room_name_value)
+				// console.log("new href", new_href)
+				student_link.href=new_href;
+				student_link.click()
+
+			}
+
+			function join_as_volunteer(){
+				let room_name_value = room_name_element.value;
+				// console.log("room_name_value", room_name_value);
+				room_name_value = room_name_value.replace(/ /g, "_")
+				// console.log("new room_name_value", room_name_value);
+				let volunteer_link = document.getElementById('join_volunteer');
+				// console.log("staff_link", staff_link);
+				let current_href = volunteer_link.href
+				// console.log("current_href", current_href)
+				let new_href = current_href.replace("Example_Room", room_name_value)
+				// console.log("new href", new_href)
+				volunteer_link.href=new_href;
+				volunteer_link.click()			
+			}
+
+
+		</script>
+	{% endif %}
+
+
+</div>
+{% endblock content %}

@@ -1,0 +1,346 @@
+<script type="text/javascript">
+console.log("Loading End Scripts")
+let jitsiID = null
+let roomName = null
+let displayName = null
+
+function get_participants_by_room_id(){
+  console.log("get_participants_by_room_id")
+  let api_call = api.getParticipantsInfo()
+  return api_call
+}
+
+function send_join_data(server){
+  console.error("JOINING jitsiID, roomName, displayName", jitsiID, roomName, displayName)
+  server.send(JSON.stringify({
+            "command": "join_jitsi",
+            "jitsi_room":roomName,
+            "room_name": room_name,
+            "room_id": room_id,
+            "member_id": user_id,
+            "display_name": displayName,
+            "jitsi_id": jitsiID,
+            "time_now": Date.now(),
+          }));
+}
+
+function send_leave_data(server){
+  console.error("LEAVING jitsiID, roomName, displayName", jitsiID, roomName, displayName)
+   server.send(JSON.stringify({
+            "command": "leave_jitsi",
+            "jitsi_room":roomName,
+            "room_name": room_name,
+            "room_id": room_id,
+            "member_id": user_id,
+            "display_name": displayName,
+            "jitsi_id": jitsiID,
+            "time_now": Date.now(),
+          }));
+}
+
+
+api.addEventListener("videoConferenceJoined", function(e){
+  user_joined_room(e)
+  });
+
+function user_joined_room(event) {
+  console.error("\n\nvideoConferenceJoined",event)
+  jitsiID = event.id;
+  roomName = event.roomName.replaceAll('%20', ' ');
+  displayName = event.displayName;
+  // get_in_room(true); 
+  
+  // send_message("Joined", participantID='' )
+  getSocket().then(function(server) {
+          send_join_data(server)
+         }).catch(function(err) {
+          console.log("Error Jitse Joined", err)
+      });
+      
+}
+
+
+api.addEventListener("videoConferenceLeft", function(e){
+  videoConferenceLeft(e)
+  });
+
+function videoConferenceLeft(event) {
+  console.error("\n\nvideoConferenceLeft",event)
+  // get_in_room(false);
+  getSocket().then(function(server) {
+          send_leave_data(server)
+      }).catch(function(err) {
+          console.warn("Error Jitsi Left", err)
+      }); 
+
+}
+
+api.addEventListener("errorOccurred", function(e){
+  errorOccurred(e)
+  });
+
+function errorOccurred(event) {
+  console.error("\n\nerrorOccurred",event)
+}
+
+api.addEventListener("participantJoined", function(e){
+  participantJoined(e)
+  });
+
+function participantJoined(event) {
+  console.error("\n\nparticipantJoined", event)
+  // send_message("Joined", participantID='' )
+}
+
+api.addEventListener("participantLeft", function(e){
+  participantLeft(e)
+  });
+
+function participantLeft(event) {
+  console.error("\n\nparticipantLeft",event)
+}
+
+api.addEventListener("readyToClose", function(e){
+  readyToClose(e)
+  });
+
+function readyToClose(event) {
+  console.error("\n\nreadyToClose",event)
+}
+
+api.addEventListener("suspendDetected", function(e){
+  suspendDetected(e)
+  });
+
+function suspendDetected(event) {
+  console.error("\n\nsuspendDetected",event)
+}
+
+// if(user_role == "Staff"){
+if(user_role == "Staff"){
+    const jitsi_btn_rooms = document.getElementById('get_jitsi_part_btn')
+
+    if(jitsi_btn_rooms){
+      jitsi_btn_rooms.addEventListener("click", function(e){
+        let websocket_rooms = document.getElementById('websocket_rooms');
+        let jitsi_meeting_rooms = document.getElementById('jitsi_meeting_rooms');
+        websocket_rooms.style.display = "none";
+        jitsi_meeting_rooms.style.display = "block";
+
+        ajax_get_jitsi_rooms();
+
+      })
+    }
+
+    if(get_jitsi_live_btn){
+      get_jitsi_live_btn.addEventListener("click", function(e){
+        let websocket_rooms = document.getElementById('websocket_rooms');
+        let jitsi_meeting_rooms = document.getElementById('jitsi_meeting_rooms');
+        let jitsi_live_rooms = document.getElementById('jitsi_live_rooms');
+        websocket_rooms.style.display = "none";
+        jitsi_live_rooms.style.display = "block";
+        jitsi_meeting_rooms.style.display = "none";
+
+        
+
+      })
+    }
+  }
+
+  function get_jitsi_rooms() {
+
+    const numberOfParticipants = api.getNumberOfParticipants();
+    console.log("\n\n\nNumber In Room", numberOfParticipants);
+
+    let participants = api.getParticipantsInfo();
+    // console.log("Room participants", participants, typeof(participants));
+    let people_in_room = JSON.stringify(participants)
+    for (let item of participants){
+      console.log("Participant ", item.displayName)
+    }
+    let string_list  = ""
+    $.ajax({
+        type: 'GET',
+        url: "https://semester.sessions-ebookbuddy.org/all-rooms",
+        success: function (response) {
+          // console.log("\n all-rooms call success for user_id", user_id)
+          console.log("all-rooms response", response) 
+
+        },
+        error: function (response) {
+          console.log("Fail")
+            console.log(response)
+        }
+      }).done(function( response ) {
+          let json_rooms = JSON.parse(response)
+          console.log("\n\n\n\n\njson_rooms", json_rooms, typeof(json_rooms)) 
+          let room_list = {}
+          for (let item of json_rooms.rooms){
+            //console.log("item", item)
+
+
+            //console.log("room", item.jid)
+            let slug = item.jid.split('@')[0].replaceAll('%20', '-')
+            //console.log("\n\nslug", slug)
+
+            let room_parts = []
+            let participants = item.participants
+            for (let item of participants){
+              //console.log("participants", item.display_name)
+              room_parts.push(item.display_name)
+            }
+            room_list[slug] = room_parts
+
+            //console.log("Room List", room_list, typeof(room_list))
+            string_list  = JSON.stringify(room_list)
+             //console.log("Room List", room_list, typeof(room_list))
+          }
+
+          payload = {
+            "csrfmiddlewaretoken": "{{ csrf_token }}",
+            "rooms_str": string_list,
+          }
+
+        $.ajax({
+        type: 'POST',
+        dataType: "json",
+        url: "{%url 'reading_sessions:ajax_by_room_participants' %}", // production
+        data: payload,
+        timeout: 5000,
+        success: function (response) {
+               if(response["valid"]){
+                
+                console.log("DJANGO Response", response);
+                let json_rooms = JSON.parse(response['rooms'])
+                // console.log("JSON Rooms", json_rooms, typeof(json_rooms))
+
+                // let jitsi_rows = document.querySelectorAll('.jitsi_row');
+                // for(let item of jitsi_rows){
+                //   item.remove()
+                // }
+
+                let table_for_jitsi = document.getElementById('tbody_rooms_participants_jitsi');
+                for (let item of json_rooms.jitsi_rooms){
+                  // console.log("item of json_rooms.jitsi_rooms", item);
+                  // let the_room_count = item.jitsi_count
+                    let jitsi_part = document.getElementById('jitsi_parts-'+ item.room_id)
+                    jitsi_part.innerHTML = ""
+
+                    let jitsi_people = item.jitsi_participants
+
+                    for(let item of jitsi_people){
+                      // console.log("J Person", item)
+                      let new_j = document.createElement('div')
+                      new_j.innerHTML = item.username + ": " + item.full_name
+                      jitsi_part.appendChild(new_j)
+   
+                      }
+
+                      let ws_part = document.getElementById('ws_parts-'+ item.room_id)
+                      ws_part.innerHTML = ""
+
+                      let ws_people = item.participants
+                      for(let item of ws_people){
+                        // console.log("WS Person", item)
+                        let new_ws = document.createElement('div')
+                        new_ws.innerHTML = item.username + ": " + item.full_name
+                        ws_part.appendChild(new_ws)
+                      }
+
+                      let jitsi_count = document.getElementById('jitsi_count-'+ item.room_id)
+                      jitsi_count.innerHTML = item.jitsi_count
+                      let ws_count = document.getElementById('ws_count-'+ item.room_id)
+                      ws_count.innerHTML = item.count
+
+                      let room_row_id = "jitsi_room_" + item.room_id
+                      let room_row_j = document.getElementById(room_row_id)
+                      if(room_row_j){
+                        if (table_for_jitsi){
+                          if(parseInt(jitsi_count) !=0){
+                            table_for_jitsi.append(room_row_j)
+                          }else{
+                            table_for_jitsi.prepend(room_row_j)
+                          }
+                          
+                        }else{
+                        console.log("table_for_jitsi")
+                      }
+
+                      } else{
+                        console.log("no_room_j")
+                      }
+                }
+               }
+             },
+             error: function (response) {
+             console.log(response)
+             },
+      });
+
+
+
+      });
+
+  }
+
+
+  function ajax_get_jitsi_rooms() {
+
+  }
+
+
+
+  function api_get_by_room(){
+    console.log("Send to websocket to print all api by room")
+    match_socket_private.send(JSON.stringify({
+            "command": "get_api_participants",            
+        }));
+
+  }
+
+  function ajax_by_room_participants(room, participants){
+    console.log("in ajax_by_room_participants",room, participants)
+
+        payload = {
+          "csrfmiddlewaretoken": "{{ csrf_token }}",
+          "room": room,
+          "participants": participants,
+        }
+
+      $.ajax({
+        type: 'POST',
+        dataType: "json",
+        url: "{%url 'reading_sessions:ajax_by_room_participants' %}", // production
+        data: payload,
+        timeout: 5000,
+        success: function (response) {
+               if(response["valid"]){               
+                console.log("DJANGO Response", response);              
+               }
+             },
+             error: function (response) {
+             console.log(response)
+             },
+      });
+
+  }
+
+
+  // function send_message(the_message, participantID='' ){
+//   console.error("\n\n\nSending Message")
+//   api.executeCommand('sendEndpointTextMessage', participantID, the_message); 
+// api.executeCommand('sendEndpointTextMessage', 'text');
+// api.executeCommand('sendEndpointTextMessage',Object.keys(api._participants)[0],"aaasdas"); 
+// }
+
+// function message_received(e) {
+//    console.error("text_message_received", e);
+//    // api.executeCommand('sendEndpointTextMessage', 'Message Received');   
+// }
+// api.addListener('incomingMessage', message_received);
+
+// api.addListener('endpointTextMessageReceived', text_message_received);
+
+
+
+</script>

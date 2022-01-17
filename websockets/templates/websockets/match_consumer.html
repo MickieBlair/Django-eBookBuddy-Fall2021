@@ -1,0 +1,1331 @@
+{% block match_script %}
+<script type="text/javascript">
+	console.log("Connecting Match Consumer");
+
+	const max_count = 4
+	let current_count = 0
+
+	
+	const site_location = room_slug	
+	let match_ws_path =""
+ 
+if (ws_scheme == "ws"){
+		console.log("ws_scheme", ws_scheme)
+		match_ws_path = ws_scheme + '://' + window.location.host + "/match/" + site_location  + "/"; // 		
+
+	 } else if (ws_scheme == "wss"){
+	 	console.log("ws_scheme", ws_scheme)
+	 	match_ws_path = ws_scheme + '://' + window.location.host + ":8001/match/"+ site_location  +"/";
+	 } else {
+	 	console.log("Else ws_scheme", ws_scheme)
+	 }
+
+
+
+	console.log("match_ws_path", match_ws_path)
+
+	let match_socket_private = null
+
+	function connect_ws(){
+		console.log("\n\n\n****MATCH CONSUMER CONNECTING")
+
+		const matchSocket = new WebSocket(match_ws_path);
+		match_socket_private = matchSocket
+
+
+	matchSocket.onmessage = function(message) {
+		const match_data = JSON.parse(message.data);
+   //console.log(" match_data ", match_data) 
+   		if(match_data.msg_type == "student_not_scheduled"){
+   			if (user_role == "Staff"){
+   				console.error("student_not_scheduled", match_data)
+   			}
+
+   			if (user_id == match_data.student_out_id){
+   				// console.error("student_not_scheduled", match_data)
+   				let student_home = document.getElementById('landing_link')
+   				student_home.click()
+   			}
+
+            
+            
+        }
+
+
+		if(match_data.msg_type == "redirect_user"){
+			if(user_role == "Staff"){
+				console.log("\n\n redirecting user ", match_data) 
+			}
+
+            //console.log(" redirect_user ", match_data) 
+            if(match_data.redirect_user_id == user_id){
+                let link_redirect = document.getElementById(match_data.link_id)
+                //console.log("\n\n\n\n\n\n\nlink_redirect", link_redirect)
+                link_redirect.click();
+              } 
+     //          else{
+     //          	if (user_role == "Staff"){
+     //          		matchSocket.send(JSON.stringify({
+					// 	"command": "get_all_redirects",
+					// 	"user_id": user_id,
+					// }))
+
+     //          	}
+     //          }            
+        }
+
+		if(match_data.msg_type == "notify_all"){
+            // console.log("notify_all", status_data)
+            displayToAll(match_data) 
+        }
+
+        if(match_data.msg_type == "manual_redirects"){
+            // console.log(status_data) 
+            // let clickable_links = document.querySelectorAll('.clickable_links');
+            // console.log(clickable_links)
+
+            let manual_redirects = JSON.parse(match_data['manual_redirects']).manual_redirects
+            // console.log(manual_redirects) 
+            for(let item of manual_redirects) {
+                 if(item.user_to_redirect_id == user_id){
+                 	// console.log("Redirect", item)
+                 	//click the link  
+                 	let link_to_click = document.getElementById('get_room_link-' + item.to_room_id)
+
+                 	// console.log("link_to_click", link_to_click)
+                    link_to_click.click();
+                  } 
+
+            }          
+        }
+
+        if(match_data.msg_type == "get_api_participants"){
+            // console.log("GETTING THE PARTICIPANTS IN ROOM", room_name, room_id, room_slug)
+            const numberOfParticipants = api.getNumberOfParticipants();
+		    // console.log("\n\n\nSocket Call Number In Room", numberOfParticipants);
+
+		    let participants = api.getParticipantsInfo();
+		    // console.log("Room participants", participants, typeof(participants));
+		    let people_in_room = JSON.stringify(participants)
+		    let list = []
+		    for (let item of participants){
+		    	// console.log("Participant ", item.displayName)
+		    	list.push(item.displayName)
+		    }
+		    ajax_by_room_participants(room_id, JSON.stringify(list))
+            
+        }
+
+
+
+		if(match_data.msg_type == "member_joining"){
+            let user_joining = match_data
+            // console.log("Joining", user_joining)
+
+            let id_to_update = "online_status-" + user_joining.member_id;
+            // console.log("id_to_update", id_to_update)
+            let online_element_to_update = document.getElementById(id_to_update);
+            if(online_element_to_update){
+                online_element_to_update.innerHTML = user_joining.full_name + " - ONLINE";
+            }
+
+            if(user_role == "Staff"){
+            	console.log("\n\n\nJoining", user_joining.room_name, user_joining.full_name, )
+            	console.log(user_joining.role, user_joining.username)
+            	// display participants
+            	// let status_icon = document.querySelectorAll("status_icon_" + match_data.member_id)
+            	// if(status_icon){
+            	// 	// console.log("status_icon", status_icon)
+            	// 	status_icon.setAttribute('class', 'fas fa-user profile_icon user_online')
+            	// }
+
+
+
+            }  else {
+            	// console.log("Not staff view Entering")
+            	// let all_room_profile_cards = document.querySelectorAll(".room_profile_card");
+            	// for(let item of all_room_profile_cards){
+            	// 	console.log(item)
+            	// }
+            }                    
+        }
+
+        if(match_data.msg_type == "member_leaving"){
+            let user_left = match_data
+            
+
+            let id_to_update = "online_status-" + user_left.member_id;
+            let online_element_to_update = document.getElementById(id_to_update);
+            if(online_element_to_update){
+                online_element_to_update.innerHTML = user_left.full_name + " - OFFLINE";
+            }
+
+            if(user_role == "Staff"){
+            	
+            	console.log("\n\n\nLeaving", user_left.room_name, user_left.full_name, )
+            	console.log(user_left.role, user_left.username)
+            	// let status_icon = document.getElementById("status_icon_" + match_data.member_id)
+            	// if(status_icon){
+            	// 	status_icon.setAttribute('class', 'fas fa-user profile_icon user_offline')
+            	// }
+
+            	let status_icons = document.querySelectorAll('.status_icon_' + match_data.member_id)
+            	// console.log("Leaving icons", status_icons)
+					for(let item of status_icons){
+						item.setAttribute('class', 'fas fa-user profile_icon user_offline status_icon_' + match_data.member_id)
+					}
+
+            	let user_manual_input = document.getElementById('manual_redirect_user-' + match_data.member_id)
+				    // console.log(user_manual_input)
+			    if(user_manual_input){
+			        user_manual_input.style.display ="none";
+			    }
+
+			    let the_member_locations = document.querySelectorAll(".the_member_location-" + match_data.member_id)
+			    for(let item of the_member_locations){
+			    	item.innerHTML = ""
+			    }
+
+			    // let the_member_location = document.getElementById("the_member_location-" + match_data.member_id)
+	      //       	if(the_member_location){
+	      //       		// console.log("the_member_location", the_member_location)
+	      //       		the_member_location.innerHTML ="";
+	            		
+	      //       	}
+            } else {
+            	// console.log("Not staff view Leaving")
+            }                     
+        } 
+
+     //    if(match_data.msg_type == "member_leaving"){
+     //        let user_left = match_data
+     //        console.log("Leaving", user_left)
+
+     //        let id_to_update = "online_status-" + user_left.member_id;
+     //        let online_element_to_update = document.getElementById(id_to_update);
+     //        if(online_element_to_update){
+     //            online_element_to_update.innerHTML = user_left.full_name + " - OFFLINE";
+     //        }
+
+     //        if(user_role == "Staff"){
+     //        	// let status_icon = document.getElementById("status_icon_" + match_data.member_id)
+     //        	// if(status_icon){
+     //        	// 	status_icon.setAttribute('class', 'fas fa-user profile_icon user_offline')
+     //        	// }
+
+     //        	let status_icons = document.querySelectorAll('.status_icon_' + match_data.member_id)
+     //        	// console.log("Leaving icons", status_icons)
+					// for(let item of status_icons){
+					// 	item.setAttribute('class', 'fas fa-user profile_icon user_offline status_icon_' + match_data.member_id)
+					// }
+
+     //        	let user_manual_input = document.getElementById('manual_redirect_user-' + match_data.member_id)
+				 //    // console.log(user_manual_input)
+			  //   if(user_manual_input){
+			  //       user_manual_input.style.display ="none";
+			  //   }
+
+			  //   let the_member_locations = document.querySelectorAll(".the_member_location-" + match_data.member_id)
+			  //   for(let item of the_member_locations){
+			  //   	item.innerHTML = ""
+			  //   }
+
+			  //   // let the_member_location = document.getElementById("the_member_location-" + match_data.member_id)
+	    //   //       	if(the_member_location){
+	    //   //       		// console.log("the_member_location", the_member_location)
+	    //   //       		the_member_location.innerHTML ="";
+	            		
+	    //   //       	}
+     //        } else {
+     //        	// console.log("Not staff view Leaving")
+     //        }                     
+     //    } 
+
+
+
+        if(match_data.msg_type == "unread_private_messages"){
+        	
+        	if(match_data.for_user == user_id){
+        		// console.log("\n\n\n******unread_private_messages", match_data)
+
+                let unread_count_e = document.querySelectorAll('.new_private_messages-' + user_id)
+                // console.log("unread_count_e", unread_count_e)
+                for(let item of unread_count_e){
+                    item.innerHTML = match_data.unread_by_room_total
+                }
+
+                let no_unread_private = document.getElementById('no_unread_' + user_id)
+
+                if(no_unread_private){
+                    if(match_data.unread_by_room_total == 0){
+                        no_unread_private.style.display = "block"
+                    }else{
+                    	
+                        no_unread_private.style.display = "none"
+                    }
+                }  
+        	}
+        }
+
+        if(match_data.msg_type == "new_private_message"){
+        	// console.log("\n\n\n******A New private_messages", match_data)
+        	
+        	if(match_data.to_user == user_id){
+        		// console.log("\n\n\n******A New private_messages", match_data)
+        		
+	                //console.log("new_private_message", status_data)
+	                play_notification_sound()
+	                let unread_count_e = document.querySelectorAll('.new_private_messages-' + user_id)
+	                // console.log("unread_count_e", unread_count_e)
+	                for(let item of unread_count_e){
+	                    item.innerHTML = match_data.total_unread
+	                }
+
+	                let no_unread_private = document.getElementById('no_unread_' + user_id)
+
+	                if(no_unread_private){
+	                    if(match_data.total_unread == 0){
+	                        no_unread_private.style.display = "block"
+	                    }else{
+	                        no_unread_private.style.display = "none"
+	                    }
+	                }  
+	                get_private_rooms_for_user()               
+	            
+        	}
+        }
+
+        if(match_data.msg_type == "private_room_list"){
+            if(match_data.for_user == user_id){
+                let previous_rows = document.querySelectorAll('.private_room_row')
+                for(let item of previous_rows){
+                    item.remove()
+                }
+                // console.log("private_room_list", status_data)
+                let with_new_private_room_table = document.getElementById('new_tbody_private_rooms_for-' + user_id)
+                let no_private_room_table = document.getElementById('no_new_tbody_private_rooms_for-' + user_id)
+                // console.log(private_room_table)
+                let private_room_list = JSON.parse(match_data.pvt_rooms).private_rooms
+
+                for(let item of private_room_list){
+                    // console.log(item)
+                    let viewing_user = ""
+                    let other_user = ""
+                    let unread_count_for_self = ""
+                    let other_user_name = ""
+
+
+                    if(user_id == item.user1_id){
+                        viewing_user = item.user1_id
+                        other_user = item.user2_id
+                        unread_count_for_self = item.user1_unread
+                        other_user_name = item.user2_name
+
+                    }else{
+                        viewing_user = item.user2_id
+                        other_user = item.user1_id
+                        other_user_name = item.user1_name
+                        unread_count_for_self = item.user2_unread
+                    }
+
+                    new_row = create_private_room_row(item, viewing_user, other_user_name, unread_count_for_self)
+                    // no_private_room_table.appendChild(new_row)
+                    // with_new_private_room_table.appendChild(new_row)
+
+                    if(unread_count_for_self == 0){
+                        no_private_room_table.appendChild(new_row)
+                    } else{
+                        with_new_private_room_table.appendChild(new_row)
+                    }
+                    
+                    
+                }
+            }
+
+        }
+
+        if(match_data.msg_type == "help_requests"){
+        	if(user_role == "Staff"){
+        		// console.log("\n\nhelp_requests", match_data)
+        		let help_count = JSON.parse(match_data.help_count)
+        		let help_requests = JSON.parse(match_data.all_help_requests).help_requests
+
+        		display_help_requests(help_requests, help_count)      		
+                
+        	}
+        }
+
+        if(match_data.msg_type == "current_redirects"){
+        	if (user_role == "Staff"){
+        		let redirect_count = JSON.parse(match_data.redirect_count)
+        		let all_redirects = JSON.parse(match_data.all_redirects).all_redirects
+				if(all_redirects){					
+					display_all_redirects(all_redirects, redirect_count)
+				}        		
+        	}
+        }
+
+
+        if(match_data.msg_type == "session_stats"){
+        	let all_stats = JSON.parse(match_data['session_stats'])
+			let rooms_and_participants = all_stats.rooms_participants			
+
+        	if(user_role == "Staff"){
+        		// console.log("\n\n\n Receiving Session Stats for Staff Member", match_data)
+        		// console.log("\n\n\nSession Stats for Staff Member")
+
+
+           		let index_of_this_room = rooms_and_participants.findIndex(function (meeting_room) {
+						return meeting_room.room_id === room_id;
+					});
+				// console.log("index_of_this_room", index_of_this_room)
+				let this_room_participants = rooms_and_participants[index_of_this_room]
+				// console.log("this_room_participants", this_room_participants)
+
+				let all_the_in_room_participant_profiles = document.querySelectorAll('.in_room_participant_profile')
+
+				for(let item of all_the_in_room_participant_profiles){
+					item.style.display = "none";
+				}
+
+				for(let item of this_room_participants.participants){
+					// console.log("This is a person in the room", item)
+					let in_room_non_staff = document.getElementById('in_room-'+ item.member_id)
+		            if(in_room_non_staff){
+		            	in_room_non_staff.style.display = "block"
+		            }
+				}
+
+        		display_rooms_and_participtants(rooms_and_participants)
+
+        		let connected_users_count = all_stats.connected_match_users
+        		let total_users_div = document.getElementById('total_users')
+        		if(total_users_div){
+        			total_users_div.innerHTML = connected_users_count
+        		}
+
+        		let all_help_requests = all_stats.help_requests
+				let help_request_count = all_stats.help_request_count
+
+				if(all_help_requests){
+					display_help_requests(all_help_requests, help_request_count)
+				}
+
+				let all_redirects = all_stats.all_redirects
+				let redirect_count = all_stats.redirect_count
+
+				if(all_redirects){					
+					display_all_redirects(all_redirects, redirect_count)
+				}
+
+				let available_for_match_rows = document.querySelectorAll('.available_for_match')
+				// console.log(available_for_match_rows)
+				for(let item of available_for_match_rows){
+					// console.log(item)
+					item.style.display = "none"
+				}
+
+
+				let students_needs_match_count = all_stats.students_needing_match_count
+				let pending_student_count = document.getElementById('pending_student_count')
+				// console.log("pending_student_count", pending_student_count)
+				pending_student_count.innerHTML = students_needs_match_count
+				let students_needing_match = all_stats.students_needing_match
+
+				for(let item of students_needing_match){
+					let id_to_display = "available_for_match-" + item.member_id
+					let row_to_display = document.getElementById(id_to_display)
+					row_to_display.style.display = 'table-row'
+				}
+
+				let volunteers_need_match_count = all_stats.volunteers_needing_match_count
+				let available_volunteer_count = document.getElementById('available_volunteer_count')
+				// console.log("available_volunteer_count", available_volunteer_count)
+				available_volunteer_count.innerHTML = volunteers_need_match_count
+				let volunteers_needing_match = all_stats.volunteers_needing_match
+
+				for(let item of volunteers_needing_match){
+					let id_to_display = "available_for_match-" + item.member_id
+					let row_to_display = document.getElementById(id_to_display)
+					row_to_display.style.display = 'table-row'
+				}
+
+				let staff_logged_in_count = all_stats.staff_logged_in_count
+				// let available_volunteer_count = document.getElementById('available_volunteer_count')
+				// console.log("staff_logged_in_count", staff_logged_in_count)
+				// available_volunteer_count.innerHTML = volunteers_need_match_count
+				let staff_logged_in = all_stats.staff_logged_in
+				for(let item of staff_logged_in){
+					let id_to_display = "available_for_match-" + item.member_id
+					let row_to_display = document.getElementById(id_to_display)
+					row_to_display.style.display = 'table-row'
+				}
+
+
+
+				let match_statuses = all_stats.match_statuses
+				process_match_statuses(match_statuses)
+
+
+
+           	} else{
+           		// console.log("Session Stats for All other users", match_data)
+           		let index_of_this_room = rooms_and_participants.findIndex(function (meeting_room) {
+						return meeting_room.room_id === room_id;
+					});
+				// console.log("index_of_this_room", index_of_this_room)
+				let this_room_participants = rooms_and_participants[index_of_this_room]
+				// console.log("this_room_participants", this_room_participants)
+
+				let all_the_in_room_participant_profiles = document.querySelectorAll('.in_room_participant_profile')
+
+				for(let item of all_the_in_room_participant_profiles){
+					item.style.display = "none";
+				}
+
+				let all_the_student_profiles = document.querySelectorAll('.volunteer_display_student_profile')
+				for(let item of all_the_student_profiles){
+					item.style.display = 'none'
+				}
+
+				for(let item of this_room_participants.participants){
+					// console.log("This is a person in the room", item)
+					let in_room_non_staff = document.getElementById('in_room-'+ item.member_id)
+		            if(in_room_non_staff){
+		            	in_room_non_staff.style.display = "block"
+		            }
+
+		            if(user_role == "Volunteer"){
+		            	if(item.role == "Student"){
+		            		// console.log("Displaying Student in room profile student_member_profile-29", item.member_id)
+		            		let this_students_profile = document.getElementById('student_member_profile-' + item.member_id)
+		            		this_students_profile.style.display = 'block'
+		            	}
+		            	
+		            }
+				}
+           	}
+
+        }
+   
+	};
+
+	matchSocket.addEventListener("open", function(e){
+		console.log("Match ChatSocket OPEN");
+		if("{{request.user.is_authenticated}}"){
+			matchSocket.send(JSON.stringify({
+				"command": "join",
+				"member_id": user_id,
+				"room_id": room_id, 
+			}))
+		}			
+	});
+
+
+	matchSocket.onerror = function(e){
+		console.error("Match Socket on error: " + JSON.stringify(e))
+	}
+
+	matchSocket.onopen = function(e){
+        console.log("Match Socket on open: " + JSON.stringify(e))
+
+
+        // console.log("\n\n\n Match Socket Open, Get Unread Counts")
+
+        if (user_role == "Staff"){
+        	console.log('Staff')
+        	// roomchat_connect_ws()
+        	// staff_chat_connect_ws()
+  
+		let staff_pvt_btn = document.getElementById('staff_messages_btn');
+		staff_pvt_btn.addEventListener("click", function(e){
+		      // console.log("Staff Private Messages");
+		      get_private_rooms_for_user()
+		  });
+		} else {
+			console.log('Non Staff')
+			// roomchat_connect_ws()
+			let non_staff_pvt_btn = document.getElementById('non_staff_private_messages_btn');
+			//console.log("non_staff_pvt_btn", non_staff_private_messages_btn)
+			non_staff_pvt_btn.addEventListener("click", function(e){
+			    // console.log("Non Staff Private Messages");
+			    get_private_rooms_for_user()
+			});
+		};
+
+
+		current_count ++
+
+		console.error("CURRENT LOAD FOR PAGE", current_count)
+		
+
+    }
+
+	matchSocket.onclose = function(e) {
+        console.error('Match Socket closed unexpectedly ' + JSON.stringify(e));
+
+        // post_ajax_drop(user_id, room_id)
+        // if(current_count <= max_count){
+        // 	connect_ws()
+        // } else {
+        // 	console.error("***MATCH MAX COUNT REACHED**");
+        // }
+        
+    };
+
+	}
+
+	connect_ws()
+
+// function clone_row_and_to_table(row, table){
+// 	console.log("\n\n clone_row_and_to_table", row, table)
+// 	// move row to bottom and clone to complete tbody_424-A-all
+// 	// let row = document.getElementById('match_status_row-' + item.match_status_id)
+// }
+
+    function insert_before(table_matches, row){
+      // let table_matches = document.getElementById('tbody_97-A-all')
+      // let all_rows = document.querySelectorAll('.all_match_row');
+
+      // let first = all_rows[0]
+
+      // console.log(first)
+
+      // // let newly_complete = document.getElementById('match_status_row-447')
+
+      // table_matches.prepend(newly_complete);
+
+      // table_matches.insertBefore(newly_complete, first);
+    }
+
+    
+
+    function insert_last(){
+      // let table_matches = document.getElementById('tbody_97-A-all')
+      // let all_rows = document.querySelectorAll('.all_match_row');
+      // let last = all_rows[all_rows.length- 1];
+
+      // console.log(last)
+
+      // let newly_complete = document.getElementById('match_status_row-420')
+
+      // console.log(newly_complete)
+
+      // table_matches.append(newly_complete);
+    }
+
+
+    function insertAfter(newNode, existingNode) {
+        // existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
+    }
+
+
+function adjust_existing_row(item){
+	// console.log("Match Status Just Adjust", item)
+
+	let student_location_div_id = "id-match-user-location_" + item.match_status_id + "-" + item.student_id
+
+	let buddy_location_div_id = "id-match-user-location_" + item.match_status_id + "-" + item.buddy_id
+
+	let student_location_text = document.getElementById(student_location_div_id)
+	let buddy_location_text = document.getElementById(buddy_location_div_id)
+
+	if(item.display_student_location){
+		if (item.student_online){
+			// console.log("Yes Display Student Location")
+			if(student_location_text){
+					student_location_text.innerHTML = ""
+				}
+			let link_to_clone1 = document.getElementById('get_room_link-' + item.student_location)
+			// console.log(link_to_clone1)
+			if(link_to_clone1){
+				let clone_link1 = link_to_clone1.cloneNode(true)
+				if(student_location_text){
+					student_location_text.appendChild(clone_link1)
+				}
+			}
+		} else{
+			// console.log("remove student location")
+			if(student_location_text){
+					student_location_text.innerHTML = ""
+				}
+		}
+		
+	} else{
+		if(student_location_text){
+					student_location_text.innerHTML = ""
+				}
+	}
+
+	if(item.display_buddy_location){
+		if (item.buddy_online){
+			if(buddy_location_text){
+					buddy_location_text.innerHTML = ""
+				}
+			// console.log("Yes Display Buddy Location")
+			let link_to_clone2 = document.getElementById('get_room_link-' + item.teacher_location)
+			// console.log(link_to_clone2)
+			if(link_to_clone2){
+				let clone_link2 = link_to_clone2.cloneNode(true)
+				if(buddy_location_text){
+					buddy_location_text.appendChild(clone_link2)
+				}
+			}
+		} else{
+			// console.log("remove buddy location")
+			if(buddy_location_text){
+					buddy_location_text.innerHTML = ""
+				}
+		}
+		
+	} else{
+		if(buddy_location_text){
+					buddy_location_text.innerHTML = ""
+				}
+	}
+
+	let complete_icon = document.getElementById('match_status_complete_'+item.match_status_id)
+	if(complete_icon){
+		if(item.complete){
+			complete_icon.setAttribute('class', 'fas fa-check match_check_green')
+			// move_to_bottom(item)
+		} else{
+			complete_icon.setAttribute('class', 'fas fa-times match_times_red')
+		}
+	}
+
+	let match_status_info = document.getElementById('match_status_info_'+item.match_status_id)
+	if(match_status_info){
+		match_status_info.innerHTML = item.status
+	}
+
+	let row = document.getElementById('match_status_row-' + item.match_status_id)
+
+	let table_id = "tbody_" + item.session_id + '-' +item.session_slot + "-all"
+	let table = document.getElementById(table_id)
+	// console.log("table id", table_id, table)
+	if(item.complete){
+		// console.log("Complete Needs to be last")			
+		table.append(row)
+	} else{
+		// console.log("Not complete")
+	}
+
+}
+
+
+function process_match_statuses(match_statuses){
+	for(let item of match_statuses){
+		// console.log("\n\n\nThis is the Item", item)
+		if(item.match_type == "Scheduled"){
+			// console.log("Scheduled")
+			adjust_existing_row(item)
+		} else{
+			// console.log("Temporary")
+			let existing_row = document.getElementById('match_status_row-' + item.match_status_id)
+			// existing_row.remove()
+			// existing_row = document.getElementById('match_status_row-' + item.match_status_id)
+			if(existing_row){
+				// console.log("Row exists")
+				adjust_existing_row(item)
+			}else{
+				// console.log("Match Status Create the TEMP ROW", item)
+				let table_id = "tbody_" + item.session_id + '-' +item.session_slot + "-all"
+				let table_to_add_to = document.getElementById(table_id)
+				// console.log(table_id)
+				let new_row = document.createElement('tr')
+				new_row.setAttribute('class', 'all_match_row')
+				new_row.setAttribute('id', 'match_status_row-'+item.match_status_id)
+				table_to_add_to.append(new_row)
+
+				let type_td=document.createElement('td')
+				type_td.innerHTML = item.get_type
+
+				let student_td = document.createElement('td')
+				student_td.setAttribute('class', 'ps-1')
+				let inner_student_div = document.createElement('div')
+				inner_student_div.setAttribute('class', 'd-inline-flex w-100')
+				inner_student_div.setAttribute('id', 'online_' + item.student_id)
+				let student_profile_div = document.createElement('div')
+				student_profile_div.setAttribute('type', 'button')
+				student_profile_div.setAttribute('class', 'd-grid justify-content-center align-items-center px-1')
+				student_profile_div.setAttribute('data-bs-toggle', 'modal')
+				student_profile_div.setAttribute('data-bs-target', '#userprofileModal')
+				let func_student = "show_only_profile('member_profile_" + item.student_id +"')"
+				student_profile_div.setAttribute('onclick', func_student)
+				inner_student_div.appendChild(student_profile_div)
+				let stu_icon = document.createElement('i')
+				let stu_icon_class = "fas fa-user profile_icon user_offline status_icon_" + item.student_id
+
+				if(item.student_online){
+					 stu_icon_class = "fas fa-user profile_icon user_online status_icon_" + item.student_id
+				}else{
+					 stu_icon_class = "fas fa-user profile_icon user_offline status_icon_" + item.student_id
+				}
+				
+				stu_icon.setAttribute('class', stu_icon_class)
+				student_profile_div.appendChild(stu_icon)
+
+				let student_div_2 =document.createElement('div')
+				let student_username_div = document.createElement('div')
+				student_username_div.setAttribute('class', "username_small_bold")
+				let s_text_username = document.createElement('text')				
+				s_text_username.innerHTML = item.student_username + ":"
+				student_username_div.appendChild(s_text_username)
+
+				let s_text_location = document.createElement('text')
+				s_text_location.setAttribute('class', "the_member_location-" +  item.student_id)
+				let student_location_div_id = "id-match-user-location_" + item.match_status_id + "-" + item.student_id
+				s_text_location.setAttribute('id', student_location_div_id)
+
+				student_username_div.appendChild(s_text_location)
+
+				let link_to_clone3 = document.getElementById('get_room_link-' + item.student_location)
+				// console.log(link_to_clone3)
+				if(link_to_clone3){
+					let clone_link3 = link_to_clone1.cloneNode(true)
+					s_text_location.appendChild(clone_link3)
+					// console.log(s_text_location)
+				}
+				
+
+
+				let student_name_div = document.createElement('div')
+				student_name_div.setAttribute('class', "full_name")
+				student_name_div.innerHTML = item.student_full_name
+
+
+				student_div_2.appendChild(student_username_div)
+				student_div_2.appendChild(student_name_div)
+				inner_student_div.appendChild(student_div_2)
+				student_td.appendChild(inner_student_div)
+
+
+
+				let volunteer_td = document.createElement('td')
+				volunteer_td.setAttribute('class', 'ps-1')
+				let inner_volunteer_div = document.createElement('div')
+				inner_volunteer_div.setAttribute('class', 'd-inline-flex w-100')
+				inner_volunteer_div.setAttribute('id', 'online_' + item.buddy_id)
+				let volunteer_profile_div = document.createElement('div')
+				volunteer_profile_div.setAttribute('type', 'button')
+				volunteer_profile_div.setAttribute('class', 'd-grid justify-content-center align-items-center px-1')
+				volunteer_profile_div.setAttribute('data-bs-toggle', 'modal')
+				volunteer_profile_div.setAttribute('data-bs-target', '#userprofileModal')
+				let func_volunteer = "show_only_profile('member_profile_" + item.buddy_id +"')"
+				volunteer_profile_div.setAttribute('onclick', func_volunteer)
+				inner_volunteer_div.appendChild(volunteer_profile_div)
+				let vol_icon = document.createElement('i')
+
+				let vol_icon_class = "fas fa-user profile_icon user_offline status_icon_" + item.buddy_id
+				if(item.buddy_online){
+					vol_icon_class = "fas fa-user profile_icon user_online status_icon_" + item.buddy_id
+				}else{
+					vol_icon_class = "fas fa-user profile_icon user_offline status_icon_" + item.buddy_id
+				}
+				
+				
+				vol_icon.setAttribute('class', vol_icon_class)
+				volunteer_profile_div.appendChild(vol_icon)
+
+				let volunteer_div_2 =document.createElement('div')
+				let volunteer_username_div = document.createElement('div')
+				volunteer_username_div.setAttribute('class', "username_small_bold")
+				let v_text_username = document.createElement('text')				
+				v_text_username.innerHTML = item.teacher_username + ":"
+				volunteer_username_div.appendChild(v_text_username)
+
+				let v_text_location = document.createElement('text')
+				v_text_location.setAttribute('class', "the_member_location-" +  item.buddy_id)
+				let buddy_location_div_id = "id-match-user-location_" + item.match_status_id + "-" + item.buddy_id
+				v_text_location.setAttribute('id', buddy_location_div_id)
+
+				volunteer_username_div.appendChild(v_text_location)
+
+				let link_to_clone2 = document.getElementById('get_room_link-' + item.teacher_location)
+				let clone_link2 = link_to_clone2.cloneNode(true)
+				v_text_location.appendChild(clone_link2)
+
+
+				let volunteer_name_div = document.createElement('div')
+				volunteer_name_div.setAttribute('class', "full_name")
+				volunteer_name_div.innerHTML = item.teacher_full_name
+
+
+				volunteer_div_2.appendChild(volunteer_username_div)
+				volunteer_div_2.appendChild(volunteer_name_div)
+				inner_volunteer_div.appendChild(volunteer_div_2)
+				volunteer_td.appendChild(inner_volunteer_div)
+
+
+
+				let complete_td = document.createElement('td')
+				complete_td.setAttribute('class', "text-center")
+				let complete_icon = document.createElement('i')
+				if(item.complete){					
+					complete_icon.setAttribute('class', "fas fa-check match_check_green")		
+				} else {
+					complete_icon.setAttribute('class', "fas fa-check match_check_green")
+				}
+				complete_icon.setAttribute('id', "match_status_complete_" + item.match_status_id)
+				complete_td.appendChild(complete_icon)
+
+				let status_td = document.createElement('td')
+				status_td.setAttribute('class', "text-center")
+				status_td.setAttribute('id', "match_status_info_" +item.match_status_id)
+				status_td.innerHTML = item.status
+
+				new_row.appendChild(type_td)
+				new_row.appendChild(student_td)
+				new_row.appendChild(volunteer_td)
+				new_row.appendChild(complete_td)
+				new_row.appendChild(status_td)
+
+
+
+
+			}
+			
+
+
+		}
+		
+		// else{
+		// 	table.prepend(row)
+		// }
+		// 	let table_id = "tbody_" + item.session_id + '-' +item.session_slot + "-complete"
+		// } else {			
+		// 	let table_id = "tbody_" + item.session_id + '-' +item.session_slot + "-incomplete"
+		// }
+
+		// let table_for_add = document.getElementById(table_id)
+		// let clone_row = row.cloneNode(true)
+
+		// table_for_add.appendChild(clone_row)
+
+
+
+	}
+
+}
+
+function displayToAll(notify_group){
+    // console.log("In display to all", notify_group)
+    if(notify_group.to_group == "All"){
+        display_message(notify_group)        
+    } else{
+        if(user_role == notify_group.to_group){
+            display_message(notify_group) 
+        }
+    }   
+}
+
+
+function display_all_redirects(all_redirects, redirect_count){
+	// console.log("DISPLAY All Redirect", all_redirects, redirect_count)
+
+	let current_redirect_rows = document.querySelectorAll('.redirect_row')
+		  			// console.log("current_redirect_rows", current_redirect_rows)   
+    for (item of current_redirect_rows) {
+        // console.log("item.remove", item)  
+        item.remove()
+    }
+
+    let no_pending_redirects_div = document.getElementById('no_pending_redirects')
+    let redirect_modal_button = document.getElementById('redirect_modal_button');
+    let number_pending_redirects = document.getElementById('number_pending_redirects')
+    number_pending_redirects.innerHTML = redirect_count;
+
+    if(no_pending_redirects_div){
+    	if(all_redirects.length == 0){
+    		no_pending_redirects_div.style.display ="block";
+    		redirect_modal_button.setAttribute('class', 'btn btn_staff_sidebar');
+        }else{
+    		no_pending_redirects_div.style.display ="none";
+    		redirect_modal_button.setAttribute('class', 'sidebar_link_notification');
+    		play_notification_sound();
+
+  		}
+    } 
+
+
+  		let table_body_all_redirects = document.getElementById('table_body_all_redirects')
+  		// console.log("table_body_all_redirects", table_body_all_redirects)  
+
+	  	if(table_body_all_redirects){
+	    	for(let item of all_redirects){
+	      		// console.log("let item of all_redirects", item)  
+	      		let row = create_redirect_row(item)
+	      		// console.log("row", row) 
+	      		table_body_all_redirects.appendChild(row)
+	    	};
+	  	};
+}
+
+function create_redirect_row(item){
+		// console.log("create_redirect_row", item)
+	  	// console.log(item.redirect_id)
+	  	// console.log(item.user_to_redirect_id)
+	  	// console.log(item.user_to_redirect_name)
+	  	// console.log(item.to_room_id)
+	  	// console.log(item.to_room_name)
+	  	// console.log(item.redirect_url)
+
+	  	let new_redirect_row = document.createElement('tr');
+	  	new_redirect_row.classList.add('redirect_row');
+
+	  	let td_student_name = document.createElement('td');
+	  	td_student_name.innerHTML = item.user_to_redirect_id +". " + item.user_to_redirect_name;
+	 	new_redirect_row.appendChild(td_student_name);
+
+	  	let td_send_to = document.createElement('td');
+		td_send_to.classList.add('text-center');
+		td_send_to.innerHTML = item.to_room_name;
+		new_redirect_row.appendChild(td_send_to);
+
+		let td_cancel_btn = document.createElement('td');
+	  	td_cancel_btn.classList.add('text-center');
+	  	let cancel_redirect = document.createElement('btn')
+	  	cancel_redirect.innerHTML = "Cancel"
+	  	cancel_redirect.setAttribute("class", "btn btn-sm btn-danger");
+	  	let id_for_c_btn = "cancel_redirect_id-" + item.redirect_id;
+	  	cancel_redirect.setAttribute("id", id_for_c_btn);
+	  	cancel_redirect.setAttribute("value", item.redirect_id);
+	  	cancel_redirect.setAttribute("onclick", "cancel_json_redirect(this)");
+	  	td_cancel_btn.appendChild(cancel_redirect);
+	  	new_redirect_row.appendChild(td_cancel_btn);
+
+
+	  	let td_redirect_btn = document.createElement('td');
+	  	td_redirect_btn.classList.add('text-center');
+
+	  	let send_redirect = document.createElement('btn')
+	  	send_redirect.innerHTML = "Redirect"
+	  	send_redirect.setAttribute("class", "btn btn-sm btn-success individual_redirect");
+	  	let id_for_btn = "redirect_id-" + item.redirect_id;
+	  	send_redirect.setAttribute("id", id_for_btn);
+	  	send_redirect.setAttribute("value", item.redirect_id);
+	  	send_redirect.setAttribute("onclick", "send_json_redirect(this)");
+
+	  	td_redirect_btn.appendChild(send_redirect);
+	  	new_redirect_row.appendChild(td_redirect_btn);
+
+	  	// let btn_div = document.createElement('div');
+	  	// btn_div.setAttribute("class", "p-1 cursor_pointer individual_redirect");
+	  	// let id_for_btn = "redirect_id-" + item.redirect_id;
+	  	// btn_div.setAttribute("id", id_for_btn);
+	  	// btn_div.setAttribute("value", item.redirect_id);
+	  	// btn_div.setAttribute("onclick", "send_json_redirect(this)");
+	  	// let btn_text_div = document.createElement('div');
+	  	// btn_text_div.setAttribute("class", "sidebar_link text-center");
+	  	// let btn_inner_text = document.createElement('h6');
+	  	// btn_inner_text.setAttribute("class", "link_text");
+	  	// btn_inner_text.innerHTML = "Redirect";
+
+	  	// btn_text_div.appendChild(btn_inner_text);
+	  	// btn_div.appendChild(btn_text_div);
+	  	// td_redirect_btn.appendChild(btn_div);
+	 
+	  	new_redirect_row.appendChild(td_redirect_btn);
+
+	  	return new_redirect_row;
+	};
+
+
+function display_help_requests(help_requests, help_count){
+	// console.log("DISPLAY Help Requests", help_requests, help_count)
+	// if(help_requests && help_count){
+		// console.log("DISPLAY Help Requests", help_requests, help_count)
+		const help_count_display = document.getElementById('request_count')
+		if (help_count_display){
+	        help_count_display.innerHTML = help_count
+	    }
+
+	    const table_body = document.getElementById('table_body_all_help_requests')
+	    const no_helps = document.getElementById('no_help_requests');
+	    let view_help_request_button =document.getElementById('view_help_request_button')
+	    if (help_count == 0){
+	    	no_helps.style.display = 'block';
+	    	view_help_request_button.setAttribute('class', 'btn btn_staff_sidebar')
+	    } else{
+	    	no_helps.style.display = 'none';
+	    	view_help_request_button.setAttribute('class', 'sidebar_link_notification')
+	    	play_notification_sound()
+	    }
+
+	    // let requests = help_requests.help_requests;
+
+		if(table_body){
+			let current_helps =  document.querySelectorAll(".help_row");
+			for (item of current_helps) {
+				item.remove()
+			}
+
+
+			for (let item of help_requests) {
+				// console.log(item)
+				new_row = new_help_row(item);            
+				table_body.appendChild(new_row);
+			}
+		}else{
+			// console.log("No Table Body")
+		}
+
+	// } else {
+	// 	console.log("Something is missing", help_requests, help_count)
+	// }
+}
+
+function new_help_row(help_item){
+    // console.log(help_item)
+    let row = document.createElement('tr');
+    row.setAttribute('id', 'help_row_' + help_item.request_id);
+    row.classList.add('help_row');
+
+    let from_td = document.createElement('td');
+    from_td.setAttribute('class', 'ps-2 py-0');
+    from_td.innerHTML = help_item.full_name;
+
+    let message_td = document.createElement('td');
+    let time_div = document.createElement('div');
+    time_div.setAttribute('class', 'fw-bold');
+    message_td.appendChild(time_div);
+    time_div.innerHTML = help_item.created;
+
+    let message_div = document.createElement('div');
+    // message_div.setAttribute('class', 'help_message');
+    message_td.appendChild(message_div);
+    message_div.innerHTML = help_item.user_message;
+
+    let room_td = document.createElement('td');
+    room_td.setAttribute('class', 'py-0');
+    let link_div = document.createElement('div');
+    room_td.appendChild(link_div);
+    let requestors_room_link = document.getElementById('get_room_link-' + help_item.from_room_id)
+    let link = requestors_room_link.cloneNode(true)
+	link.setAttribute('onclick', 'mark_as_done(' + help_item.request_id +', ' + false +')');
+    link_div.appendChild(link);
+
+    room_td.appendChild(link_div);
+
+    let done_td = document.createElement('td');
+    let button = document.createElement('button');
+    button.setAttribute('value', help_item.request_id);
+    button.setAttribute('class', 'btn btn-success btn-sm individual_help_request');
+    button.setAttribute('onclick', 'mark_as_done(' + help_item.request_id +', ' + true +')');
+    button.innerHTML = "Mark Done";
+    done_td.appendChild(button);    
+
+    row.appendChild(from_td);
+    row.appendChild(message_td);
+    row.appendChild(room_td);
+    row.appendChild(done_td);
+
+    return row
+}
+
+
+	function display_message(notify_message){
+	    const display_to_all_btn = document.getElementById('display_to_all_btn')
+	    const notificationModalLabel = document.getElementById('notificationModalLabel')
+	    const sender_of = document.getElementById('sender')
+	    const this_msg = document.getElementById('this_msg')
+	    notificationModalLabel.innerHTML = "Session Notification"
+	    sender_of.innerHTML = notify_message.from
+	    this_msg.innerHTML = notify_message.message   
+	    display_to_all_btn.click();
+	}
+
+	function display_rooms_and_participtants(all_rooms_all_participants){
+		for(let item of all_rooms_all_participants){
+
+			
+			//console.log("Room",item)
+			let room_name_for_user = item.room_name
+			let this_room_link = document.getElementById('get_room_link-' + item.room_id)
+			//console.log("this_room_link",this_room_link)
+			
+
+			let individual_room_row = document.getElementById(item.room_row)
+			let individual_room_row_count = document.getElementById(item.room_row + "_count")
+			individual_room_row_count.innerHTML = item.count
+			let individual_room_row_participants = document.getElementById(item.room_row + "_participants")
+			// console.log(individual_room_row_participants)
+			individual_room_row_participants.innerHTML =""
+
+			let manual_room_count=document.getElementById('manual_room_count-' + item.room_id);
+		    if(manual_room_count){
+		      manual_room_count.innerHTML = item.count;  
+		    }
+
+			if (item.occupied){
+				// console.log(item.room_name, "occupied")
+				individual_room_row.style.display = "table-row"
+				let meeting_participants = item.participants
+				for(let item of meeting_participants){	
+
+					
+
+
+					let status_icons = document.querySelectorAll('.status_icon_' + item.member_id)
+					// console.log("Status icons", item, status_icons)
+					let new_class =  "fas fa-user profile_icon user_online status_icon_" + item.member_id
+					// console.log("New Class", new_class)
+					for(let item of status_icons){
+						item.setAttribute('class', new_class)
+					}
+
+					// svg-inline--fa fa-user fa-w-14 profile_icon user_offline status_icon_30
+					// let status_icon = document.getElementById("status_icon_" + item.member_id)
+	    //         	if(status_icon){
+	    //         		// console.log("status_icon", status_icon)
+	    //         		status_icon.setAttribute('class', 'fas fa-user profile_icon user_online')
+	    //         	}
+	            	
+					let user_manual_input = document.getElementById('manual_redirect_user-' + item.member_id)
+				    // console.log(user_manual_input)
+				    if(user_manual_input){
+				        user_manual_input.style.display ="inline-grid";
+				    }
+
+				    let manual_user_location_element = document.getElementById('manual_user_location_' + item.member_id)
+				    // console.log("item", room_name_for_user, item, manual_user_location_element)
+				    if (manual_user_location_element){
+				    	manual_user_location_element.innerHTML = room_name_for_user
+				    }
+
+
+				    // let the_member_location = document.getElementById("the_member_location-" + item.member_id)
+	       //      	if(the_member_location){
+	       //      		// console.log("the_member_location", the_member_location)
+	       //      		the_member_location.innerHTML =item.room_name;
+	       //      		// let this_room_link_clone2 = this_room_link_clone.cloneNode(true)
+	       //      		// the_member_location.appendChild(this_room_link_clone2)
+	       //      	}
+
+					let ind_part_div = document.createElement('div')
+					if(item.role != "Staff"){
+						ind_part_div.innerHTML = item.role[0] + ": " +item.full_name
+					} else{
+						ind_part_div.innerHTML = item.full_name
+					}
+					
+					ind_part_div.setAttribute('id', item.username)
+					ind_part_div.setAttribute('class', "user_in_room cursor_pointer")
+					
+					ind_part_div.setAttribute('data-bs-toggle', 'modal')
+					ind_part_div.setAttribute('data-bs-target', '#userprofileModal')
+
+					let member_profile_click = "member_profile_" + item.member_id
+					ind_part_div.setAttribute('onclick', 'show_only_profile("' + member_profile_click + '")')
+					individual_room_row_participants.appendChild(ind_part_div)
+
+
+
+					// console.log(ind_part_div)
+				}
+			}else{
+				// console.log(item.room_name, "empty")
+				individual_room_row.style.display = "none"
+			}
+
+
+		}
+
+	}
+
+
+function create_private_room_row(private_room_item, viewing_user, other_user, unread_count_for_self){
+
+    let row = document.createElement('tr');
+    row.setAttribute('id', 'private_room_row_' + private_room_item.private_room_id);
+    row.classList.add('private_room_row');
+
+    let from_td = document.createElement('td');
+    from_td.setAttribute('class', 'ps-2');
+    from_td.innerHTML = other_user;
+
+    let count_td = document.createElement('td');
+    count_td.setAttribute('class', 'text-center');
+    if(unread_count_for_self !=0){
+        count_td.innerHTML = unread_count_for_self;
+    }else{
+        count_td.innerHTML = private_room_item.total;
+    }
+    
+
+    let read_td = document.createElement('td');
+    read_td.setAttribute('class', 'ps-2');
+    let read_messages_btn = document.createElement('button')    
+    read_messages_btn.innerHTML = "View";
+    read_messages_btn.setAttribute('class', 'btn btn-sm btn-success m-1');
+    read_messages_btn.setAttribute('type', 'button');
+    read_messages_btn.setAttribute('value', parseInt(private_room_item.private_room_id));
+    read_messages_btn.setAttribute('onclick',"get_pvt_room_messages(this.value)");
+    read_messages_btn.setAttribute('data-bs-toggle', 'modal');
+    read_messages_btn.setAttribute('data-bs-target', '#read_private_msg_Modal');
+    read_td.appendChild(read_messages_btn);
+     // < data-bs-toggle="modal" data-bs-target="#read_private_msg_Modal">
+
+    row.appendChild(from_td);
+    row.appendChild(count_td);
+    row.appendChild(read_td);
+
+    return row
+
+}
+
+
+
+function get_private_rooms_for_user(){
+	// console.log("Get private rooms for user")
+	match_socket_private.send(JSON.stringify({
+			"command": "get_private_rooms",
+			"user_id": user_id,
+		}));
+}
+
+function get_pvt_room_messages(private_room_id){
+	//console.log("Getting Private Messages for room", private_room_id)
+	setupWebSocket(private_room_id)
+	match_socket_private.send(JSON.stringify({
+	  "command": "get_private_messages",
+	  "user_id": user_id
+	  })); 
+}
+
+function adjust_session_stats_ajax(adjust_room, adjust_user){
+	match_socket_private.send(JSON.stringify({
+	  "command": "send_session_stats",
+	  "adjust_room": adjust_room,
+	  "adjust_user": adjust_user,
+	  })); 
+
+}
+
+
+
+				
+</script>
+<button type="button" class="d-none btn btn-primary" data-bs-toggle="modal" data-bs-target="#notificationModal" id="display_to_all_btn"></button>
+
+<!-- Modal -->
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="notificationModalLabel">Modal title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h6><span class="fw-bold">From:</span> <text id="sender">{{user.full_name}}</h6>
+        <p id="this_msg"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div> 
+{% endblock match_script %}
+

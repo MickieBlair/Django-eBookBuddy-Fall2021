@@ -1,0 +1,57 @@
+ {% load static %}
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">eBookBuddy {% if logged_in_user.role.name == "Staff" %}
+    <text class="navbar-brand staff_name ps-2"> - Staff: {{logged_in_user.first_name}}</text>
+    {% endif %}</a> 
+    
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse " id="navbarNav">
+      <ul class="navbar-nav ms-auto align-items-end">
+        {% if logged_in_user.role.name == "Staff" %} 
+         <li class="nav-item d-flex align-items-end">
+               <a class="btn btn-info btn-sm fixed_width_75 m-1" href="{% url 'reading_sessions:room' 'match-pending' %}">Pending</a>    
+          </li>
+
+        <li class="nav-item d-flex align-items-end">
+            <a class="btn btn-warning btn-sm fixed_width_75 m-1" href="{% url 'reading_sessions:room' 'session-lobby' %}">Lobby</a>
+        </li>
+
+        {% endif %} 
+
+        <li class="nav-item ps-4 pe-2">
+          <a class="nav-link" href="/">Home </a>
+        </li>
+
+        {% if not logged_in_user.is_authenticated %}
+        <li class="nav-item px-2">
+          <a class="nav-link" href="/login">Login</a>
+        </li>
+
+        {% endif %}
+
+        {% if logged_in_user.role.name == "Staff" %} 
+         <li class="nav-item px-2">
+          <a class="nav-link " href="{% url 'site_admin:admin_home' %}">Site Admin</a>
+        </li>
+        {% endif %} 
+
+        {% if logged_in_user.is_superuser %} 
+        <li class="nav-item px-2">
+          <a class="nav-link " href="{% url 'admin:index' %}">Django Admin</a>
+        </li>
+        {% endif %}         
+
+        {% if logged_in_user.is_authenticated %}
+
+        <li class="nav-item px-2">
+          <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>

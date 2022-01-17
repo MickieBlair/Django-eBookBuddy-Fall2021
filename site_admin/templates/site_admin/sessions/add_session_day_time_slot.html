@@ -1,0 +1,97 @@
+{% extends 'site_admin/admin_base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="mt-1">
+{% include 'site_admin/snippets/buttons.html' %}
+{% include 'site_admin/snippets/django_messages_snippet.html' %}
+</div>
+
+<div class="row pt-5">
+  <div class="col-lg-7 col-md-9 col-sm-11 mx-auto">
+    <div class="card mx-auto">
+      <div class="card-header custom_bg_blue">
+        <h1 class="h3 mb-3 w-100 text-center fw-bold mt-2">New Day/Time/Slot</h1>
+      </div>
+      <div class="card-body">
+        <form method="POST">
+        	{% csrf_token %}
+
+        	<div class="fieldWrapper my-1 text-center">
+        		<label for="id_day" class="fixed_width_bold_label">Day:</label>
+            <select name="day" id="id_day" class="fixed_width_input2">
+              <option value="" disabled {% if form.day.value == None %} selected {% endif %}>---------</option>
+              {% for day in days %}
+                <option value="{{day.id}}"{% if form.day.value == day.id|slugify %} selected {% endif %}>{{day}}</option>
+              {% endfor %}
+            </select>
+              {% if form.day.errors %}
+                <ul class="error_list pb-3">
+                {% for error in form.day.errors %}
+                    <li>{{ error|escape }}</li>
+                {% endfor %}
+                </ul>
+              {% endif %}
+        	</div>
+
+        	<div class="fieldWrapper my-1 text-center">
+        		<label for="id_time_start" class="fixed_width_bold_label">Start Time::</label>
+            <input type="time" name="time_start" id="id_time_start" class="fixed_width_input2"  
+            {% if form.time_start.value %} value="{{form.time_start.value}}" {% endif %}>
+              {% if form.time_start.errors %}
+                <ul class="error_list pb-3">
+                {% for error in form.time_start.errors %}
+                    <li>{{ error|escape }}</li>
+                {% endfor %}
+                </ul>
+              {% endif %}
+       	  </div>
+
+          <div class="fieldWrapper my-1 text-center">
+              <label for="id_time_end" class="fixed_width_bold_label">End Time::</label>
+              <input type="time" name="time_end" id="id_time_end" class="fixed_width_input2" 
+              {% if form.time_end.value %} value="{{form.time_end.value}}" {% endif %} >
+                {% if form.time_end.errors %}
+                  <ul class="error_list pb-3">
+                  {% for error in form.time_end.errors %}
+                      <li>{{ error|escape }}</li>
+                  {% endfor %}
+                  </ul>
+                {% endif %}
+          </div>
+
+          <div class="fieldWrapper my-1 text-center">
+            <label for="id_session_slot" class="fixed_width_bold_label">Session Slot:</label>
+            <input type="text" name="session_slot" maxlength="1" class="fixed_width_input2"  id="id_session_slot" maxlength="1"
+            {% if form.session_slot.value %} value="{{form.session_slot.value}}" {% endif %}>
+              {% if form.session_slot.errors %}
+                <ul class="error_list pb-3">
+                {% for error in form.session_slot.errors %}
+                    <li>{{ error|escape }}</li>
+                {% endfor %}
+                </ul>
+              {% endif %}
+          </div>
+
+          <div class="my-3 text-center red">
+            {% if form.non_field_error %}
+              {{ form.non_field_errors }}
+            {% endif %}
+          </div>
+
+          <div class="pt-2 my-1 text-center">
+            <label for="id_currently_active" class="role_label pe-3">Slot Active for Current Semester:</label>
+                  <input type="checkbox" id="id_currently_active" name="currently_active" class="roles_radio" checked onclick="clear_error()">
+          </div>
+
+          <button class="w-100 btn btn-lg btn-success my-3" type="submit">Create</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+

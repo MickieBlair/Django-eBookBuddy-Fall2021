@@ -1,0 +1,162 @@
+{% extends 'site_admin/admin_base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="mt-1">
+{% include 'site_admin/snippets/buttons.html' %}
+{% include 'site_admin/snippets/django_messages_snippet.html' %}
+</div>
+<h4 class="pt-3 mb-0 pb-0">Attendance Records</h4>
+<div class="row">
+  <div class="col">
+      <div>
+        <div class="">
+          <h4 class="pt-2 mb-0 pb-0 border-bottom"> S: {{match.student.full_name}} - V: {{match.volunteer.full_name}}</h4>
+          
+        </div>
+        <div>
+          <h5 class="pt-1">Total Records- {{count}}</h5>
+        </div>
+      </div>  
+  </div>
+  <div class="col d-flex justify-content-end align-items-center">
+    </div> 
+</div>
+
+
+
+<div class="table-responsive pt-1">
+  <table class="table table-striped table-sm align-middle">
+    <thead>
+      <tr>
+        <th>ID</th>            
+        <th>Session</th>
+        <th class="text-center">Member Reassigned</th>
+        <th class="text-center">Student</th>
+        <th class="text-center">Volunteer</th>
+        <th class="text-center">Match Complete</th>
+        <th class="text-center">Duration</th>
+        <th class="text-center">Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for record in match_attendance_records %}
+      <tr>
+        <td>
+          {{record.id}}       
+        </td>
+        <td>
+          {{record.session.name}}
+        </td> 
+        <td class="text-center">
+          {% if record.member_reassigned %}
+              <i class="fas fa-check  match_check_green"></i>
+            {% else %}
+              <!-- <i class="fas fa-times " ></i> -->
+            {% endif %}
+          <!-- {{record.member_reassigned}} -->
+        </td>
+        <td>
+          <div class="text-center">
+            {% if record.student_present %}
+              <i class="fas fa-check match_check_green" id="user_{{record.match.student.id}}"></i>
+            {% else %}
+              <div>
+                <i class="fas fa-times match_times_red" id="user_{{record.match.student.id}}"></i>
+              </div>
+              
+              {% if record.student_reassigned%}
+                <div>
+                   <text>Reassigned</text>
+                </div>                     
+              {% endif%}
+
+            {% endif %}
+            
+          </div>
+          <div class="text-center"> 
+            {% if record.student_present %}
+              {{record.student_time_in.time}} - 
+
+              {% if record.student_time_out %}
+                {{record.student_time_out.time}}
+              {%else%} 
+                {% if record.record.student_time_in.time %}
+                  N/A 
+                {%endif%}
+              {%endif%}
+            {% endif %}
+          </div>                                 
+        </td> 
+        <td>
+          <div class="text-center">
+            {% if record.volunteer_present %}
+                <i class="fas fa-check match_check_green" id="user_{{record.match.volunteer.id}}" ></i>
+            {% else %}
+              <div>
+                <i class="fas fa-times match_times_red" id="user_{{record.match.volunteer.id}}"></i>
+              </div>
+
+              {% if record.volunteer_reassigned %}
+                <div>
+                   <text>Reassigned</text>
+                </div>                     
+              {% endif%}
+                
+            {% endif %}
+          </div>
+          <div class="text-center">
+            {% if record.volunteer_present %}
+              {{record.volunteer_time_in.time}} - 
+              {% if record.volunteer_time_out %}
+                {{record.volunteer_time_out.time}}
+              {%else%}
+                {% if record.volunteer_time_in.time %}
+                  N/A 
+                {%endif%}
+
+               {%endif%}
+            {% endif %}
+            </div>
+        </td>
+        <td>
+          <div class="text-center">
+            {% if record.match_successful %}
+              <i class="fas fa-check match_check_green" id="match_{{record.match.id}}"></i>
+            {% else %}
+              <i class="fas fa-times match_times_red" id="match_{{record.match.id}}"></i>
+            {% endif %}
+            
+          </div>
+          <div class="text-center"> 
+            {% if record.match_successful %}
+              {{record.match_complete_at.time}} - {% if record.match_ended_at %}{{record.match_ended_at.time}}{%else%}
+              {% if record.match_complete_at.time %}
+               N/A 
+              {%endif%}
+              {%endif%}
+            {% endif %}
+          </div>                                 
+        </td>
+        <td class="text-center">
+          {% if record.duration %}
+            {{record.duration}}
+          {% endif %}
+        </td> 
+        <td>
+          {% for note in record.notes.all %}
+          <div>
+            {{note.content}}
+          </div>
+          {% endfor %}
+        </td>                         
+      </tr>
+      {% endfor %}
+
+    </tbody>
+  </table>
+</div>
+
+{% endblock content %}

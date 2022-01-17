@@ -1,0 +1,108 @@
+<span class="d-none page-number" id="id_staff_page_number">1</span>
+
+
+<div class="modal fade" id="staff_members_modal" tabindex="-1" aria-labelledby="staff_members_modalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staff_members_modalLabel">In Room</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <ul class="people_in_room " id="staff_in_room-{{room.id}}">
+ <!--       for member in members 
+         	<li class="pb-3" id="staff_in_room-{{member.id}}">
+        		<div class="card">
+        			<div class="card-header" id="staff_profile_header-{{member.id}}" onclick="show_profile_body('profile_body-{{member.id}}')">
+        				{{member.username}} - {{member.full_name}}
+        			</div>
+        			<div class = "card-body profile_body" id="staff_profile_body-{{member.id}}">
+        				{{member.profile.contact_number}}
+        			</div>        			
+        		</div>
+
+        	</li>        	
+        	endfor --> 
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card mt-1 me-1 staff_chat_height">
+	<div class="card-header bg_chat_header">
+		<div class="row ">
+			<div class="col">
+				<h5 class="m-0">Staff Chat</h5>
+			</div>
+			<div class="col d-flex justify-content-end">
+				<div class="people_count" type="button" data-bs-toggle="modal" data-bs-target="#staff_members_modal">
+					<div class="align-items-center justify-content-center">
+						<i class="fas fa-user person_icon"></i>
+					</div>
+					<div id="id_staff_chat_connected_users">
+						0
+					</div>					
+				</div>				
+			</div>			
+		</div>
+	</div>
+	<div class="card-body staff_chat_card">
+		<!-- <textarea id="chat-log" class="chat_textarea" name="chat_lobby" disabled rows=10 ></textarea> -->
+		<div class="d-flex flex-row justify-content-center" id="id_chatroom_loading_spinner_container">
+			<div class="spinner-border text-primary"  id="id_staff_chatroom_loading_spinner" role="status"  style="display: none; ">
+				<span class="sr-only">Loading...</span>
+			</div>
+		</div>
+		<div class="d-flex staff_chat_log" id="id_staff_chat_log">
+			<!-- {% for msg in messages %} -->
+<!-- 			<div class="message_container">
+				<div class="top_div">
+					<div class="name">
+						{{msg.user}} 
+					</div>
+					<div class="time">
+						@ {{msg.timestamp}}
+					</div>
+				</div>
+				<div class="message_div">
+					<p class="msg_p">
+					{{msg.content}}
+					</p>
+				</div>
+				
+			</div>
+			{% endfor %} -->				
+		</div>
+			
+			
+		
+	</div>
+	<div class="card-footer">
+		<div class="chat_input">
+			<input id="staff_chat-message-input" type="text" class="chat_input_message">
+			<input id="staff_chat-message-submit" type="button" value="Send" class="send_button mt-2">
+		</div>
+
+	</div>
+	
+</div>
+
+<script type="text/javascript">
+	function show_profile_body(element_id){
+    if (user_role == "Staff"){
+        let profile_body = document.getElementById(element_id);
+          let displayStyle = window.getComputedStyle(profile_body, null).getPropertyValue("display");
+           if(displayStyle == "block"){
+            profile_body.style.display = "none";
+          } else if (displayStyle == "none"){
+            profile_body.style.display = "block";
+          } else{
+            console.log("Neither", displayStyle)
+          } 
+
+    }
+  
+}
+</script>
+

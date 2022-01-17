@@ -1,0 +1,423 @@
+<script type="text/javascript">
+	console.log("consumer_jitsi_script")
+	const jitsi_max_tries = 10
+	let jitsi_tries = 0
+
+	if (ws_scheme == "ws"){
+		// console.log("ws_scheme", ws_scheme)
+		jitsi_ws_path = ws_scheme + '://' + window.location.host + "/jitsi_data/"; // 		
+
+	 } else if (ws_scheme == "wss"){
+	 	// console.log("ws_scheme", ws_scheme)
+	 	jitsi_ws_path = ws_scheme + '://' + window.location.host + ":8001/jitsi_data/";
+	 } else {
+	 	console.log("Else ws_scheme", ws_scheme)
+	 }
+
+	// console.log("jitsi_ws_path", jitsi_ws_path)
+
+	let jitsi_data_Socket = null
+
+	function getSocket() {
+
+	  if (getSocket.server && getSocket.server.readyState < 2) {
+	    console.log("reusing the socket connection [state = " + getSocket.server.readyState + "]: " + getSocket.server.url);
+	    return Promise.resolve(getSocket.server);
+	  }
+
+	  return new Promise(function (resolve, reject) {
+
+	    getSocket.server = new WebSocket(jitsi_ws_path);
+
+	    getSocket.server.onopen = function () {
+	      console.log("Jitsi socket connection is opened [state = " + getSocket.server.readyState + "]: " + getSocket.server.url);
+	      jitsi_data_Socket=getSocket.server;
+	      resolve(getSocket.server);
+	    };
+
+	    getSocket.server.onerror = function (err) {
+	      console.error("Jitsi socket connection error : ", err);
+	      reject(err);
+	    };
+
+	    getSocket.server.onclose = function (err) {
+	      console.error("Jitsi socket onclose : ", err);
+	      jitsi_data_Socket=null;
+	      reject(err);
+	    };	
+
+	    getSocket.server.onmessage = function(message) {
+        let server_data = JSON.parse(message.data);
+        // console.warn("TOP FUNCTION Server Data", server_data)
+        	try {
+			  process_incoming_messages(server_data);
+			} catch (error) {
+			  console.error(error);
+			}
+        
+      };
+
+
+	  });
+	}
+
+function serialize (data) {
+	let obj = {};
+	for (let [key, value] of data) {
+		if (obj[key] !== undefined) {
+			if (!Array.isArray(obj[key])) {
+				obj[key] = [obj[key]];
+			}
+			obj[key].push(value);
+		} else {
+			obj[key] = value;
+		}
+	}
+	return obj;
+}
+
+function submit_adjust_ajax(){
+	let adjust_form = document.getElementById('adjust_form');
+	// console.log("adjust_form", adjust_form)
+	let form_data = new FormData(adjust_form);
+	let queryString = serialize(form_data)
+	// console.log("queryString", queryString)
+	payload = {
+	    "csrfmiddlewaretoken": "{{ csrf_token }}",
+	    "form_data": JSON.stringify(queryString),
+	  }
+
+
+        $.ajax({
+            type: 'POST',
+        	dataType: "json",
+            url: "{% url 'reading_sessions:adjust_user_status' %}" ,
+            data: payload,
+            timeout: 5000,
+            success: function (response) {                
+                console.log("response", response)
+                adjust_session_stats_ajax(response['adjust_room'], response['adjust_user'],)
+
+                let close_adjust_btn = document.getElementById('close_adjust')
+                close_adjust_btn.click()
+            },
+            error: function(response) {
+                // $("#MESSAGE-DIV").html("Something went wrong!");
+                console.log("response", response)
+            }
+        });
+
+
+
+}
+
+
+function send_user_adjust(){
+	console.log("send_user_adjust");
+	// let submit_data_adjust_btn = document.getElementById('adjust_form_submission')
+	// submit_data_adjust_btn.click()
+
+}
+
+function adjust_participant(element){
+	console.log("element", element);
+	let modal_button_adjust = document.getElementById('adjust_user_btn');
+	let adjust_user_title = document.getElementById('adjust_user_title');
+	adjust_user_title.innerHTML = element.innerHTML;
+	let room_click_type = document.getElementById('room_click_type')
+	let elem_id = element.id
+	let elem_value = element.getAttribute('value')
+	let room_click_type_text = elem_id.split('-')[0]
+	if(room_click_type_text == "in_ws_room"){
+		room_click_type_text = "WebSocket"
+	} else if (room_click_type_text == "in_j_room"){
+		room_click_type_text = "Jitsi"
+	}
+
+	room_click_type.innerHTML = room_click_type_text
+
+	let adjust_user_id=document.getElementById('adjust_user_id');
+	adjust_user_id.value = elem_value.split('-')[1]
+	let adjust_ws_room = document.getElementById('adjust_ws_room')
+	adjust_ws_room.value = elem_id.split('-')[1]
+	modal_button_adjust.click()
+}
+
+
+function adjust_jitsi_live_table(jitsi_room_info){
+
+	// console.log(jitsi_room_info, typeof(jitsi_room_info)) 
+	let live_jitsi_table_body = document.getElementById('tbody_rooms_participants_jitsi_live')
+	// console.log("live_jitsi_table_body", live_jitsi_table_body)
+	let live_room_data = jitsi_room_info[0]
+	if(live_jitsi_table_body){
+		let live_room_id = "jitsi_room_live_" + live_room_data.base_room_id
+		let live_room_row = document.getElementById(live_room_id)
+		let live_count_jitsi_id = "live_count-" + live_room_data.base_room_id
+		let live_count_td = document.getElementById(live_count_jitsi_id)
+		live_count_td.innerHTML = live_room_data.count
+
+		let student_alone_jitsi_id = "student_alone-" + live_room_data.base_room_id
+		let student_alone_td = document.getElementById(student_alone_jitsi_id)
+
+		if(live_room_data.student_alone){
+			student_alone_td.innerHTML = "Yes";
+		}else{
+			student_alone_td.innerHTML = "";
+		}
+
+		let mismatch_jitsi_id = "j_ws_mismatch-" + live_room_data.base_room_id
+		let mismatch_div= document.getElementById(mismatch_jitsi_id)
+
+		if(live_room_data.mismatch){
+			mismatch_div.innerHTML = "NO";
+		}else{
+			mismatch_div.innerHTML = "";
+		}
+		
+
+		let live_participants_id = "live_jitsi_parts-"+ live_room_data.base_room_id
+		let live_participants_td = document.getElementById(live_participants_id)
+		live_participants_td.innerHTML ="";
+
+		let j_parts = live_room_data.participants
+		console.log("j_parts", j_parts, typeof(j_parts))
+		
+		if(j_parts){
+			console.log("j_parts length", j_parts.length)
+			if(j_parts.length > 0){
+				for(let item of j_parts){
+					let live_person_div = document.createElement('div');
+					live_person_div.innerHTML = item.username;
+					live_person_div.setAttribute('id', "in_j_room-" + live_room_data.base_room_id)
+					live_person_div.setAttribute('value', "user_in_jitsi-" + item.member_id)
+					let j_func="adjust_participant(this)";
+					live_person_div.setAttribute('onclick', j_func)
+					live_participants_td.appendChild(live_person_div);
+				} 
+			}	
+		}
+			
+
+		let ws_live_id = "ws_live-"+ live_room_data.base_room_id
+		let ws_live_td = document.getElementById(ws_live_id)
+		ws_live_td.innerHTML ="";
+
+		let base_parts = live_room_data.base_participants
+		console.log("base_parts", base_parts, typeof(base_parts))
+		if(base_parts){
+			console.log("base_parts length", base_parts.length)
+
+			if(base_parts.length > 0){
+				for(let item of base_parts){
+					let ws_live_person_div = document.createElement('div');
+					ws_live_person_div.setAttribute('id', "in_ws_room-" + live_room_data.base_room_id)
+					ws_live_person_div.setAttribute('value', "user_in_websocket-" + item.member_id)
+					let base_func="adjust_participant(this)";
+					ws_live_person_div.setAttribute('onclick', base_func)
+					ws_live_person_div.innerHTML = item.username;
+					ws_live_td.appendChild(ws_live_person_div);
+				} 
+			}
+		}
+
+		if(live_room_data.count == 0){
+			// console.log()
+			if (live_room_data.student_alone){
+				live_jitsi_table_body.prepend(live_room_row)
+			} else if (live_room_data.mismatch){
+				live_jitsi_table_body.prepend(live_room_row)
+			} else{
+				live_jitsi_table_body.append(live_room_row)
+			}
+			
+
+		} else {
+
+			live_jitsi_table_body.prepend(live_room_row)
+		}
+	}
+
+}
+
+
+function process_incoming_messages(server_data){
+
+	console.warn("msg type", server_data.msg_type)
+
+	let message_type = server_data.msg_type
+
+
+	if(message_type =="api_call_for_participants"){
+		console.error("api_call_for_participants", server_data)
+		let get_info = server_data.to_get_room_id
+		console.error("get_info", get_info)
+		if(get_info == room_id){
+
+			let r_participants = get_participants_by_room_id()
+			console.log("r_participants", r_participants)
+			jitsi_data_Socket.send(JSON.stringify({
+            "command": "api_set_room_participants",
+            "sender_id": user_id,
+            "room_id": room_id,
+            "room_participants": r_participants,
+          }));
+		}
+	}
+	
+	if(user_role == "Staff"){
+		// console.warn("\n\nprocess_incoming_messages server_data", server_data);
+		// console.warn("msg type", server_data.msg_type)
+
+		// let message_type = server_data.msg_type
+
+		if(message_type=="updated_room_participants"){
+
+			console.error("updated_room_participants", server_data)
+
+			if(server_data.status){
+				let jitsi_room_info = JSON.parse(server_data.status).jitsi_room_data		
+				adjust_jitsi_live_table(jitsi_room_info)
+			} else{
+				console.error("NO server.status")
+			}
+			
+		} 
+
+
+
+		else if(message_type=="jitsi_join"){
+
+			console.error("jitsi_join", server_data)
+
+
+			if(server_data.status){
+				let jitsi_room_info = JSON.parse(server_data.status).jitsi_room_data		
+				adjust_jitsi_live_table(jitsi_room_info)
+			} else{
+				console.error("NO server.status")
+			}
+			
+		} 
+
+		else if(message_type=="jitsi_left"){
+			console.error("jitsi_left", server_data)
+			if(server_data.status){
+				let jitsi_room_info = JSON.parse(server_data.status).jitsi_room_data	
+				adjust_jitsi_live_table(jitsi_room_info)
+
+			}
+		}
+
+		else if(message_type=="disconnect_user"){
+			console.error("disconnect_user", server_data)
+			// let jitsi_room_info = JSON.parse(server_data.status).jitsi_room_data
+			// adjust_jitsi_live_table(jitsi_room_info)
+		}
+
+	} 
+
+}
+
+
+
+function api_check_room_participants(base_room_id){	
+	console.log("function api_checking base room id", base_room_id)
+	  jitsi_data_Socket.send(JSON.stringify({
+            "command": "api_get_room_participants",
+            "sender_id": user_id,
+            "room_id": base_room_id,
+          }));
+}
+
+
+function display_live_jitsi_rooms() {
+	// console.log("\n\n\n\ndisplaying live jitsi room info")
+}
+
+function ajax_check_mismatch(base_room_id){
+	console.log("ajax_check_mismatch base_room_id", base_room_id)
+	payload = {
+          "room_id": base_room_id,
+        }
+
+	$.ajax({
+        type: 'GET',
+        url: "{% url 'reading_sessions:ajax_check_room_mismatch' %}",
+     	data: payload,
+     	timeout: 5000,
+        success: function (response) {
+          console.log("response", response) 
+          let jitsi_room_info = JSON.parse(response['room_info']).jitsi_room_data
+          adjust_jitsi_live_table(jitsi_room_info)          
+        },
+        error: function (response) {
+          console.log("Fail")
+            console.log(response)
+        }
+      })
+
+}
+
+
+
+
+
+	// function connect_jitsi_data_ws(roomName, jitsi_id, displayName){
+
+		// let jitsi_data_Socket
+		// let jitsi_data_interval
+
+		// function connect_jitsi_data_ws(){
+		// 	jitsi_data_Socket = new WebSocket(jitsi_ws_path)
+
+		// 	jitsi_data_Socket.addEventListener("open", function(e){
+		// 		console.log("jitsi_data_Socket OPEN", e);
+		// 		clearInterval(jitsi_data_interval)
+
+
+
+							
+		// 	});	
+
+		// 	jitsi_data_Socket.onmessage = function(message) {
+		// 		let jitsi_data = JSON.parse(message.data);
+		// 		console.log("jitsi_data", jitsi_data);		
+		// 	};
+
+		// 	jitsi_data_Socket.onerror = function(e){
+		// 		console.error("jitsi_data_Socket on error: " + JSON.stringify(e))
+		// 	};
+
+		// 	jitsi_data_Socket.onclose = function(e){
+		// 		console.error("jitsi_data_Socket on CLOSE: " + JSON.stringify(e))
+		// 		// setTimeout(jitsi_data_Socket.open(), 30000)
+		// 		 jitsi_data_interval = setInterval(check_jitsi_socket_connection, 30000)
+		// 	};
+
+
+		// }
+
+	// connect_jitsi_data_ws()	
+
+
+
+	// }
+
+// function check_jitsi_socket_connection(){
+// 	let jitsi_data_status = jitsi_data_Socket.readyState
+// 	console.error("jitsi_data_status", jitsi_data_status)
+
+// 	if(jitsi_data_status != 1 && jitsi_tries < jitsi_max_tries){
+// 		jitsi_data_Socket = new WebSocket(jitsi_ws_path)
+// 		connect_jitsi_data_ws()
+// 		jitsi_tries++
+// 		get_in_room(roomName)
+// 	} else{
+// 		console.log("Else", jitsi_data_status, jitsi_tries, jitsi_max_tries)
+// 	}
+
+// }
+
+
+</script>

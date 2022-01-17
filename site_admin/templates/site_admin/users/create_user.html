@@ -1,0 +1,153 @@
+{% extends 'site_admin/admin_base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="mt-1">
+{% include 'site_admin/snippets/buttons.html' %}
+{% include 'site_admin/snippets/django_messages_snippet.html' %}
+</div>
+
+<div class="row pt-2">
+  <div class="col-lg-6 col-md-8 col-sm-10 mx-auto">
+    <div class="card mx-auto">
+      <div class="card-header p-custom_bg_blue">
+        <h3 class="w-100 text-center fw-bold m-0">Create User</h3>
+      </div>
+      <div class="card-body p-2">
+        <form method="POST">
+        	{% csrf_token %}
+
+          <div class="my-1">
+            <div class="row text-center pt-1 pb-2">
+
+            {% for role in all_roles %}
+              <div class= "col">            
+                <input type="radio" name="role" id="role_{{role.name}}" value="{{role.id}}" class="roles_radio" 
+              {% if registration_form.role.value == role.id|slugify %} checked {% endif %} onclick="clear_error()">
+                <label class="role_label">{{role.name}}</label>
+              </div>
+            {% endfor %}
+            </div>
+          </div>
+          
+        	
+        	<div class="fieldWrapper my-1 text-center">
+        		<label for="{{ registration_form.username.id_for_label }}" class="fixed_width_bold_label">Username:</label>
+        		<input type="text" id="id_username" name="username" class="fixed_width_input" placeholder="" autofocus {% if registration_form.username.value %}value="{{registration_form.username.value}}" {% endif %} onclick="clear_error()">
+        	</div>
+
+
+	        <div class="fieldWrapper my-1 text-center">
+	        	<label for="{{ registration_form.email.id_for_label }}" class="fixed_width_bold_label">Email:</label>
+	            <input type="email" id="id_email" name="email" class="fixed_width_input" placeholder="" {% if registration_form.email.value %}value="{{registration_form.email.value}}" {% endif %} onclick="clear_error()">
+	        </div>
+
+          	<div class="fieldWrapper my-1 text-center">
+            	<label for="id_first_name" class="fixed_width_bold_label">First Name:</label>
+            	<input type="text" id="id_first_name" name="first_name" class="fixed_width_input" placeholder="" {% if registration_form.first_name.value %}value="{{registration_form.first_name.value}}" {% endif %} onclick="clear_error()">
+          	</div>
+
+          	<div class="fieldWrapper my-1 text-center">
+           		<label for="id_middle_name" class="fixed_width_bold_label">Middle Name:</label>
+           		<input type="text" id="id_middle_name" name="middle_name" class="fixed_width_input" placeholder="" {% if registration_form.middle_name.value %}value="{{registration_form.middle_name.value}}" {% endif %} onclick="clear_error()">
+          	</div>
+
+          	<div class="fieldWrapper my-1 text-center">
+          		<label for="id_last_name" class="fixed_width_bold_label">Last Name:</label>
+            	<input type="text" id="id_last_name" name="last_name" class="fixed_width_input" placeholder="" {% if registration_form.last_name.value %}value="{{registration_form.last_name.value}}" {% endif %} onclick="clear_error()">
+          	</div>
+
+          	<div class="my-1 text-center">
+            	<label for="id_password1" class="fixed_width_bold_label">Password:</label>
+            	<input type="text" id="id_password1" name="password1" class="fixed_width_input" placeholder="" autocomplete="new-password" onclick="clear_error()">
+          	</div>
+
+          	<div class="my-1 text-center">
+            	<label for="id_password2" class="fixed_width_bold_label">Confirm Password:</label>
+            	<input type="text" id="id_password2" name="password2" class="fixed_width_input" placeholder="" autocomplete="new-password" onclick="clear_error()">
+          	</div>
+         
+
+          	<!-- <div class="my-1"> -->
+<!--            		<div class="row text-center pt-3">
+
+              		{% for role in roles %}
+              		<div class= "col">           	
+              			<input type="radio" name="role" id="role_{{role.name}}" value="{{role.id}}" class="roles_radio" 
+              			{% if registration_form.role.value == role.id|slugify %} checked {% endif %} onclick="clear_error()">
+              			<label class="role_label">{{role.name}}</label>
+              		</div>
+              		{% endfor %}
+			</div> -->
+
+			<div class="pt-2 my-1 text-center">
+				<label for="id_is_approved" class="role_label pe-3">Approved:</label>
+            	<input type="checkbox" id="id_is_approved" name="is_approved" class="roles_radio" checked onclick="clear_error()">
+
+			</div>
+
+          <!-- </div> -->
+
+          <div class="text-center">
+                {% for field in registration_form %}
+                        <p>
+                          {% for error in field.errors %}
+                            <p class="error_form" style="color: red">{{field.label}}: {{ error }}</p>
+                          {% endfor %}
+                        </p>
+                    {% endfor %}
+                    
+                    {% if registration_form.non_field_errors %}
+                      <div style="color: red">
+                        <p class="error_form" >{{registration_form.non_field_errors}}</p>
+                      </div>
+                        
+                    {% endif %}
+              </div>
+
+          <button class="w-100 btn btn-lg btn-success" type="submit">Create User</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  const student_role_radio = document.getElementById('role_Student');
+  const vol_role_radio = document.getElementById('role_Volunteer');
+  const staff_role_radio = document.getElementById('role_Staff');
+  const id_password1 = document.getElementById('id_password1');
+  const id_password2 = document.getElementById('id_password2')
+  const django_messages = document.getElementById('django_messages')
+  
+
+  staff_role_radio.addEventListener('click', function () {
+    id_password1.value = "buddystaff";
+    id_password2.value = 'buddystaff';
+    if(django_messages){
+      django_messages.innerHTML = '';
+    }
+  })
+
+  vol_role_radio.addEventListener('click', function () {
+    id_password1.value = "ebookbuddy";
+    id_password2.value = 'ebookbuddy';
+     if(django_messages){
+      django_messages.innerHTML = '';
+    }
+  })
+
+  student_role_radio.addEventListener('click', function () {
+    id_password1.value = "readbook";
+    id_password2.value = 'readbook';
+     if(django_messages){
+      django_messages.innerHTML = '';
+    }
+  })
+
+</script>
+
+
+{% endblock content %}
